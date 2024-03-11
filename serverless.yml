@@ -1,0 +1,31 @@
+service: aws-custom-authorizer-auth0
+
+frameworkVersion: "3"
+
+custom:
+  localstack:
+    stages:
+      - local
+    lambda:
+      mountCode: false
+  pythonRequirements:
+    dockerizePip: non-linux
+
+
+provider:
+  name: aws
+  runtime: python3.9
+  region: eu-central-2
+
+
+functions:
+  findme-users:
+    handler: findme-users/handler.lambda_handler
+    events:
+      - http:
+          path: /
+          method: get
+          cors: true
+plugins:
+  - serverless-python-requirements
+  - serverless-localstack
