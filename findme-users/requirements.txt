@@ -2,3 +2,4 @@ aws-lambda-powertools
 aws_xray_sdk
 requests
 boto3
+pydantic

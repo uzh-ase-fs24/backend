@@ -11,6 +11,8 @@ custom:
   pythonRequirements:
     dockerizePip: non-linux
 
+package:
+  individually: true
 
 provider:
   name: aws
@@ -20,11 +22,16 @@ provider:
 
 functions:
   findme-users:
-    handler: findme-users/handler.lambda_handler
+    handler: handler.lambda_handler
+    module: findme-users
     events:
       - http:
           path: /
           method: get
+          cors: true
+      - http:
+          path: /users
+          method: post
           cors: true
 
 resources: # CloudFormation template syntax from here on.
