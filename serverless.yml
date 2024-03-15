@@ -26,6 +26,24 @@ functions:
           path: /
           method: get
           cors: true
+
+resources: # CloudFormation template syntax from here on.
+      Resources:
+        usersTable:
+          Type: AWS::DynamoDB::Table
+          Properties:
+            TableName: usersTable
+            AttributeDefinitions:
+              - AttributeName: username
+                AttributeType: S
+            KeySchema:
+              - AttributeName: username
+                KeyType: HASH
+            ProvisionedThroughput:
+              ReadCapacityUnits: 1
+              WriteCapacityUnits: 1
+
 plugins:
   - serverless-python-requirements
   - serverless-localstack
+
