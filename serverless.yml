@@ -26,9 +26,13 @@ functions:
     module: findme-users
     events:
       - http:
-          path: /
+          path: /users/{id}
           method: get
           cors: true
+          request:
+            parameters:
+              paths:
+                id: true
       - http:
           path: /users
           method: post
@@ -41,10 +45,10 @@ resources: # CloudFormation template syntax from here on.
           Properties:
             TableName: usersTable
             AttributeDefinitions:
-              - AttributeName: username
-                AttributeType: S
+              - AttributeName: userId
+                AttributeType: N
             KeySchema:
-              - AttributeName: username
+              - AttributeName: userId
                 KeyType: HASH
             ProvisionedThroughput:
               ReadCapacityUnits: 1

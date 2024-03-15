@@ -13,3 +13,6 @@ class UserService:
             print(e)
             return e, 400
         return self.user_repository.post_user_to_db(user)
+    
+    def get_user(self, userId):
+        return self.user_repository.get_user_by_userId_from_db(userId)

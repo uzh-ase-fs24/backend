@@ -14,3 +14,12 @@ class UserRepository:
         except ClientError as e:
             print("Error saving user to DynamoDB:", e)
             return e, 500 
+        
+    def get_user_by_userId_from_db(self, userId):
+        try:
+            response = self.table.get_item(Key={'userId': userId})
+            return response, 200  
+        
+        except ClientError as e:
+            print("Error getting the User by userId:", e)
+            return e, 404

@@ -1,4 +1,5 @@
-import boto3
+from aws_lambda_powertools.shared.types import Annotated
+from aws_lambda_powertools.event_handler.openapi.params import Path
 from src.UserService import UserService
 from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 from aws_lambda_powertools import Logger, Tracer
@@ -18,26 +19,10 @@ def post_user():
     return user_service.post_user(app.current_event.json_body)
 
 
-@app.get("/")
+@app.get("/users/<id>")
 @tracer.capture_method
-def hello_world():
-    dynamodb = boto3.resource('dynamodb', region_name='eu-central-2')  # Replace 'your-region' with your AWS region
-    #
-    # # Get reference to the users table
-    table = dynamodb.Table('usersTable')
-    
-    response = table.get_item(Key={'username': 'j.alba'})
-
-    if 'Item' in response:
-        item = response['Item']
-        print("User found:")
-        print("User ID:", item['userId'])
-        print("First Name:", item['firstName'])
-        print("Last Name:", item['lastName'])
-        print("Username:", item['username'])
-    else:
-        print("User not found.")
-    return {"message": "Hello World"}
+def get_user(id: Annotated[int, Path(lt=999)]):
+    return user_service.get_user(int(id))
 
 
 # You can continue to use other utilities just as before
