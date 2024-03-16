@@ -1,5 +1,6 @@
 import boto3
 from botocore.exceptions import ClientError
+from src.UserDto import UserDto
 
 class UserRepository:
     def __init__(self):
@@ -8,8 +9,8 @@ class UserRepository:
     
     def post_user_to_db(self, user):
         try:
-            response = self.table.put_item(Item=user.dict())
-            return response, 200  
+            self.table.put_item(Item=user.dict())
+            return user, 200  
         
         except ClientError as e:
             print("Error saving user to DynamoDB:", e)
@@ -18,7 +19,7 @@ class UserRepository:
     def get_user_by_userId_from_db(self, userId):
         try:
             response = self.table.get_item(Key={'userId': userId})
-            return response, 200  
+            return UserDto(**response["Item"]), 200 
         
         except ClientError as e:
             print("Error getting the User by userId:", e)

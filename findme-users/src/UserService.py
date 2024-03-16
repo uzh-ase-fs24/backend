@@ -1,6 +1,6 @@
 from pydantic import ValidationError
 from src.UserRepository import UserRepository
-from src.User import User
+from src.UserDto import UserDto
 
 class UserService:
     def __init__(self):
@@ -8,7 +8,7 @@ class UserService:
 
     def post_user(self, data):
         try:
-            user = User(**data)
+            user = UserDto(**data)
         except ValidationError as e:
             print(e)
             return e, 400
