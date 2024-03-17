@@ -2,6 +2,7 @@
 
 # Default stage
 STAGE="dev"
+HOST="localstack-main"
 
 # Parse command line options
 while [[ $# -gt 0 ]]; do
@@ -20,7 +21,12 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-while ! nc -z localstack-main 4566; do
+# Set HOST based on stage
+if [ "$STAGE" == "local" ]; then
+  HOST="localhost"
+fi
+
+while ! nc -z $HOST 4566; do
     echo 'Waiting for LocalStack to be ready...';
     sleep 1;
 done;
