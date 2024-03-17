@@ -11,7 +11,7 @@ custom:
       mountCode: false
   stage:
     dev:
-      host: http://findme-localstack
+      host: http://localstack-main
     local:
       host: http://localhost
 
