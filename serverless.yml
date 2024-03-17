@@ -19,6 +19,9 @@ custom:
     local:
       host: http://localhost
 
+package:
+  individually: true
+
 provider:
   name: aws
   runtime: python3.9
@@ -31,12 +34,38 @@ provider:
 
 functions:
   findme-users:
-    handler: findme-users/handler.lambda_handler
+    handler: handler.lambda_handler
+    module: findme-users
     events:
       - http:
-          path: /
+          path: /users/{id}
           method: get
           cors: true
+          request:
+            parameters:
+              paths:
+                id: true
+      - http:
+          path: /users
+          method: post
+          cors: true
+
+resources: # CloudFormation template syntax from here on.
+  Resources:
+    usersTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: usersTable
+        AttributeDefinitions:
+          - AttributeName: userId
+            AttributeType: N
+        KeySchema:
+          - AttributeName: userId
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+
 plugins:
   - serverless-python-requirements
   - serverless-localstack

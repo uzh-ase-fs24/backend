@@ -1,3 +1,6 @@
+from aws_lambda_powertools.shared.types import Annotated
+from aws_lambda_powertools.event_handler.openapi.params import Path
+from src.UserService import UserService
 from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.logging import correlation_paths
@@ -7,12 +10,19 @@ tracer = Tracer()
 logger = Logger()
 app = APIGatewayRestResolver()
 
+user_service = UserService()
 
-@app.get("/")
+
+@app.post("/users")
 @tracer.capture_method
-def hello_world():
-    # Simply return Hello World
-    return {"message": "Hello World"}
+def post_user():
+    return user_service.post_user(app.current_event.json_body)
+
+
+@app.get("/users/<id>")
+@tracer.capture_method
+def get_user(id: Annotated[int, Path(lt=999)]):
+    return user_service.get_user(int(id))
 
 
 # You can continue to use other utilities just as before
