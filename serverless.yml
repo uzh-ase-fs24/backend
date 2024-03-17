@@ -1,4 +1,4 @@
-service: aws-custom-authorizer-auth0
+service: findme-microservices
 
 frameworkVersion: "3"
 
@@ -6,17 +6,28 @@ custom:
   localstack:
     stages:
       - local
+      - dev
+    host: ${self:custom.stage.${opt:stage}.host}
+    edgePort: 4566
     lambda:
       mountCode: false
   pythonRequirements:
     dockerizePip: non-linux
-
+  stage:
+    dev:
+      host: http://localstack-main
+    local:
+      host: http://localhost
 
 provider:
   name: aws
   runtime: python3.9
   region: eu-central-2
-
+  apiGateway:
+    restApiId:
+      "Fn::ImportValue": findmeApiGateway-restApiId
+    restApiRootResourceId:
+      "Fn::ImportValue": findmeApiGateway-rootResourceId
 
 functions:
   findme-users:

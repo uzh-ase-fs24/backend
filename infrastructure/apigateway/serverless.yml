@@ -1,0 +1,48 @@
+service: findme-apigateway
+
+custom:
+  localstack:
+    stages:
+      - local
+      - dev
+    host: ${self:custom.stage.${opt:stage}.host}
+    edgePort: 4566
+    lambda:
+      mountCode: false
+  stage:
+    dev:
+      host: http://findme-localstack
+    local:
+      host: http://localhost
+
+provider:
+  name: aws
+  region: eu-central-2
+
+resources:
+  Resources:
+    findmeApiGateway:
+      Type: AWS::ApiGateway::RestApi
+      Properties:
+        Name: findmeApiGateway
+        Tags:
+          - Key: _custom_id_
+            Value: findme
+
+  Outputs:
+    apiGatewayRestApiId:
+      Value:
+        Ref: findmeApiGateway
+      Export:
+        Name: findmeApiGateway-restApiId
+
+    apiGatewayRestApiRootResourceId:
+      Value:
+        Fn::GetAtt:
+          - findmeApiGateway
+          - RootResourceId
+      Export:
+        Name: findmeApiGateway-rootResourceId
+
+plugins:
+  - serverless-localstack

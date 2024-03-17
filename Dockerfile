@@ -18,4 +18,5 @@ RUN npm install
 
 EXPOSE 4566
 
-CMD ["sh", "-c", "serverless --version"]
+RUN chmod +x deploy.sh
+CMD ["sh", "deploy.sh"]
