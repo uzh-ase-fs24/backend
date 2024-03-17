@@ -1,4 +1,4 @@
-service: aws-custom-authorizer-auth0
+service: findme-microservices
 
 frameworkVersion: "3"
 
@@ -6,10 +6,18 @@ custom:
   localstack:
     stages:
       - local
+      - dev
+    host: ${self:custom.stage.${opt:stage}.host}
+    edgePort: 4566
     lambda:
       mountCode: false
   pythonRequirements:
     dockerizePip: non-linux
+  stage:
+    dev:
+      host: http://localstack-main
+    local:
+      host: http://localhost
 
 package:
   individually: true
@@ -18,7 +26,11 @@ provider:
   name: aws
   runtime: python3.9
   region: eu-central-2
-
+  apiGateway:
+    restApiId:
+      "Fn::ImportValue": findmeApiGateway-restApiId
+    restApiRootResourceId:
+      "Fn::ImportValue": findmeApiGateway-rootResourceId
 
 functions:
   findme-users:
@@ -39,22 +51,21 @@ functions:
           cors: true
 
 resources: # CloudFormation template syntax from here on.
-      Resources:
-        usersTable:
-          Type: AWS::DynamoDB::Table
-          Properties:
-            TableName: usersTable
-            AttributeDefinitions:
-              - AttributeName: userId
-                AttributeType: N
-            KeySchema:
-              - AttributeName: userId
-                KeyType: HASH
-            ProvisionedThroughput:
-              ReadCapacityUnits: 1
-              WriteCapacityUnits: 1
+  Resources:
+    usersTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: usersTable
+        AttributeDefinitions:
+          - AttributeName: userId
+            AttributeType: N
+        KeySchema:
+          - AttributeName: userId
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
 
 plugins:
   - serverless-python-requirements
   - serverless-localstack
-
