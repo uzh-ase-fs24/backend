@@ -8,4 +8,4 @@ The backend consists of three microservices
 
 - Run Docker
 - Run `localstack start`
-- Deploy newest version using `serverless deploy --stage local --verbose`
+- Deploy newest version using `sh deploy.sh --stage local`
