@@ -1,4 +1,7 @@
 {
+  "scripts": {
+    "start": "cd .\\infrastructure\\apigateway\\ && sls deploy -s local && cd ../.. && sls deploy -s local"
+  },
   "devDependencies": {
     "serverless-localstack": "^1.2.0",
     "serverless-python-requirements": "^6.0.1"
