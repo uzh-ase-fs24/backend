@@ -1,14 +1,19 @@
-from aws_lambda_powertools.shared.types import Annotated
-from aws_lambda_powertools.event_handler.openapi.params import Path
-from src.UserService import UserService
-from aws_lambda_powertools.event_handler import APIGatewayRestResolver
+import os
+
 from aws_lambda_powertools import Logger, Tracer
+from aws_lambda_powertools.event_handler import APIGatewayRestResolver, CORSConfig
+from aws_lambda_powertools.event_handler.openapi.params import Path
 from aws_lambda_powertools.logging import correlation_paths
+from aws_lambda_powertools.shared.types import Annotated
 from aws_lambda_powertools.utilities.typing import LambdaContext
+
+from src.UserService import UserService
 
 tracer = Tracer()
 logger = Logger()
-app = APIGatewayRestResolver()
+
+cors_config = CORSConfig(allow_origin=os.environ.get("FRONTEND_ORIGIN"))
+app = APIGatewayRestResolver(cors=cors_config)
 
 user_service = UserService()
 

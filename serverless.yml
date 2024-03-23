@@ -16,8 +16,10 @@ custom:
   stage:
     dev:
       host: http://localstack-main
+      frontendOrigin: http://localhost:8100
     local:
       host: http://localhost
+      frontendOrigin: http://localhost:8100
 
 package:
   individually: true
@@ -36,11 +38,14 @@ functions:
   findme-users:
     handler: handler.lambda_handler
     module: findme-users
+    environment:
+      FRONTEND_ORIGIN: ${self:custom.stage.${opt:stage}.frontendOrigin}
     events:
       - http:
           path: /users/{id}
           method: get
-          cors: true
+          cors:
+            origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
           request:
             parameters:
               paths:
@@ -48,7 +53,8 @@ functions:
       - http:
           path: /users
           method: post
-          cors: true
+          cors:
+            origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
 
 resources: # CloudFormation template syntax from here on.
   Resources:
