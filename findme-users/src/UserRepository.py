@@ -1,6 +1,11 @@
 import boto3
 from botocore.exceptions import ClientError
 from src.UserDto import UserDto
+from pydantic import ValidationError
+from aws_lambda_powertools.event_handler.exceptions import (
+    BadRequestError,
+    NotFoundError,
+)
 
 class UserRepository:
     def __init__(self):
@@ -10,17 +15,18 @@ class UserRepository:
     def post_user_to_db(self, user):
         try:
             self.table.put_item(Item=user.dict())
-            return user, 200  
-        
+            return user
         except ClientError as e:
-            print("Error saving user to DynamoDB:", e)
-            return e, 500 
+            print(f"Error saving user to DynamoDB: {e}")
+            raise BadRequestError(f"Error saving user to DynamoDB: {e}")
         
     def get_user_by_userId_from_db(self, userId):
+        response = self.table.get_item(Key={'userId': userId})
+        if "Item" not in response:
+            raise NotFoundError(f"No User with userId: {userId} found")
+
         try:
-            response = self.table.get_item(Key={'userId': userId})
-            return UserDto(**response["Item"]), 200 
-        
-        except ClientError as e:
-            print("Error getting the User by userId:", e)
-            return e, 404
+            return UserDto(**response["Item"])
+        except ValidationError as e:
+            print(e)
+            raise BadRequestError(f"Unable to read Data from DB {e}")
