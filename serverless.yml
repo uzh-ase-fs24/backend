@@ -19,7 +19,10 @@ custom:
       frontendOrigin: http://localhost:8100
     local:
       host: http://localhost
+      mountCode: true
       frontendOrigin: http://localhost:8100
+      auth0Domain: findme-dev.eu.auth0.com
+      auth0Audience: https://findme-dev.eu.auth0.com/api/v2/
 
 package:
   individually: true
@@ -40,6 +43,8 @@ functions:
     module: findme-users
     environment:
       FRONTEND_ORIGIN: ${self:custom.stage.${opt:stage}.frontendOrigin}
+      AUTH0_DOMAIN: ${self:custom.stage.${opt:stage}.auth0Domain}
+      AUTH0_AUDIENCE: ${self:custom.stage.${opt:stage}.auth0Audience}
     events:
       - http:
           path: /users/{id}

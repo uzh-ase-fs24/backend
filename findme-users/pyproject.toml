@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "src"
+version = "0.1.0"
+description = "Microservice for findme handling users"
+authors = ["findMe"]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+aws-lambda-powertools = "^2.35.1"
+boto3 = "^1.34.69"
+findme = { git = "https://github.com/uzh-ase-fs24/shared", branch = "1-authorizer-to-validate-auth0-token" }
+aws-xray-sdk = "^2.13.0"
+pydantic = "^2.6.4"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
