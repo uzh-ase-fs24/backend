@@ -9,14 +9,19 @@ custom:
       - dev
     host: ${self:custom.stage.${opt:stage}.host}
     edgePort: 4566
+    autoStart: true
     lambda:
-      mountCode: false
+      mountCode: ${self:custom.stage.${opt:stage}.mountCode}
   pythonRequirements:
     dockerizePip: non-linux
   stage:
     dev:
       host: http://localstack-main
+      mountCode: false
       frontendOrigin: http://localhost:8100
+      auth0Domain: findme-dev.eu.auth0.com
+      auth0Audience: https://findme-dev.eu.auth0.com/api/v2/
+
     local:
       host: http://localhost
       mountCode: true
@@ -29,7 +34,7 @@ package:
 
 provider:
   name: aws
-  runtime: python3.9
+  runtime: python3.12
   region: eu-central-2
   apiGateway:
     restApiId:
@@ -60,8 +65,18 @@ functions:
           method: post
           cors:
             origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
+  findme-location-riddles:
+    handler: handler.lambda_handler
+    module: findme-users
+    events:
+      - http:
+          path: /location-riddles
+          method: get
+          cors:
+            origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
 
 resources: # CloudFormation template syntax from here on.
+  extensions: ${file(./sls-config-${opt:stage}.yml), null}
   Resources:
     usersTable:
       Type: AWS::DynamoDB::Table
