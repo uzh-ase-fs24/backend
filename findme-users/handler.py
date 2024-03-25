@@ -1,3 +1,6 @@
+import sys
+
+sys.path.insert(0, "/var/task/.venv/lib/python3.12/site-packages")
 import os
 
 from aws_lambda_powertools import Logger, Tracer
