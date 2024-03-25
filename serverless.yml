@@ -29,6 +29,13 @@ custom:
       auth0Domain: findme-dev.eu.auth0.com
       auth0Audience: https://findme-dev.eu.auth0.com/api/v2/
 
+    local-no-mount:
+      host: http://localhost
+      mountCode: false
+      frontendOrigin: http://localhost:8100
+      auth0Domain: findme-dev.eu.auth0.com
+      auth0Audience: https://findme-dev.eu.auth0.com/api/v2/
+
 package:
   individually: true
 
