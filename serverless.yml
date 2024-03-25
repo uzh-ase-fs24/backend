@@ -74,9 +74,14 @@ functions:
           method: post
           cors:
             origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
+      - http:
+          path: /users
+          method: put
+          cors:
+            origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
   findme-location-riddles:
     handler: handler.lambda_handler
-    module: findme-users
+    module: findme-location-riddles
     events:
       - http:
           path: /location-riddles
@@ -93,7 +98,7 @@ resources: # CloudFormation template syntax from here on.
         TableName: usersTable
         AttributeDefinitions:
           - AttributeName: userId
-            AttributeType: N
+            AttributeType: S
         KeySchema:
           - AttributeName: userId
             KeyType: HASH
