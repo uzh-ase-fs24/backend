@@ -53,6 +53,7 @@ provider:
 functions:
   findme-users:
     handler: handler.lambda_handler
+    timeout: 30
     module: findme-users
     environment:
       FRONTEND_ORIGIN: ${self:custom.stage.${opt:stage}.frontendOrigin}
