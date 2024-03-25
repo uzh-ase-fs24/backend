@@ -1,6 +1,9 @@
 from pydantic import ValidationError
 from src.UserRepository import UserRepository
 from src.UserDto import UserDto
+from aws_lambda_powertools.event_handler.exceptions import (
+    BadRequestError,
+)
 
 class UserService:
     def __init__(self):
@@ -10,8 +13,8 @@ class UserService:
         try:
             user = UserDto(**data)
         except ValidationError as e:
-            print(e)
-            return e, 400
+            print(f"unable to create user with provided parameters. {e}")
+            raise BadRequestError(f"unable to create user with provided parameters. {e}")
         return self.user_repository.post_user_to_db(user)
     
     def get_user(self, userId):
