@@ -10,6 +10,8 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
 
 from findme.authorization import Authorizer
 
+from src.LocationRiddlesService import LocationRiddlesService
+
 tracer = Tracer()
 logger = Logger()
 
@@ -21,13 +23,14 @@ authorizer = Authorizer(
     auth0_audience=os.environ.get("AUTH0_AUDIENCE"),
 )
 
+locationRiddlesService = LocationRiddlesService()
+
 
 @app.post("/location-riddles")
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
 def post_location_riddles():
-    print(app.current_event)
-    return {"message": "hello"}
+    return locationRiddlesService.post_image(app.current_event.json_body['image'])
 
 
 # You can continue to use other utilities just as before
