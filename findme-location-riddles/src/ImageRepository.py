@@ -10,15 +10,16 @@ from aws_lambda_powertools.event_handler.exceptions import (
 class ImageRepository:
     def __init__(self):
         self.s3 = boto3.client('s3')
+        self.bucket_name = 'imageuploadbucket'
 
-    def post_image_to_s3(self, image_base64):
+    def post_image_to_s3(self, image_base64, user_id):
         image_data = base64.b64decode(image_base64)
+        key = f"{user_id}-image1.png"
 
         try:
-            # Upload the image to S3
             self.s3.put_object(
-                Bucket='imageuploadbucket',
-                Key='uploaded_image.png',
+                Bucket=self.bucket_name,
+                Key=key,
                 Body=image_data,
                 ContentType='image/png'
             )
@@ -26,3 +27,28 @@ class ImageRepository:
         except ClientError as e:
             raise BadRequestError(f"Error saving image to bucket: {e}")
 
+    def get_image_from_s3(self, user_id):
+        image_data = self.__get_image_data_from_s3(user_id)
+
+        if image_data:
+            encoded_image = base64.b64encode(image_data).decode('utf-8')
+
+            return {
+                "image_base64": encoded_image,
+                "Content-Type": "image/png"
+            }
+        else:
+            raise BadRequestError("Failed to retrieve image from S3")
+
+    def __get_image_data_from_s3(self, user_id):
+        key = f"{user_id}-image1.png"
+
+        try:
+            response = self.s3.get_object(
+                Bucket=self.bucket_name,
+                Key=key
+            )
+            image_data = response['Body'].read()
+            return image_data
+        except ClientError as e:
+            raise BadRequestError(f"Error retrieving image from S3: {e}")

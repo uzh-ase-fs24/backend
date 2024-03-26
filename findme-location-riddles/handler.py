@@ -30,7 +30,15 @@ locationRiddlesService = LocationRiddlesService()
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
 def post_location_riddles():
-    return locationRiddlesService.post_image(app.current_event.json_body['image'])
+    user_id = app.context.get('claims').get('sub')
+    return locationRiddlesService.post_image(app.current_event.json_body['image'], user_id)
+
+@app.get("/location-riddles")
+@tracer.capture_method
+@authorizer.requires_auth(app=app)
+def post_location_riddles():
+    user_id = app.context.get('claims').get('sub')
+    return locationRiddlesService.get_image(user_id)
 
 
 # You can continue to use other utilities just as before
