@@ -43,6 +43,14 @@ def get_user(userId: Annotated[int, Path(lt=999)]):
     # Get user id from oauth token
     return user_service.get_user(userId)
 
+@app.get("/users")
+@tracer.capture_method
+@authorizer.requires_auth(app=app)
+def get_individual_user():
+    # Get user id from oauth token
+    userId = app.context.get('claims').get('sub')
+    return user_service.get_user(userId)
+
 
 @app.put("/users")
 @tracer.capture_method
