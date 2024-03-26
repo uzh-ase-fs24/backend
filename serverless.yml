@@ -71,6 +71,11 @@ functions:
                 id: true
       - http:
           path: /users
+          method: get
+          cors:
+            origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
+      - http:
+          path: /users
           method: post
           cors:
             origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
