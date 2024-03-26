@@ -30,18 +30,16 @@ locationRiddlesService = LocationRiddlesService()
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
 def post_location_riddles():
-    user_id = app.context.get('claims').get('sub')
-    return locationRiddlesService.post_image(app.current_event.json_body['image'], user_id)
+    return locationRiddlesService.post_image(app.current_event.json_body['image'], app.context.get('claims').get('sub'))
+
 
 @app.get("/location-riddles")
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
 def post_location_riddles():
-    user_id = app.context.get('claims').get('sub')
-    return locationRiddlesService.get_image(user_id)
+    return locationRiddlesService.get_image(app.context.get('claims').get('sub'))
 
 
-# You can continue to use other utilities just as before
 @logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST)
 @tracer.capture_lambda_handler
 def lambda_handler(event: dict, context: LambdaContext) -> dict:

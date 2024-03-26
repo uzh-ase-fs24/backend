@@ -61,7 +61,7 @@ functions:
       AUTH0_AUDIENCE: ${self:custom.stage.${opt:stage}.auth0Audience}
     events:
       - http:
-          path: /users/{id}
+          path: /users/{user_id}
           method: get
           cors:
             origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
@@ -116,10 +116,10 @@ resources: # CloudFormation template syntax from here on.
       Properties:
         TableName: usersTable
         AttributeDefinitions:
-          - AttributeName: userId
+          - AttributeName: user_id
             AttributeType: S
         KeySchema:
-          - AttributeName: userId
+          - AttributeName: user_id
             KeyType: HASH
         ProvisionedThroughput:
           ReadCapacityUnits: 1
