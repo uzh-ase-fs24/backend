@@ -97,6 +97,11 @@ functions:
 resources: # CloudFormation template syntax from here on.
   extensions: ${file(./sls-config-${opt:stage}.yml), null}
   Resources:
+    imageUploadBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: imageUploadBucket
+        AccessControl: PublicRead
     usersTable:
       Type: AWS::DynamoDB::Table
       Properties:
