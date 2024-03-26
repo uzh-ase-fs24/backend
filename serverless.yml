@@ -87,10 +87,14 @@ functions:
   findme-location-riddles:
     handler: handler.lambda_handler
     module: findme-location-riddles
+    environment:
+      FRONTEND_ORIGIN: ${self:custom.stage.${opt:stage}.frontendOrigin}
+      AUTH0_DOMAIN: ${self:custom.stage.${opt:stage}.auth0Domain}
+      AUTH0_AUDIENCE: ${self:custom.stage.${opt:stage}.auth0Audience}
     events:
       - http:
           path: /location-riddles
-          method: get
+          method: post
           cors:
             origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
 
