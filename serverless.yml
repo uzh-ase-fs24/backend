@@ -107,15 +107,31 @@ functions:
 resources: # CloudFormation template syntax from here on.
   extensions: ${file(./sls-config-${opt:stage}.yml), null}
   Resources:
+
     ase-findme-image-upload-bucket:
       Type: AWS::S3::Bucket
       Properties:
         BucketName: ase-findme-image-upload-bucket
         AccessControl: PublicRead
+
     usersTable:
       Type: AWS::DynamoDB::Table
       Properties:
         TableName: usersTable
+        AttributeDefinitions:
+          - AttributeName: user_id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: user_id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+
+    usersImageTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: usersImageTable
         AttributeDefinitions:
           - AttributeName: user_id
             AttributeType: S
