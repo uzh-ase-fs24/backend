@@ -17,8 +17,7 @@ coverage
 
 # python env
 **/.venv
-# dependencies are defined in pyproject.toml and not requirements.txt
-**/requirements.txt
+
 # Grunt intermediate storage (http://gruntjs.com/creating-plugins#storing-task-files)
 .grunt
 
