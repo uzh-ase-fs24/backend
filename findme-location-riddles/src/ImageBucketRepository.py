@@ -7,10 +7,10 @@ from aws_lambda_powertools.event_handler.exceptions import (
 )
 
 
-class ImageRepository:
+class ImageBucketRepository:
     def __init__(self):
         self.s3 = boto3.client('s3')
-        self.bucket_name = 'imageuploadbucket'
+        self.bucket_name = 'ase-findme-image-upload-bucket'
 
     def post_image_to_s3(self, image_base64, user_id):
         image_data = base64.b64decode(image_base64)

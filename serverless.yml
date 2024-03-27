@@ -87,6 +87,7 @@ functions:
   findme-location-riddles:
     handler: handler.lambda_handler
     module: findme-location-riddles
+    timeout: 30
     environment:
       FRONTEND_ORIGIN: ${self:custom.stage.${opt:stage}.frontendOrigin}
       AUTH0_DOMAIN: ${self:custom.stage.${opt:stage}.auth0Domain}
@@ -106,10 +107,10 @@ functions:
 resources: # CloudFormation template syntax from here on.
   extensions: ${file(./sls-config-${opt:stage}.yml), null}
   Resources:
-    imageUploadBucket:
+    ase-findme-image-upload-bucket:
       Type: AWS::S3::Bucket
       Properties:
-        BucketName: imageUploadBucket
+        BucketName: ase-findme-image-upload-bucket
         AccessControl: PublicRead
     usersTable:
       Type: AWS::DynamoDB::Table
