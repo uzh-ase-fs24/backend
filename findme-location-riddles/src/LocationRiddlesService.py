@@ -22,4 +22,6 @@ class LocationRiddlesService:
         return self.image_bucket_repository.post_image_to_s3(image_base64, image_path)
 
     def get_image(self, user_id):
-        return self.image_bucket_repository.get_image_from_s3(user_id)
+        image_ids = self.image_db_repository.get_all_image_ids_for_user(user_id)
+        key = f"{user_id}/{image_ids[-1]}.png"
+        return self.image_bucket_repository.get_image_from_s3(key)

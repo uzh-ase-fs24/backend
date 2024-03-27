@@ -32,5 +32,11 @@ class ImageDbRepository:
             print(f"Error writing user_images to DynamoDB: {e}")
             raise BadRequestError(f"Error writing user_images to DynamoDB: {e}")
 
+    def get_all_image_ids_for_user(self, user_id):
+        if not self.__does_user_with_user_id_exist(user_id):
+            raise NotFoundError(f"No User with user_id: {user_id} found")
+        response = self.table.get_item(Key={'user_id': user_id})
+        return response["Item"]["image_ids"].copy()
+
     def __does_user_with_user_id_exist(self, user_id):
         return 'Item' in self.table.get_item(Key={'user_id': user_id})

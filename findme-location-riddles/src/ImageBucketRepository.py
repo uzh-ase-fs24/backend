@@ -26,8 +26,8 @@ class ImageBucketRepository:
         except ClientError as e:
             raise BadRequestError(f"Error saving image to bucket: {e}")
 
-    def get_image_from_s3(self, user_id):
-        image_data = self.__get_image_data_from_s3(user_id)
+    def get_image_from_s3(self, key):
+        image_data = self.__get_image_data_from_s3(key)
 
         if image_data:
             encoded_image = base64.b64encode(image_data).decode('utf-8')
@@ -39,9 +39,7 @@ class ImageBucketRepository:
         else:
             raise BadRequestError("Failed to retrieve image from S3")
 
-    def __get_image_data_from_s3(self, user_id):
-        key = f"{user_id}-image1.png"
-
+    def __get_image_data_from_s3(self, key):
         try:
             response = self.s3.get_object(
                 Bucket=self.bucket_name,
