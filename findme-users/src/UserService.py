@@ -10,23 +10,23 @@ class UserService:
     def __init__(self):
         self.user_repository = UserRepository()
 
-    def post_user(self, data, userId):
+    def post_user(self, data, user_id):
         try:
-            user_data = {**data, "userId": userId}
+            user_data = {**data, "user_id": user_id}
             user = User(**user_data)
-            return self.user_repository.post_user_to_db(user)
-
         except ValidationError as e:
             raise BadRequestError(f"unable to create user with provided parameters. {e}")
 
-    def get_user(self, userId):
-        return self.user_repository.get_user_by_userId_from_db(userId)
+        return self.user_repository.post_user_to_db(user)
 
-    def update_user(self, data, userId):
+    def get_user(self, user_id):
+        return self.user_repository.get_user_by_user_id_from_db(user_id)
+
+    def update_user(self, data, user_id):
         try:
-            # Insert id retrieved from header
-            user_data = {**data, "userId": userId}
+            user_data = {**data, "user_id": user_id}
             user = User(**user_data)
-            return self.user_repository.update_user_in_db(user)
         except ValidationError as e:
             raise BadRequestError(f"unable to update user with provided parameters. {e}")
+
+        return self.user_repository.update_user_in_db(user)

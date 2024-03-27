@@ -46,3 +46,13 @@ The backend consists of three microservices
 
 With this setup the lambda functions are configured to automatically hot reload. This means that if you perform a change
 in e.g findme-users/ you will instantly see the change after saving.
+
+### Token
+To get a token for developing use the following curl command:
+`curl --request POST \
+  --url https://findme-dev.eu.auth0.com/oauth/token \
+  --header 'content-type: application/json' \
+  --data '{"client_id":"0FhpaZeIjhSG1lwNR3RWPI20VgLgU5rk",
+            "client_secret":<client_secret>,
+            "audience":"https://findme-dev.eu.auth0.com/api/v2/","grant_type":"client_credentials"}'
+`
