@@ -12,9 +12,8 @@ class ImageBucketRepository:
         self.s3 = boto3.client('s3')
         self.bucket_name = 'ase-findme-image-upload-bucket'
 
-    def post_image_to_s3(self, image_base64, user_id):
+    def post_image_to_s3(self, image_base64, key):
         image_data = base64.b64decode(image_base64)
-        key = f"{user_id}-image1.png"
 
         try:
             self.s3.put_object(
