@@ -52,3 +52,15 @@ in e.g findme-users/ you will see the change after saving without redeploying.
 - double-check the absolute path in the `sls-config-local.yml` file
 - The properties in the `sls-config-local.yml` file have to be named exactly like serverless names the cloudformation
   resources, double-check that the names match to the ones in `.serverless/cloudformation-template-update-stack.json`
+=======
+in e.g findme-users/ you will instantly see the change after saving.
+
+### Token
+To get a token for developing use the following curl command:
+`curl --request POST \
+  --url https://findme-dev.eu.auth0.com/oauth/token \
+  --header 'content-type: application/json' \
+  --data '{"client_id":"0FhpaZeIjhSG1lwNR3RWPI20VgLgU5rk",
+            "client_secret":<client_secret>,
+            "audience":"https://findme-dev.eu.auth0.com/api/v2/","grant_type":"client_credentials"}'
+`
