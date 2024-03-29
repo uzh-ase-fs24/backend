@@ -32,24 +32,24 @@ user_service = UserService()
 @authorizer.requires_auth(app=app)
 def post_user():
     # Get user id from oauth token
-    userId = app.context.get('claims').get('sub')
-    return user_service.post_user(app.current_event.json_body, userId)
+    user_id = app.context.get('claims').get('sub').split("|")[1]
+    return user_service.post_user(app.current_event.json_body, user_id)
 
 
-@app.get("/users/<userId>")
+@app.get("/users/<user_id>")
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
-def get_user(userId: Annotated[int, Path(lt=999)]):
+def get_user(user_id: Annotated[int, Path(lt=999)]):
     # Get user id from oauth token
-    return user_service.get_user(userId)
+    return user_service.get_user(user_id)
 
 @app.get("/users")
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
 def get_individual_user():
     # Get user id from oauth token
-    userId = app.context.get('claims').get('sub')
-    return user_service.get_user(userId)
+    user_id = app.context.get('claims').get('sub').split("|")[1]
+    return user_service.get_user(user_id)
 
 
 @app.put("/users")
@@ -57,8 +57,8 @@ def get_individual_user():
 @authorizer.requires_auth(app=app)
 def get_user():
     # Get user id from oauth token
-    id = app.context.get('claims').get('sub')
-    return user_service.update_user(app.current_event.json_body, id)
+    user_id = app.context.get('claims').get('sub').split("|")[1]
+    return user_service.update_user(app.current_event.json_body, user_id)
 
 
 # You can continue to use other utilities just as before
