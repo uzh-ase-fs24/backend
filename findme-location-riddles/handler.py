@@ -43,6 +43,13 @@ def get_location_riddles_by_user():
     return locationRiddlesService.get_location_riddles_for_user(app.context.get('claims').get('sub'))
 
 
+@app.get("/location-riddles/<location_riddle_id>")
+@tracer.capture_method
+@authorizer.requires_auth(app=app)
+def get_location_riddles_by_user(location_riddle_id: Annotated[int, Path(lt=999)]):
+    return locationRiddlesService.get_location_riddle(location_riddle_id)
+
+
 @app.get("/location-riddles/user/<user_id>")
 @tracer.capture_method
 @authorizer.requires_auth(app=app)

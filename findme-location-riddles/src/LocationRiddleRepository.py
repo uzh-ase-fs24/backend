@@ -1,6 +1,7 @@
 import boto3
 from src.LocationRiddle import LocationRiddle
 from botocore.exceptions import ClientError
+from boto3.dynamodb.conditions import Key
 from pydantic import ValidationError
 from aws_lambda_powertools.event_handler.exceptions import (
     BadRequestError,
@@ -13,8 +14,8 @@ class LocationRiddleRepository:
         self.dynamodb = boto3.resource('dynamodb', region_name='eu-central-2')
         self.table = self.dynamodb.Table('locationRiddleTable')
 
-    def write_location_riddle_to_db(self, user_id, image_id):
-        location_riddle_data = {"location_riddle_id": image_id, "user_id": user_id}
+    def write_location_riddle_to_db(self, user_id, location_riddle_id):
+        location_riddle_data = {"location_riddle_id": location_riddle_id, "user_id": user_id}
 
         try:
             location_riddle = LocationRiddle(**location_riddle_data)
@@ -36,3 +37,15 @@ class LocationRiddleRepository:
             response = self.table.scan(ExclusiveStartKey=response['LastEvaluatedKey'])
             data.extend(response['Items'])
         return data
+
+    def get_location_riddle_by_location_riddle_id_from_db(self, location_riddle_id):
+        # ToDo: fix query
+        response = self.table.query(
+            KeyConditionExpression=Key('location_riddle_id').eq(location_riddle_id)
+        )
+
+        if 'Item' not in response:
+            raise NotFoundError(f"No location riddle with location_riddle_id: {location_riddle_id} found")
+
+        # ToDo: create LocationRiddle instance from the response -> create new optional field image on dataclass
+        return response["Item"]
