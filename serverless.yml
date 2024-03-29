@@ -128,16 +128,20 @@ resources: # CloudFormation template syntax from here on.
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
 
-    usersImageTable:
+    locationRiddleTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: usersImageTable
+        TableName: locationRiddleTable
         AttributeDefinitions:
+          - AttributeName: location_riddle_id
+            AttributeType: S
           - AttributeName: user_id
             AttributeType: S
         KeySchema:
-          - AttributeName: user_id
+          - AttributeName: location_riddle_id
             KeyType: HASH
+          - AttributeName: user_id
+            KeyType: RANGE
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1

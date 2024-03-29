@@ -1,5 +1,5 @@
 import boto3
-from src.UserImages import UserImages
+from src.LocationRiddle import LocationRiddle
 from botocore.exceptions import ClientError
 from pydantic import ValidationError
 from aws_lambda_powertools.event_handler.exceptions import (
@@ -11,26 +11,24 @@ from aws_lambda_powertools.event_handler.exceptions import (
 class ImageDbRepository:
     def __init__(self):
         self.dynamodb = boto3.resource('dynamodb', region_name='eu-central-2')
-        self.table = self.dynamodb.Table('usersImageTable')
+        self.table = self.dynamodb.Table('locationRiddleTable')
 
-    def write_image_to_db(self, user_id, image_id):
-        if not self.__does_user_with_user_id_exist(user_id):
-            user_images_data = {"user_id": user_id, "image_ids": [image_id]}
-        else:
-            response = self.table.get_item(Key={'user_id': user_id})
-            user_images_data = response["Item"].copy()
-            user_images_data["image_ids"].append(image_id)
+    def write_location_riddle_to_db(self, user_id, image_id):
+        location_riddle_data = {"location_riddle_id": image_id, "user_id": user_id}
+        # response = self.table.get_item(Key={'user_id': user_id})
+        # location_riddle_data = response["Item"].copy()
+        # location_riddle_data["image_ids"].append(image_id)
 
         try:
-            user_images = UserImages(**user_images_data)
+            location_riddle = LocationRiddle(**location_riddle_data)
         except ValidationError as e:
-            raise BadRequestError(f"unable to update user_images with provided parameters. {e}")
+            raise BadRequestError(f"unable to update location_riddle with provided parameters. {e}")
 
         try:
-            self.table.put_item(Item=user_images.dict())
+            self.table.put_item(Item=location_riddle.dict())
         except ClientError as e:
-            print(f"Error writing user_images to DynamoDB: {e}")
-            raise BadRequestError(f"Error writing user_images to DynamoDB: {e}")
+            print(f"Error writing location_riddle to DynamoDB: {e}")
+            raise BadRequestError(f"Error writing location_riddle to DynamoDB: {e}")
 
     def get_all_image_ids_for_user(self, user_id):
         if not self.__does_user_with_user_id_exist(user_id):
