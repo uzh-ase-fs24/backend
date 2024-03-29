@@ -37,8 +37,8 @@ def post_location_riddles():
 @app.get("/location-riddles")
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
-def post_location_riddles():
-    return locationRiddlesService.get_image(app.context.get('claims').get('sub'))
+def get_location_riddles():
+    return locationRiddlesService.get_location_riddles_for_user(app.context.get('claims').get('sub'))
 
 
 @logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST)
