@@ -121,9 +121,13 @@ resources: # CloudFormation template syntax from here on.
         AttributeDefinitions:
           - AttributeName: user_id
             AttributeType: S
+          - AttributeName: username
+            AttributeType: S
         KeySchema:
           - AttributeName: user_id
             KeyType: HASH
+          - AttributeName: username
+            KeyType: RANGE
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
