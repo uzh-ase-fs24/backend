@@ -61,7 +61,7 @@ functions:
       AUTH0_AUDIENCE: ${self:custom.stage.${opt:stage}.auth0Audience}
     events:
       - http:
-          path: /users/{id}
+          path: /users/{user_id}
           method: get
           cors:
             origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
@@ -87,7 +87,17 @@ functions:
   findme-location-riddles:
     handler: handler.lambda_handler
     module: findme-location-riddles
+    timeout: 30
+    environment:
+      FRONTEND_ORIGIN: ${self:custom.stage.${opt:stage}.frontendOrigin}
+      AUTH0_DOMAIN: ${self:custom.stage.${opt:stage}.auth0Domain}
+      AUTH0_AUDIENCE: ${self:custom.stage.${opt:stage}.auth0Audience}
     events:
+      - http:
+          path: /location-riddles
+          method: post
+          cors:
+            origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
       - http:
           path: /location-riddles
           method: get
@@ -97,15 +107,36 @@ functions:
 resources: # CloudFormation template syntax from here on.
   extensions: ${file(./sls-config-${opt:stage}.yml), null}
   Resources:
+
+    ase-findme-image-upload-bucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ase-findme-image-upload-bucket
+        AccessControl: PublicRead
+
     usersTable:
       Type: AWS::DynamoDB::Table
       Properties:
         TableName: usersTable
         AttributeDefinitions:
-          - AttributeName: userId
+          - AttributeName: user_id
             AttributeType: S
         KeySchema:
-          - AttributeName: userId
+          - AttributeName: user_id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+
+    usersImageTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: usersImageTable
+        AttributeDefinitions:
+          - AttributeName: user_id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: user_id
             KeyType: HASH
         ProvisionedThroughput:
           ReadCapacityUnits: 1

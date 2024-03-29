@@ -40,7 +40,6 @@ def post_user():
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
 def get_user(user_id: Annotated[int, Path(lt=999)]):
-    # Get user id from oauth token
     return user_service.get_user(user_id)
 
 @app.get("/users")
