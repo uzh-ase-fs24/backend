@@ -6,6 +6,8 @@ import os
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.event_handler import APIGatewayRestResolver, CORSConfig
 from aws_lambda_powertools.logging import correlation_paths
+from aws_lambda_powertools.shared.types import Annotated
+from aws_lambda_powertools.event_handler.openapi.params import Path
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
 from findme.authorization import Authorizer
@@ -37,8 +39,15 @@ def post_location_riddles():
 @app.get("/location-riddles")
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
-def get_location_riddles():
+def get_location_riddles_by_user():
     return locationRiddlesService.get_location_riddles_for_user(app.context.get('claims').get('sub'))
+
+
+@app.get("/location-riddles/user/<user_id>")
+@tracer.capture_method
+@authorizer.requires_auth(app=app)
+def get_location_riddles_by_user(user_id: Annotated[int, Path(lt=999)]):
+    return locationRiddlesService.get_location_riddles_for_user(user_id)
 
 
 @logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST)

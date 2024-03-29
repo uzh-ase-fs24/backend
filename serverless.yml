@@ -103,6 +103,11 @@ functions:
           method: get
           cors:
             origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
+      - http:
+          path: /location-riddles/user/{user_id}
+          method: get
+          cors:
+            origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
 
 resources: # CloudFormation template syntax from here on.
   extensions: ${file(./sls-config-${opt:stage}.yml), null}
