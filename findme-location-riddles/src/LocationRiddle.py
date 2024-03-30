@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import BaseModel
 
 
@@ -7,3 +9,4 @@ class LocationRiddle(BaseModel):
     ratings: list = []
     comments: list = []
     guesses: list = []
+    created_at: int = int(datetime.now().timestamp())
