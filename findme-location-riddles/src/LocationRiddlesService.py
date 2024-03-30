@@ -37,19 +37,18 @@ class LocationRiddlesService:
         return location_riddle.dict() | {"location_riddle_image": location_riddle_image}
 
     def get_location_riddles_for_user(self, user_id):
-        location_riddles = self.location_riddle_repository.get_all_location_riddles()
+        location_riddles = (
+            self.location_riddle_repository.get_all_location_riddles_by_user_id(user_id)
+        )
 
         response = []
         for location_riddle in location_riddles:
-            if location_riddle.user_id == user_id:
-                key = f"location-riddles/{location_riddle.location_riddle_id}.png"
-                location_riddle_image = self.image_bucket_repository.get_image_from_s3(
-                    key
-                )
-                response.append(
-                    location_riddle.dict()
-                    | {"location_riddle_image": location_riddle_image}
-                )
+            key = f"location-riddles/{location_riddle.location_riddle_id}.png"
+            location_riddle_image = self.image_bucket_repository.get_image_from_s3(key)
+            response.append(
+                location_riddle.dict()
+                | {"location_riddle_image": location_riddle_image}
+            )
 
         if len(location_riddles) == 0:
             raise NotFoundError(

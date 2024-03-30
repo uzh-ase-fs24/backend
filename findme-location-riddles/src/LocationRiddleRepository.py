@@ -3,6 +3,7 @@ from aws_lambda_powertools.event_handler.exceptions import (
     BadRequestError,
     NotFoundError,
 )
+from boto3.dynamodb.conditions import Key
 from botocore.exceptions import ClientError
 from pydantic import ValidationError
 from src.LocationRiddle import LocationRiddle
@@ -32,13 +33,18 @@ class LocationRiddleRepository:
             print(f"Error writing location_riddle to DynamoDB: {e}")
             raise BadRequestError(f"Error writing location_riddle to DynamoDB: {e}")
 
-    def get_all_location_riddles(self):
-        # ToDo: do the scanning by user_id here instead of LocationRiddlesService.get_location_riddles_for_user()
-        response = self.table.scan()
+    def get_all_location_riddles_by_user_id(self, user_id):
+        response = self.table.query(
+            IndexName="UserIndex", KeyConditionExpression=Key("user_id").eq(user_id)
+        )
         items = response["Items"]
 
         while "LastEvaluatedKey" in response:
-            response = self.table.scan(ExclusiveStartKey=response["LastEvaluatedKey"])
+            response = self.table.query(
+                IndexName="UserIndex",
+                ExclusiveStartKey=response["LastEvaluatedKey"],
+                KeyConditionExpression=Key("user_id").eq(user_id),
+            )
             items.extend(response["Items"])
 
         try:
