@@ -36,6 +36,26 @@ class UserRepository:
             print(e)
             raise BadRequestError(f"Unable to read Data from DB {e}")
 
+    def get_users_by_username_prefix(self, username_prefix):
+        # Handle the case where no username prefix is provided.
+        if not username_prefix:
+            return []
+
+        # TODO works for now, scan is not really efficient though
+        try:
+            response = self.table.scan(
+                FilterExpression='begins_with(username, :prefix)',
+                ExpressionAttributeValues={
+                    ':prefix': username_prefix
+                }
+            )
+
+        except ValidationError as e:
+            print(e)
+            raise BadRequestError(f"Unable to read Data from DB {e}")
+
+        return response.get('Items', [])
+
     def __does_user_with_user_id_exist(self, user_id):
         return 'Item' in self.table.get_item(Key={'user_id': user_id})
 

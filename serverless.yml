@@ -84,6 +84,17 @@ functions:
           method: put
           cors:
             origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
+      - http:
+          path: /users/search
+          method: get
+          cors:
+            origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
+          request:
+            parameters:
+              querystrings:
+                username: true
+                type: false
+
   findme-location-riddles:
     handler: handler.lambda_handler
     module: findme-location-riddles
@@ -104,7 +115,7 @@ functions:
           cors:
             origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
 
-resources: # CloudFormation template syntax from here on.
+resources:
   extensions: ${file(./sls-config-${opt:stage}.yml), null}
   Resources:
 
@@ -121,12 +132,25 @@ resources: # CloudFormation template syntax from here on.
         AttributeDefinitions:
           - AttributeName: user_id
             AttributeType: S
+          - AttributeName: username
+            AttributeType: S
         KeySchema:
           - AttributeName: user_id
             KeyType: HASH
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
+        GlobalSecondaryIndexes:
+          - IndexName: UsernameIndex
+            KeySchema:
+              - AttributeName: username
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+            ProvisionedThroughput:
+              ReadCapacityUnits: 1
+              WriteCapacityUnits: 1
+
 
     usersImageTable:
       Type: AWS::DynamoDB::Table
@@ -141,6 +165,7 @@ resources: # CloudFormation template syntax from here on.
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
+
 
 plugins:
   - serverless-python-requirements

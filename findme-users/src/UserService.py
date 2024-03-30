@@ -30,3 +30,18 @@ class UserService:
             raise BadRequestError(f"unable to update user with provided parameters. {e}")
 
         return self.user_repository.update_user_in_db(user)
+
+    def get_similar_users(self, username_prefix):
+        user_items = self.user_repository.get_users_by_username_prefix(username_prefix)
+        users = []
+
+        for item in user_items:
+            try:
+                user = User(**item)
+                users.append(user)
+            except ValidationError as e:
+                print(e)
+                raise BadRequestError(f"Unable to read Data from DB {e}")
+
+        return users
+

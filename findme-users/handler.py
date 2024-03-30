@@ -46,11 +46,19 @@ def get_user(user_id: Annotated[int, Path(lt=999)]):
 def get_individual_user():
     return user_service.get_user(app.context.get('claims').get('sub'))
 
+@app.get("/users/search")
+@tracer.capture_method
+@authorizer.requires_auth(app=app)
+def get_similar_users():
+    username = app.current_event.query_string_parameters.get("username")
+    return user_service.get_similar_users(username)
+
+
 
 @app.put("/users")
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
-def get_user():
+def update_user():
     return user_service.update_user(app.current_event.json_body, app.context.get('claims').get('sub'))
 
 
