@@ -1,9 +1,9 @@
-from pydantic import ValidationError
-from src.UserRepository import UserRepository
-from src.User import User
 from aws_lambda_powertools.event_handler.exceptions import (
     BadRequestError,
 )
+from pydantic import ValidationError
+from src.UserRepository import UserRepository
+from src.entities.User import User
 
 
 class UserService:
@@ -44,4 +44,3 @@ class UserService:
                 raise BadRequestError(f"Unable to read Data from DB {e}")
 
         return users
-

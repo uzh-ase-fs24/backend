@@ -94,6 +94,42 @@ functions:
               querystrings:
                 username: true
                 type: false
+      - http:
+          path: /users/{user_id}/follow
+          method: put
+          cors:
+            origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
+          request:
+            parameters:
+              paths:
+                id: true
+      - http:
+          path: /users/{user_id}/follow
+          method: patch
+          cors:
+            origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
+          request:
+            parameters:
+              paths:
+                id: true
+              querystrings:
+                action: true
+                type: false
+      - http:
+          path: /users/{user_id}/follow
+          method: get
+          cors:
+            origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
+          request:
+            parameters:
+              paths:
+                id: true
+      - http:
+          path: /users/follow
+          method: get
+          cors:
+            origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
+
 
   findme-location-riddles:
     handler: handler.lambda_handler
@@ -150,6 +186,51 @@ resources:
             ProvisionedThroughput:
               ReadCapacityUnits: 1
               WriteCapacityUnits: 1
+
+    FollowerTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: FollowerTable
+        AttributeDefinitions:
+          - AttributeName: partition_key # Request/Connection
+            AttributeType: S
+          - AttributeName: sort_key # ID
+            AttributeType: S
+          - AttributeName: requestee_id
+            AttributeType: S
+          - AttributeName: requester_id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: partition_key
+            KeyType: HASH
+          - AttributeName: sort_key
+            KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+        GlobalSecondaryIndexes:
+          - IndexName: RequesterIDIndex
+            KeySchema:
+              - AttributeName: requester_id
+                KeyType: HASH
+              - AttributeName: sort_key
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+            ProvisionedThroughput:
+              ReadCapacityUnits: 5
+              WriteCapacityUnits: 5
+          - IndexName: RequesteeIDIndex
+            KeySchema:
+              - AttributeName: requestee_id
+                KeyType: HASH
+              - AttributeName: sort_key
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+            ProvisionedThroughput:
+              ReadCapacityUnits: 5
+              WriteCapacityUnits: 5
 
 
     usersImageTable:

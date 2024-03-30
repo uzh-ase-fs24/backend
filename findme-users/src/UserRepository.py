@@ -1,11 +1,13 @@
+import uuid
+
 import boto3
-from botocore.exceptions import ClientError
-from src.User import User
-from pydantic import ValidationError
 from aws_lambda_powertools.event_handler.exceptions import (
     BadRequestError,
     NotFoundError,
 )
+from botocore.exceptions import ClientError
+from pydantic import ValidationError
+from src.entities.User import User
 
 
 class UserRepository:
