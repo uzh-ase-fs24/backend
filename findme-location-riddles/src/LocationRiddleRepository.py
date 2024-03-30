@@ -35,12 +35,18 @@ class LocationRiddleRepository:
     def get_all_location_riddles(self):
         # ToDo: do the scanning by user_id here instead of LocationRiddlesService.get_location_riddles_for_user()
         response = self.table.scan()
-        data = response["Items"]
+        items = response["Items"]
 
         while "LastEvaluatedKey" in response:
             response = self.table.scan(ExclusiveStartKey=response["LastEvaluatedKey"])
-            data.extend(response["Items"])
-        return data
+            items.extend(response["Items"])
+
+        try:
+            location_riddles = [LocationRiddle(**item) for item in items]
+        except ValidationError as e:
+            raise BadRequestError(f"Unable to read Data from DB {e}")
+
+        return location_riddles
 
     def get_location_riddle_by_location_riddle_id_from_db(self, location_riddle_id):
         response = self.table.get_item(Key={"location_riddle_id": location_riddle_id})
@@ -49,6 +55,9 @@ class LocationRiddleRepository:
             raise NotFoundError(
                 f"No location riddle with location_riddle_id: {location_riddle_id} found"
             )
+        try:
+            location_riddle = LocationRiddle(**response["Item"])
+        except ValidationError as e:
+            raise BadRequestError(f"Unable to read Data from DB {e}")
 
-        # ToDo: create LocationRiddle instance from the response -> create new optional field image on dataclass
-        return response["Item"]
+        return location_riddle

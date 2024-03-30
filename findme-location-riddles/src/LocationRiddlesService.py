@@ -1,10 +1,11 @@
-from src.ImageBucketRepository import ImageBucketRepository
-from src.LocationRiddleRepository import LocationRiddleRepository
 import uuid
+
 from aws_lambda_powertools.event_handler.exceptions import (
     BadRequestError,
-    NotFoundError
+    NotFoundError,
 )
+from src.ImageBucketRepository import ImageBucketRepository
+from src.LocationRiddleRepository import LocationRiddleRepository
 
 
 class LocationRiddlesService:
@@ -14,37 +15,44 @@ class LocationRiddlesService:
 
     def post_location_riddle(self, image_base64, user_id):
         location_riddle_id = str(uuid.uuid4())
-        image_path = f"{user_id}/{location_riddle_id}.png"
+        image_path = f"location-riddles/{location_riddle_id}.png"
 
         try:
-            self.location_riddle_repository.write_location_riddle_to_db(user_id, location_riddle_id)
+            self.location_riddle_repository.write_location_riddle_to_db(
+                user_id, location_riddle_id
+            )
         except Exception as e:
             raise BadRequestError(e)
 
         return self.image_bucket_repository.post_image_to_s3(image_base64, image_path)
 
     def get_location_riddle(self, location_riddle_id):
-        location_riddle = (self.location_riddle_repository
-                           .get_location_riddle_by_location_riddle_id_from_db(location_riddle_id))
+        location_riddle = self.location_riddle_repository.get_location_riddle_by_location_riddle_id_from_db(
+            location_riddle_id
+        )
 
-        key = f"{location_riddle["user_id"]}/{location_riddle["location_riddle_id"]}.png"
+        key = f"location-riddles/{location_riddle.location_riddle_id}.png"
         location_riddle_image = self.image_bucket_repository.get_image_from_s3(key)
-        location_riddle["location_riddle_image"] = location_riddle_image
 
-        return location_riddle
+        return location_riddle.dict() | {"location_riddle_image": location_riddle_image}
 
     def get_location_riddles_for_user(self, user_id):
         location_riddles = self.location_riddle_repository.get_all_location_riddles()
 
         response = []
         for location_riddle in location_riddles:
-            if location_riddle["user_id"] != user_id:
-                continue
-            key = f"{user_id}/{location_riddle["location_riddle_id"]}.png"
-            location_riddle_image = self.image_bucket_repository.get_image_from_s3(key)
-            location_riddle["location_riddle_image"] = location_riddle_image
-            response.append(location_riddle)
+            if location_riddle.user_id == user_id:
+                key = f"location-riddles/{location_riddle.location_riddle_id}.png"
+                location_riddle_image = self.image_bucket_repository.get_image_from_s3(
+                    key
+                )
+                response.append(
+                    location_riddle.dict()
+                    | {"location_riddle_image": location_riddle_image}
+                )
 
         if len(location_riddles) == 0:
-            raise NotFoundError(f"No location riddles for user with user_id: {user_id} found")
+            raise NotFoundError(
+                f"No location riddles for user with user_id: {user_id} found"
+            )
         return response
