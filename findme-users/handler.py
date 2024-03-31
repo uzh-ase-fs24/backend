@@ -37,7 +37,10 @@ follower_service = FollowerService()
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
 def post_user():
-    return user_service.post_user(app.current_event.json_body, app.context.get('claims').get('sub'))
+    user_id = app.context.get('claims').get('sub')
+    if '|' in user_id:
+        user_id = user_id.split("|")[1]
+    return user_service.post_user(app.current_event.json_body, user_id)
 
 
 @app.get("/users/<user_id>")
@@ -51,7 +54,10 @@ def get_user(user_id: Annotated[int, Path(lt=999)]):
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
 def get_individual_user():
-    return user_service.get_user(app.context.get('claims').get('sub'))
+    user_id = app.context.get('claims').get('sub')
+    if '|' in user_id:
+        user_id = user_id.split("|")[1]
+    return user_service.get_user(user_id)
 
 
 @app.get("/users/search")
@@ -102,8 +108,11 @@ def get_user_connections(user_id: Annotated[int, Path(lt=999)]):
 @app.put("/users")
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
-def update_user():
-    return user_service.update_user(app.current_event.json_body, app.context.get('claims').get('sub'))
+def get_user():
+    user_id = app.context.get('claims').get('sub')
+    if '|' in user_id:
+        user_id = user_id.split("|")[1]
+    return user_service.update_user(app.current_event.json_body, user_id)
 
 
 # You can continue to use other utilities just as before
