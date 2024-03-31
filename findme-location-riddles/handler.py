@@ -32,15 +32,20 @@ locationRiddlesService = LocationRiddlesService()
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
 def post_location_riddles():
-    return locationRiddlesService.post_location_riddle(app.current_event.json_body['image'],
-                                                       app.context.get('claims').get('sub'))
+    user_id = app.context.get('claims').get('sub')
+    if '|' in user_id:
+        user_id = user_id.split("|")[1]
+    return locationRiddlesService.post_location_riddle(app.current_event.json_body['image'], user_id)
 
 
 @app.get("/location-riddles")
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
 def get_location_riddles_by_user():
-    return locationRiddlesService.get_location_riddles_for_user(app.context.get('claims').get('sub'))
+    user_id = app.context.get('claims').get('sub')
+    if '|' in user_id:
+        user_id = user_id.split("|")[1]
+    return locationRiddlesService.get_location_riddles_for_user(user_id)
 
 
 @app.get("/location-riddles/<location_riddle_id>")
