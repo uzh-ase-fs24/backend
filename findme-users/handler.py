@@ -81,6 +81,8 @@ def follow_user(user_id: Annotated[int, Path(lt=999)]):
 @authorizer.requires_auth(app=app)
 def update_follow_user(requester_id: Annotated[int, Path(lt=999)]):
     requestee_id = app.context.get('claims').get('sub')
+    if '|' in requestee_id:
+        requestee_id = requestee_id.split("|")[1]
     action = app.current_event.query_string_parameters.get("action")
     if action == "accept":
         return follower_service.accept_follow_request(requester_id, requestee_id)
@@ -95,6 +97,8 @@ def update_follow_user(requester_id: Annotated[int, Path(lt=999)]):
 @authorizer.requires_auth(app=app)
 def get_received_follow_requests():
     user_id = app.context.get('claims').get('sub')
+    if '|' in user_id:
+        user_id = user_id.split("|")[1]
     return follower_service.get_received_follow_requests(user_id)
 
 
