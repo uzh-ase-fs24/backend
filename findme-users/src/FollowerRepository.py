@@ -58,8 +58,9 @@ class FollowerRepository:
                 }
             )
 
-            # Requester now follows requestee which means that the requester is a follower of the requestee. The
+
             # relation is uni-directional
+            # sort_key: "requestee" has the follower "requester"
             self.table.put_item(
                 Item={
                     'partition_key': f"FOLLOWERS",
@@ -68,6 +69,7 @@ class FollowerRepository:
                 }
             )
             # Store mirrored for efficient queries
+            # sort_key: "requester" is following "requestee"
             self.table.put_item(
                 Item={
                     'partition_key': f"FOLLOWING",
@@ -134,12 +136,13 @@ class FollowerRepository:
     def get_following(self, user_id: str):
         try:
             following_response = self.table.query(
-                KeyConditionExpression=f"partition_key = :following and begins_with(sort_key, '{user_id}')",
+                KeyConditionExpression="partition_key = :partition_key AND begins_with(sort_key, :user_id)",
                 ExpressionAttributeValues={
-                    ':following': f"FOLLOWING"
+                    ':partition_key': "FOLLOWING",
+                    ':user_id': user_id
                 }
             )
-            return following_response.get(['Items'])
+            return following_response
         except Exception as e:
             print(e)
             raise BadRequestError(f"Unable to retrieve user connections. {e}")
@@ -147,12 +150,13 @@ class FollowerRepository:
     def get_followers(self, user_id: str):
         try:
             following_response = self.table.query(
-                KeyConditionExpression=f"partition_key = :followers and begins_with(sort_key, '{user_id}')",
+                KeyConditionExpression="partition_key = :partition_key AND begins_with(sort_key, :user_id)",
                 ExpressionAttributeValues={
-                    ':followers': f"FOLLOWERS"
+                    ':partition_key': "FOLLOWERS",
+                    ':user_id': user_id
                 }
             )
-            return following_response.get(['Items'])
+            return following_response
         except Exception as e:
             print(e)
             raise BadRequestError(f"Unable to retrieve user connections. {e}")

@@ -6,6 +6,8 @@ from src.FollowerRepository import FollowerRepository
 from src.entities.FollowRequest import FollowRequest
 from src.entities.UserConnections import UserConnections
 
+from src.entities.FollowRelationship import FollowRelationship
+
 
 class FollowerService:
     def __init__(self):
@@ -38,12 +40,13 @@ class FollowerService:
         return follow_requests
 
     def get_user_connections(self, user_id):
-        following = self.follower_repository.get_following(user_id)
-        followers = self.follower_repository.get_followers(user_id)
+        following_response = self.follower_repository.get_following(user_id)
+        followers_response = self.follower_repository.get_followers(user_id)
 
-        connections = UserConnections(
-            following=following,
-            followers=followers
-        )
+        connections = UserConnections()
+
+        # Always take the second user_id since the first is indicating who we are searching for
+        connections.following = [item['sort_key'].split("#")[1] for item in following_response['Items']]
+        connections.followers = [item['sort_key'].split("#")[1] for item in followers_response['Items']]
 
         return connections
