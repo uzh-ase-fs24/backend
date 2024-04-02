@@ -130,7 +130,6 @@ functions:
           cors:
             origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
 
-
   findme-location-riddles:
     handler: handler.lambda_handler
     module: findme-location-riddles
@@ -154,7 +153,6 @@ functions:
 resources:
   extensions: ${file(./sls-config-${opt:stage}.yml), null}
   Resources:
-
     ase-findme-image-upload-bucket:
       Type: AWS::S3::Bucket
       Properties:
@@ -166,26 +164,25 @@ resources:
       Properties:
         TableName: usersTable
         AttributeDefinitions:
-          - AttributeName: user_id
+          - AttributeName: partition_key
             AttributeType: S
           - AttributeName: username
             AttributeType: S
-        KeySchema:
           - AttributeName: user_id
+            AttributeType: S
+        BillingMode: PAY_PER_REQUEST
+        KeySchema:
+          - AttributeName: partition_key
             KeyType: HASH
-        ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
+          - AttributeName: username
+            KeyType: RANGE
         GlobalSecondaryIndexes:
-          - IndexName: UsernameIndex
+          - IndexName: UserIdIndex
             KeySchema:
-              - AttributeName: username
+              - AttributeName: user_id
                 KeyType: HASH
             Projection:
               ProjectionType: ALL
-            ProvisionedThroughput:
-              ReadCapacityUnits: 1
-              WriteCapacityUnits: 1
 
     FollowerTable:
       Type: AWS::DynamoDB::Table
@@ -205,9 +202,7 @@ resources:
             KeyType: HASH
           - AttributeName: sort_key
             KeyType: RANGE
-        ProvisionedThroughput:
-          ReadCapacityUnits: 5
-          WriteCapacityUnits: 5
+        BillingMode: PAY_PER_REQUEST
         GlobalSecondaryIndexes:
           - IndexName: RequesterIDIndex
             KeySchema:
@@ -217,9 +212,6 @@ resources:
                 KeyType: RANGE
             Projection:
               ProjectionType: ALL
-            ProvisionedThroughput:
-              ReadCapacityUnits: 5
-              WriteCapacityUnits: 5
           - IndexName: RequesteeIDIndex
             KeySchema:
               - AttributeName: requestee_id
@@ -228,10 +220,6 @@ resources:
                 KeyType: RANGE
             Projection:
               ProjectionType: ALL
-            ProvisionedThroughput:
-              ReadCapacityUnits: 5
-              WriteCapacityUnits: 5
-
 
     usersImageTable:
       Type: AWS::DynamoDB::Table
@@ -243,9 +231,7 @@ resources:
         KeySchema:
           - AttributeName: user_id
             KeyType: HASH
-        ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
+        BillingMode: PAY_PER_REQUEST
 
 
 plugins:
