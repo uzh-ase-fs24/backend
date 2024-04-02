@@ -60,7 +60,7 @@ class UserRepository:
     def __does_user_with_user_id_exist(self, user_id):
         return 'Item' in self.table.query(
             IndexName="UserIdIndex",
-            KeyConditionExpression=Key('partition_key').eq("USER") & Key('user_id').eq(user_id),
+            KeyConditionExpression=Key('user_id').eq(user_id),
             ProjectionExpression="user_id, username, first_name, last_name"
         )
 
