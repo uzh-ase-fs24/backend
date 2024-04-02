@@ -32,10 +32,10 @@ class UserRepository:
             ProjectionExpression="user_id, username, first_name, last_name",
             KeyConditionExpression=Key('user_id').eq(user_id)
         )
-        if not response.get('Items'):
+        if not response.get('Items') or not response.get('Items')[0]:
             raise NotFoundError(f"No User with user_id: {user_id} found")
         try:
-            return User(**response["Item"])
+            return User(**response["Items"][0])
         except ValidationError as e:
             print(e)
             raise BadRequestError(f"Unable to read Data from DB {e}")
