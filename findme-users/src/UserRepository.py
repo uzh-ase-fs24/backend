@@ -1,6 +1,5 @@
-import uuid
-
 import boto3
+from boto3.dynamodb.conditions import Key
 from aws_lambda_powertools.event_handler.exceptions import (
     BadRequestError,
     NotFoundError,
@@ -28,10 +27,13 @@ class UserRepository:
         return self.__put_user_to_db(user)
 
     def get_user_by_user_id_from_db(self, user_id):
-        if not self.__does_user_with_user_id_exist(user_id):
+        response = self.table.query(
+            IndexName="UserIdIndex",
+            ProjectionExpression="user_id, username, first_name, last_name",
+            KeyConditionExpression=Key('user_id').eq(user_id)
+        )
+        if not response.get('Items'):
             raise NotFoundError(f"No User with user_id: {user_id} found")
-
-        response = self.table.get_item(Key={'user_id': user_id})
         try:
             return User(**response["Item"])
         except ValidationError as e:
@@ -43,13 +45,10 @@ class UserRepository:
         if not username_prefix:
             return []
 
-        # TODO works for now, scan is not really efficient though
         try:
-            response = self.table.scan(
-                FilterExpression='begins_with(username, :prefix)',
-                ExpressionAttributeValues={
-                    ':prefix': username_prefix
-                }
+            response = self.table.query(
+                ProjectionExpression="user_id, username, first_name, last_name",
+                KeyConditionExpression=Key('partition_key').eq("USER") & Key('username').begins_with(username_prefix)
             )
 
         except ValidationError as e:
@@ -59,11 +58,17 @@ class UserRepository:
         return response.get('Items', [])
 
     def __does_user_with_user_id_exist(self, user_id):
-        return 'Item' in self.table.get_item(Key={'user_id': user_id})
+        return 'Item' in self.table.query(
+            IndexName="UserIdIndex",
+            KeyConditionExpression=Key('partition_key').eq("USER") & Key('user_id').eq(user_id),
+            ProjectionExpression="user_id, username, first_name, last_name"
+        )
 
     def __put_user_to_db(self, user):
         try:
-            self.table.put_item(Item=user.dict())
+            user = user.dict()
+            user['partition_key'] = "USER"
+            self.table.put_item(Item=user)
             return user
         except ClientError as e:
             print(f"Error saving user to DynamoDB: {e}")
