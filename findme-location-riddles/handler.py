@@ -48,18 +48,28 @@ def get_location_riddles_by_user():
     return locationRiddlesService.get_location_riddles_for_user(user_id)
 
 
-@app.get("/location-riddles/<location_riddle_id>")
-@tracer.capture_method
-@authorizer.requires_auth(app=app)
-def get_location_riddles_by_user(location_riddle_id: Annotated[int, Path(lt=999)]):
-    return locationRiddlesService.get_location_riddle(location_riddle_id)
-
-
 @app.get("/location-riddles/user/<user_id>")
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
 def get_location_riddles_by_user(user_id: Annotated[int, Path(lt=999)]):
     return locationRiddlesService.get_location_riddles_for_user(user_id)
+
+
+@app.get("/location-riddles/<location_riddle_id>")
+@tracer.capture_method
+@authorizer.requires_auth(app=app)
+def get_location_riddles_by_location_riddle_id(location_riddle_id: Annotated[int, Path(lt=999)]):
+    return locationRiddlesService.get_location_riddle(location_riddle_id)
+
+
+@app.delete("/location-riddles/<location_riddle_id>")
+@tracer.capture_method
+@authorizer.requires_auth(app=app)
+def delete_location_riddles_by_location_riddle_id(location_riddle_id: Annotated[int, Path(lt=999)]):
+    user_id = app.context.get('claims').get('sub')
+    if '|' in user_id:
+        user_id = user_id.split("|")[1]
+    return locationRiddlesService.delete_location_riddle(location_riddle_id, user_id)
 
 
 @logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST)

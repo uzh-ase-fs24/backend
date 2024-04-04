@@ -67,3 +67,10 @@ class LocationRiddleRepository:
             raise BadRequestError(f"Unable to read Data from DB {e}")
 
         return location_riddle
+
+    def delete_location_riddle_from_db(self, location_riddle_id):
+        try:
+            self.table.delete_item(Key={"location_riddle_id": location_riddle_id})
+        except ClientError as e:
+            print(f"Error deleting location_riddle from DynamoDB: {e}")
+            raise BadRequestError(f"Error deleting location_riddle from DynamoDB: {e}")

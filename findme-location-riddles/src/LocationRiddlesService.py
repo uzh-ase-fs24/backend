@@ -55,3 +55,16 @@ class LocationRiddlesService:
                 f"No location riddles for user with user_id: {user_id} found"
             )
         return response
+
+    def delete_location_riddle(self, location_riddle_id, user_id):
+        location_riddle = self.location_riddle_repository.get_location_riddle_by_location_riddle_id_from_db(
+            location_riddle_id
+        )
+
+        if location_riddle.user_id != user_id:
+            raise BadRequestError("User does not have permission to delete this location riddle")
+
+        key = f"location-riddles/{location_riddle.location_riddle_id}.png"
+        self.image_bucket_repository.delete_image_from_s3(key)
+        self.location_riddle_repository.delete_location_riddle_from_db(location_riddle_id)
+        return {"message": "Location riddle deleted successfully"}
