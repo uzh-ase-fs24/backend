@@ -1,5 +1,6 @@
 import uuid
-import requests
+import json
+import boto3
 
 from aws_lambda_powertools.event_handler.exceptions import (
     BadRequestError,
@@ -58,14 +59,21 @@ class LocationRiddlesService:
             )
         return response
 
-    def get_location_riddles_feed(self, token, user_id):
+    def get_location_riddles_feed(self, event, user_id):
         # TODO: Implement API call to findme-user service to get the list of users that the current user follows
-        url = f"http://localhost:4566/restapis/findme/local/_user_request_/users/{user_id}"
-        headers = {'Authorization': token}
-        response = requests.get(url, headers=headers)
-        if response.status_code != 200:
-            raise Exception(f"GET /users/{user_id} failed with status {response.status_code}.")
-        print(response.json())
+        event_dict = dict(event)
+        event_dict["path"] = "/users"
+        client = boto3.client("lambda", region_name="eu-central-2")
+        response = client.invoke(FunctionName="findme-microservices-local-findme-users", Payload=json.dumps(event_dict))
+
+        streaming_body = response['Payload']
+        payload_bytes = streaming_body.read()
+        payload_str = payload_bytes.decode('utf-8')
+        payload_dict = json.loads(payload_str)
+
+        print(payload_dict)
+        # the above code shows a way to call another service to get the list of users that the current user follows.
+        # currently set to get /users as the /following endpoint is not implemented in the findme-users service
 
         following_users = ["660e5fc5de3e93a3b75f51a8", "0FhpaZeIjhSG1lwNR3RWPI20VgLgU5rk@clients"]
         response = []
