@@ -27,6 +27,7 @@ class LocationRiddlesService:
         return self.image_bucket_repository.post_image_to_s3(image_base64, image_path)
 
     def get_location_riddle(self, location_riddle_id):
+        # TODO: check if requesting user is following the user_id
         location_riddle = self.location_riddle_repository.get_location_riddle_by_location_riddle_id_from_db(
             location_riddle_id
         )
@@ -37,9 +38,14 @@ class LocationRiddlesService:
         return location_riddle.dict() | {"location_riddle_image": location_riddle_image}
 
     def get_location_riddles_for_user(self, user_id):
+        # TODO: check if requesting user is following the user_id
         location_riddles = (
             self.location_riddle_repository.get_all_location_riddles_by_user_id(user_id)
         )
+        if len(location_riddles) == 0:
+            raise NotFoundError(
+                f"No location riddles for user with user_id: {user_id} found"
+            )
 
         response = []
         for location_riddle in location_riddles:
@@ -49,11 +55,18 @@ class LocationRiddlesService:
                 location_riddle.dict()
                 | {"location_riddle_image": location_riddle_image}
             )
+        return response
 
-        if len(location_riddles) == 0:
-            raise NotFoundError(
-                f"No location riddles for user with user_id: {user_id} found"
-            )
+    def get_location_riddles_feed(self, user_id):
+        # TODO: Implement API call to findme-user service
+        # to get the list of users that the current user follows
+        following_users = ["660e5fc5de3e93a3b75f51a8", "0FhpaZeIjhSG1lwNR3RWPI20VgLgU5rk@clients"]
+        response = []
+        for user_id in following_users:
+            try:
+                response.extend(self.get_location_riddles_for_user(user_id))
+            except NotFoundError:
+                continue
         return response
 
     def delete_location_riddle(self, location_riddle_id, user_id):

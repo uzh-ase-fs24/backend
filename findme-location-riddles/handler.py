@@ -45,7 +45,7 @@ def get_location_riddles_by_user():
     user_id = app.context.get('claims').get('sub')
     if '|' in user_id:
         user_id = user_id.split("|")[1]
-    return locationRiddlesService.get_location_riddles_for_user(user_id)
+    return locationRiddlesService.get_location_riddles_feed(user_id)
 
 
 @app.get("/location-riddles/user/<user_id>")
