@@ -19,21 +19,21 @@ custom:
     dev:
       host: http://localstack-main
       mountCode: false
-      frontendOrigin: http://localhost:8100
+      frontendOrigin: http://localhost
       auth0Domain: findme-dev.eu.auth0.com
       auth0Audience: https://findme-dev.eu.auth0.com/api/v2/
 
     local:
       host: http://localhost
       mountCode: true
-      frontendOrigin: http://localhost:8100
+      frontendOrigin: http://localhost
       auth0Domain: findme-dev.eu.auth0.com
       auth0Audience: https://findme-dev.eu.auth0.com/api/v2/
 
     local-no-mount:
       host: http://localhost
       mountCode: false
-      frontendOrigin: http://localhost:8100
+      frontendOrigin: http://localhost
       auth0Domain: findme-dev.eu.auth0.com
       auth0Audience: https://findme-dev.eu.auth0.com/api/v2/
 

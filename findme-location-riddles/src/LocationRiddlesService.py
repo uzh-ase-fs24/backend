@@ -1,4 +1,5 @@
 import uuid
+import requests
 
 from aws_lambda_powertools.event_handler.exceptions import (
     BadRequestError,
@@ -57,9 +58,15 @@ class LocationRiddlesService:
             )
         return response
 
-    def get_location_riddles_feed(self, user_id):
-        # TODO: Implement API call to findme-user service
-        # to get the list of users that the current user follows
+    def get_location_riddles_feed(self, token, user_id):
+        # TODO: Implement API call to findme-user service to get the list of users that the current user follows
+        url = f"http://localhost:4566/restapis/findme/local/_user_request_/users/{user_id}"
+        headers = {'Authorization': token}
+        response = requests.get(url, headers=headers)
+        if response.status_code != 200:
+            raise Exception(f"GET /users/{user_id} failed with status {response.status_code}.")
+        print(response.json())
+
         following_users = ["660e5fc5de3e93a3b75f51a8", "0FhpaZeIjhSG1lwNR3RWPI20VgLgU5rk@clients"]
         response = []
         for user_id in following_users:
