@@ -6,7 +6,10 @@ from src.FollowerRepository import FollowerRepository
 from src.entities.FollowRequest import FollowRequest
 from src.entities.UserConnections import UserConnections
 
-from src.entities.FollowRelationship import FollowRelationship
+from aws_lambda_powertools.event_handler.exceptions import (
+    BadRequestError,
+)
+
 
 
 class FollowerService:
@@ -14,6 +17,9 @@ class FollowerService:
         self.follower_repository = FollowerRepository()
 
     def create_follower_request(self, requester_id, requestee_id):
+        if requester_id == requestee_id:
+            raise BadRequestError(f"It is not possible to create the follow request since requester ({requester_id}) and requestee ({requestee_id}) are the same person!")
+
         follow_request = FollowRequest(
             requester_id=requester_id,
             requestee_id=requestee_id,
