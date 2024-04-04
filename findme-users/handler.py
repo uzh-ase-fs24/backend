@@ -112,7 +112,7 @@ def get_user_connections(user_id: Annotated[int, Path(lt=999)]):
 @app.put("/users")
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
-def get_user():
+def update_user():
     user_id = app.context.get('claims').get('sub')
     if '|' in user_id:
         user_id = user_id.split("|")[1]

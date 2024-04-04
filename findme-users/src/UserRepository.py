@@ -16,13 +16,17 @@ class UserRepository:
 
     def post_user_to_db(self, user):
         if self.__does_user_with_user_id_exist(user.user_id):
-            raise BadRequestError(f"User with id {user.user_id} already has an account")
+            raise BadRequestError(f"User with id {user.user_id} already has an account!")
+        if self.__does_user_with_username_exist(user.username):
+            raise BadRequestError(f"Username '{user.username}' is already taken!")
 
         return self.__put_user_to_db(user)
 
     def update_user_in_db(self, user):
         if not self.__does_user_with_user_id_exist(user.user_id):
             raise NotFoundError(f"No User with user_id: {user.user_id} found")
+        if self.__does_user_with_username_exist(user.username):
+            raise BadRequestError(f"Username '{user.username}' is already taken!")
 
         return self.__put_user_to_db(user)
 
@@ -58,11 +62,19 @@ class UserRepository:
         return response.get('Items', [])
 
     def __does_user_with_user_id_exist(self, user_id):
-        return 'Item' in self.table.query(
+        response = self.table.query(
             IndexName="UserIdIndex",
             KeyConditionExpression=Key('user_id').eq(user_id),
             ProjectionExpression="user_id, username, first_name, last_name"
         )
+        return 'Items' in response and len(response['Items']) > 0
+
+    def __does_user_with_username_exist(self, username):
+        response = self.table.query(
+            KeyConditionExpression=Key('partition_key').eq('USER') & Key('username').eq(username),
+            ProjectionExpression="user_id, username, first_name, last_name"
+        )
+        return 'Items' in response and len(response['Items']) > 0
 
     def __put_user_to_db(self, user):
         try:
