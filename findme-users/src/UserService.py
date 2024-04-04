@@ -16,8 +16,9 @@ class UserService:
             user = User(**user_data)
         except ValidationError as e:
             raise BadRequestError(f"unable to create user with provided parameters. {e}")
+        self.user_repository.post_user_to_db(user)
 
-        return self.user_repository.post_user_to_db(user)
+        return user
 
     def get_user(self, user_id):
         return self.user_repository.get_user_by_user_id_from_db(user_id)
@@ -29,7 +30,9 @@ class UserService:
         except ValidationError as e:
             raise BadRequestError(f"unable to update user with provided parameters. {e}")
 
-        return self.user_repository.update_user_in_db(user)
+        self.user_repository.update_user_in_db(user)
+
+        return user
 
     def get_similar_users(self, username_prefix):
         user_items = self.user_repository.get_users_by_username_prefix(username_prefix)
