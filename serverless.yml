@@ -150,9 +150,7 @@ resources: # CloudFormation template syntax from here on.
         KeySchema:
           - AttributeName: location_riddle_id
             KeyType: HASH
-        ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
+        BillingMode: PAY_PER_REQUEST
         GlobalSecondaryIndexes:
           - IndexName: UserIndex
             KeySchema:
@@ -160,9 +158,6 @@ resources: # CloudFormation template syntax from here on.
                 KeyType: HASH
             Projection:
               ProjectionType: ALL
-            ProvisionedThroughput:
-              ReadCapacityUnits: 1
-              WriteCapacityUnits: 1
 
 plugins:
   - serverless-python-requirements
