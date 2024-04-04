@@ -103,6 +103,16 @@ functions:
           method: get
           cors:
             origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
+      - http:
+          path: /location-riddles/{location_riddle_id}
+          method: get
+          cors:
+            origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
+      - http:
+          path: /location-riddles/user/{user_id}
+          method: get
+          cors:
+            origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
 
 resources: # CloudFormation template syntax from here on.
   extensions: ${file(./sls-config-${opt:stage}.yml), null}
@@ -128,19 +138,26 @@ resources: # CloudFormation template syntax from here on.
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
 
-    usersImageTable:
+    locationRiddleTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: usersImageTable
+        TableName: locationRiddleTable
         AttributeDefinitions:
+          - AttributeName: location_riddle_id
+            AttributeType: S
           - AttributeName: user_id
             AttributeType: S
         KeySchema:
-          - AttributeName: user_id
+          - AttributeName: location_riddle_id
             KeyType: HASH
-        ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
+        BillingMode: PAY_PER_REQUEST
+        GlobalSecondaryIndexes:
+          - IndexName: UserIndex
+            KeySchema:
+              - AttributeName: user_id
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
 
 plugins:
   - serverless-python-requirements
