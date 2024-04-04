@@ -38,7 +38,7 @@ def post_location_riddles():
     return locationRiddlesService.post_location_riddle(app.current_event.json_body['image'], user_id)
 
 
-@app.get("/location-riddles")
+@app.get("/location-riddles")  # get all location riddles of users I follow
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
 def get_location_riddles_by_user():
@@ -52,6 +52,16 @@ def get_location_riddles_by_user():
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
 def get_location_riddles_by_user(user_id: Annotated[int, Path(lt=999)]):
+    return locationRiddlesService.get_location_riddles_for_user(user_id)
+
+
+@app.get("/location-riddles/user")
+@tracer.capture_method
+@authorizer.requires_auth(app=app)
+def get_location_riddles_by_user():
+    user_id = app.context.get('claims').get('sub')
+    if '|' in user_id:
+        user_id = user_id.split("|")[1]
     return locationRiddlesService.get_location_riddles_for_user(user_id)
 
 
