@@ -95,10 +95,10 @@ def update_follow_user(requester_id: Annotated[int, Path(lt=999)]):
     action = app.current_event.query_string_parameters.get("action")
     if action == "accept":
         return follower_service.accept_follow_request(requester_id, requestee_id)
-    if action == "declined":
+    if action == "decline":
         return follower_service.deny_follow_request(requester_id, requestee_id)
     else:
-        raise BadRequestError(f"Action {action} does not exist, please provide a valid value (accept/declined)")
+        raise BadRequestError(f"Action {action} does not exist, please provide a valid value (accept/decline)")
 
 
 @app.get("/users/follow")

@@ -84,7 +84,7 @@ class FollowerRepository:
 
     def deny_follow_request(self, requester_id: str, requestee_id: str):
         try:
-            # Update the follow request status to 'rejected'
+            # Update the follow request status to 'declined'
             response = self.table.update_item(
                 Key={
                     'partition_key': f"REQUEST",
@@ -92,7 +92,7 @@ class FollowerRepository:
                 },
                 UpdateExpression="set #status = :s",
                 ExpressionAttributeValues={
-                    ':s': 'rejected'
+                    ':s': 'declined'
                 },
                 ExpressionAttributeNames={
                     '#status': 'status'
