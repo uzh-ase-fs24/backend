@@ -5,9 +5,10 @@ from aws_lambda_powertools.event_handler.exceptions import (
     BadRequestError,
     NotFoundError,
 )
+from src.base.AbstractBucketRepository import AbstractBucketRepository
 
 
-class ImageBucketRepository:
+class ImageBucketRepository(AbstractBucketRepository):
     def __init__(self):
         self.s3 = boto3.client('s3')
         self.bucket_name = 'ase-findme-image-upload-bucket'
