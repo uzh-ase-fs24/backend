@@ -65,7 +65,10 @@ def get_individual_user():
 @authorizer.requires_auth(app=app)
 def get_similar_users():
     username = app.current_event.query_string_parameters.get("username")
-    return user_service.get_similar_users(username)
+    user_id = app.context.get('claims').get('sub')
+    if '|' in user_id:
+        user_id = user_id.split("|")[1]
+    return user_service.get_similar_users(username, user_id)
 
 
 @app.put("/users/<user_id>/follow")

@@ -34,11 +34,14 @@ class UserService:
 
         return user
 
-    def get_similar_users(self, username_prefix):
+    def get_similar_users(self, username_prefix, user_id):
         user_items = self.user_repository.get_users_by_username_prefix(username_prefix)
         users = []
 
         for item in user_items:
+            # Skip own user
+            if item['user_id'] == user_id:
+                continue
             try:
                 user = User(**item)
                 users.append(user)
