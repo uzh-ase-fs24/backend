@@ -15,7 +15,7 @@ class UserRepository:
         self.table = self.dynamodb.Table('usersTable')
 
     def post_user_to_db(self, user):
-        if self.__does_user_with_user_id_exist(user.user_id):
+        if self.does_user_with_user_id_exist(user.user_id):
             raise BadRequestError(f"User with id {user.user_id} already has an account!")
         if self.__does_user_with_username_exist(user.username):
             raise BadRequestError(f"Username '{user.username}' is already taken!")
@@ -23,7 +23,7 @@ class UserRepository:
         return self.__put_user_to_db(user)
 
     def update_user_in_db(self, user):
-        if not self.__does_user_with_user_id_exist(user.user_id):
+        if not self.does_user_with_user_id_exist(user.user_id):
             raise NotFoundError(f"No User with user_id: {user.user_id} found")
         if self.__does_user_with_username_exist(user.username):
             raise BadRequestError(f"Username '{user.username}' is already taken!")
