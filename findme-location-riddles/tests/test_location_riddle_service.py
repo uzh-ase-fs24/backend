@@ -14,6 +14,30 @@ class TestLocationRiddleService(unittest.TestCase):
         self.assertEqual(self.location_riddles_service.post_location_riddle("mock_image_base64", "mock_user_id"),
                          {"message": "Mock image upload successful"})
 
+    def test_get_location_riddle(self):
+        self.assertEqual(self.location_riddles_service.get_location_riddle("mock_location_riddle_id"),
+                         {
+                             "location_riddle_id": "mock_location_riddle_id",
+                             "user_id": "mock_user_id", "ratings": [], "comments": [],
+                             "guesses": [], "created_at": 1234567890,
+                             "location_riddle_image": {"image_base64": "mock_image_base64",
+                                                       "Content-Type": "image/png"}
+                         })
+
+    def test_get_location_riddles_for_user(self):
+        self.assertEqual(self.location_riddles_service.get_location_riddles_for_user("mock_user_id"),
+                         [{
+                             "location_riddle_id": "mock_location_riddle_id",
+                             "user_id": "mock_user_id", "ratings": [], "comments": [],
+                             "guesses": [], "created_at": 1234567890,
+                             "location_riddle_image": {"image_base64": "mock_image_base64",
+                                                       "Content-Type": "image/png"}
+                         }])
+
+    def test_delete_location_riddle(self):
+        self.assertEqual(self.location_riddles_service.delete_location_riddle("mock_location_riddle_id", "mock_user_id"),
+                         {"message": "Location riddle deleted successfully"})
+
 
 if __name__ == '__main__':
     unittest.main()
