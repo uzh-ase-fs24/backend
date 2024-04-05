@@ -17,6 +17,8 @@ from findme.authorization import Authorizer
 
 from src.UserService import UserService
 from src.FollowerService import FollowerService
+from src.entities.UserConnections import UserConnections
+
 
 tracer = Tracer()
 logger = Logger()
@@ -113,7 +115,18 @@ def get_received_follow_requests():
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
 def get_user_connections(user_id: Annotated[int, Path(lt=999)]):
-    return follower_service.get_user_connections(user_id)
+    connections = follower_service.get_user_connections(user_id)
+    user_connections = UserConnections()
+
+    for follower in connections['followers']:
+        follower_item = user_service.get_user(follower)
+        user_connections.followers.append(follower_item)
+
+    for following in connections['following']:
+        following_item = user_service.get_user(following)
+        user_connections.following.append(following_item)
+
+    return user_connections
 
 
 @app.put("/users")

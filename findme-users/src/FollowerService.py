@@ -54,10 +54,9 @@ class FollowerService:
         following_response = self.follower_repository.get_following(user_id)
         followers_response = self.follower_repository.get_followers(user_id)
 
-        connections = UserConnections()
-
         # Always take the second user_id since the first is indicating who we are searching for
-        connections.following = [item['sort_key'].split("#")[1] for item in following_response['Items']]
-        connections.followers = [item['sort_key'].split("#")[1] for item in followers_response['Items']]
+        following = [item['sort_key'].split("#")[1] for item in following_response['Items']]
+        followers = [item['sort_key'].split("#")[1] for item in followers_response['Items']]
 
-        return connections
+        return {'following': following, 'followers': followers}
+
