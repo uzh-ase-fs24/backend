@@ -94,7 +94,7 @@ def update_follow_user(requester_id: Annotated[int, Path(lt=999)]):
     if action == "declined":
         return follower_service.create_follower_request(requester_id, requestee_id)
     else:
-        raise BadRequestError(f"Action {action} does not exist, please provide a valid value (accept/decline)")
+        raise BadRequestError(f"Action {action} does not exist, please provide a valid value (accept/declined)")
 
 
 @app.get("/users/follow")
