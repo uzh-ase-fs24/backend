@@ -26,7 +26,9 @@ class UserRepository:
         if not self.does_user_with_user_id_exist(user.user_id):
             raise NotFoundError(f"No User with user_id: {user.user_id} found")
         if self.__does_user_with_username_exist(user.username):
-            raise BadRequestError(f"Username '{user.username}' is already taken!")
+            # If the user is not the owner of the username don't allow him to edit
+            if not self.get_user_by_user_id_from_db(user.user_id)['username'] == user.username:
+                raise BadRequestError(f"Username '{user.username}' is already taken!")
 
         return self.__put_user_to_db(user)
 
