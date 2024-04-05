@@ -5,9 +5,10 @@ from aws_lambda_powertools.event_handler.exceptions import (
     BadRequestError,
     NotFoundError,
 )
+from src.base.AbstractBucketRepository import AbstractBucketRepository
 
 
-class ImageBucketRepository:
+class ImageBucketRepository(AbstractBucketRepository):
     def __init__(self):
         self.s3 = boto3.client('s3')
         self.bucket_name = 'ase-findme-image-upload-bucket'
@@ -38,6 +39,16 @@ class ImageBucketRepository:
             }
         else:
             raise BadRequestError("Failed to retrieve image from S3")
+
+    def delete_image_from_s3(self, key):
+        try:
+            self.s3.delete_object(
+                Bucket=self.bucket_name,
+                Key=key
+            )
+            return {"message": "Image deleted successfully"}
+        except ClientError as e:
+            raise BadRequestError(f"Error deleting image from bucket: {e}")
 
     def __get_image_data_from_s3(self, key):
         try:
