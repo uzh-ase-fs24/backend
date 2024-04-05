@@ -63,4 +63,9 @@ To get a token for developing use the following curl command:
   --data '{"client_id":"0FhpaZeIjhSG1lwNR3RWPI20VgLgU5rk",
             "client_secret":<client_secret>,
             "audience":"https://findme-dev.eu.auth0.com/api/v2/","grant_type":"client_credentials"}'
-`
+
+
+### Testing
+To run the tests for the microservices, navigate to the respective directory and run `pytest`.
+Alternatively, you can run `pytest` in the root directory to run all tests.
+(to create a new test, create a file with the name `test_*.py` in the respective directory)
