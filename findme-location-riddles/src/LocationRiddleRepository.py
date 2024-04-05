@@ -7,9 +7,10 @@ from boto3.dynamodb.conditions import Key
 from botocore.exceptions import ClientError
 from pydantic import ValidationError
 from src.LocationRiddle import LocationRiddle
+from src.base.AbstractDbRepository import AbstractDbRepository
 
 
-class LocationRiddleRepository:
+class LocationRiddleRepository(AbstractDbRepository):
     def __init__(self):
         self.dynamodb = boto3.resource("dynamodb", region_name="eu-central-2")
         self.table = self.dynamodb.Table("locationRiddleTable")

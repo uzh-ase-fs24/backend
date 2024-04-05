@@ -4,14 +4,12 @@ from aws_lambda_powertools.event_handler.exceptions import (
     BadRequestError,
     NotFoundError,
 )
-from src.ImageBucketRepository import ImageBucketRepository
-from src.LocationRiddleRepository import LocationRiddleRepository
 
 
 class LocationRiddlesService:
-    def __init__(self):
-        self.image_bucket_repository = ImageBucketRepository()
-        self.location_riddle_repository = LocationRiddleRepository()
+    def __init__(self, location_riddle_repository, image_bucket_repository):
+        self.image_bucket_repository = image_bucket_repository
+        self.location_riddle_repository = location_riddle_repository
 
     def post_location_riddle(self, image_base64, user_id):
         location_riddle_id = str(uuid.uuid4())
