@@ -19,8 +19,8 @@ class FollowerRepository:
             # Check if follow request already exists
             existing_request = self.table.scan(
                 FilterExpression=Attr('partition_key').eq(
-                    f"REQUEST#{follow_request.requester_id}#{follow_request.requestee_id}") & Attr('sort_key').eq(
-                    "REQUEST")
+                    f"REQUEST") & Attr('sort_key').eq(
+                    f"{follow_request.requester_id}#{follow_request.requestee_id}")
             )['Items']
 
             if existing_request:
@@ -46,8 +46,8 @@ class FollowerRepository:
         try:
             self.table.update_item(
                 Key={
-                    'partition_key': f"REQUEST#{requester_id}#{requestee_id}",
-                    'sort_key': "REQUEST"
+                    'partition_key': f"REQUEST",
+                    'sort_key': f"{requester_id}#{requestee_id}"
                 },
                 UpdateExpression="set #status = :s",
                 ExpressionAttributeValues={
@@ -57,7 +57,6 @@ class FollowerRepository:
                     '#status': 'status'
                 }
             )
-
 
             # relation is uni-directional
             # sort_key: "requestee" has the follower "requester"
@@ -88,8 +87,8 @@ class FollowerRepository:
             # Update the follow request status to 'rejected'
             response = self.table.update_item(
                 Key={
-                    'partition_key': f"REQUEST#{requester_id}#{requestee_id}",
-                    'sort_key': "REQUEST"
+                    'partition_key': f"REQUEST",
+                    'sort_key': f"{requester_id}#{requestee_id}"
                 },
                 UpdateExpression="set #status = :s",
                 ExpressionAttributeValues={
@@ -132,6 +131,21 @@ class FollowerRepository:
         except ClientError as e:
             print(e)
             raise BadRequestError(f"Unable to fetch received follow requests. {e}")
+
+    def does_follow_request_exist(self, requester_id, requestee_id):
+        follow_request_id = f"{requester_id}#{requestee_id}"
+        try:
+            follow_request = self.table.query(
+                KeyConditionExpression="partition_key = :partition_key AND sort_key = :user_id",
+                ExpressionAttributeValues={
+                    ':partition_key': "REQUEST",
+                    ':user_id': follow_request_id
+                }
+            )
+            return 'Items' in follow_request and len(follow_request['Items']) == 1 and follow_request['Items'][0]['status'] == 'pending'
+        except ClientError as e:
+            print(e)
+            raise BadRequestError(f"Couldn't fetch follow request. {e}")
 
     def get_following(self, user_id: str):
         try:

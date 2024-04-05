@@ -61,7 +61,7 @@ class UserRepository:
 
         return response.get('Items', [])
 
-    def __does_user_with_user_id_exist(self, user_id):
+    def does_user_with_user_id_exist(self, user_id):
         response = self.table.query(
             IndexName="UserIdIndex",
             KeyConditionExpression=Key('user_id').eq(user_id),

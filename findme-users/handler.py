@@ -78,6 +78,8 @@ def follow_user(user_id: Annotated[int, Path(lt=999)]):
     requestee_id = app.context.get('claims').get('sub')
     if '|' in requestee_id:
         requestee_id = requestee_id.split("|")[1]
+    if not user_service.does_user_with_user_id_exist(user_id):
+        raise BadRequestError(f"User with user id {user_id} does not exist!")
     return follower_service.create_follower_request(requestee_id, user_id)
 
 
@@ -92,7 +94,7 @@ def update_follow_user(requester_id: Annotated[int, Path(lt=999)]):
     if action == "accept":
         return follower_service.accept_follow_request(requester_id, requestee_id)
     if action == "declined":
-        return follower_service.create_follower_request(requester_id, requestee_id)
+        return follower_service.deny_follow_request(requester_id, requestee_id)
     else:
         raise BadRequestError(f"Action {action} does not exist, please provide a valid value (accept/declined)")
 

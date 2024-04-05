@@ -50,3 +50,6 @@ class UserService:
                 raise BadRequestError(f"Unable to read Data from DB {e}")
 
         return users
+
+    def does_user_with_user_id_exist(self, user_id):
+        return self.user_repository.does_user_with_user_id_exist(user_id)

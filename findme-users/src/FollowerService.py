@@ -11,14 +11,14 @@ from aws_lambda_powertools.event_handler.exceptions import (
 )
 
 
-
 class FollowerService:
     def __init__(self):
         self.follower_repository = FollowerRepository()
 
     def create_follower_request(self, requester_id, requestee_id):
         if requester_id == requestee_id:
-            raise BadRequestError(f"It is not possible to create the follow request since requester ({requester_id}) and requestee ({requestee_id}) are the same person!")
+            raise BadRequestError(
+                f"It is not possible to create the follow request since requester ({requester_id}) and requestee ({requestee_id}) are the same person!")
 
         follow_request = FollowRequest(
             requester_id=requester_id,
@@ -32,13 +32,18 @@ class FollowerService:
         return follow_request
 
     def accept_follow_request(self, requester_id, requestee_id):
-        self.follower_repository.accept_follow_request(requester_id, requestee_id)
-        return f"Follow request by {requester_id} accepted!"
+        if self.follower_repository.does_follow_request_exist(requester_id, requestee_id):
+            self.follower_repository.accept_follow_request(requester_id, requestee_id)
+            return f"Follow request by {requester_id} accepted!"
+        else:
+            raise BadRequestError(f"The given follow request does not exist!")
 
     def deny_follow_request(self, requester_id, requestee_id):
-        response = self.follower_repository.deny_follow_request(requester_id, requestee_id)
-        update_follow_request = FollowRequest(**response['items'])
-        return update_follow_request
+        if self.follower_repository.does_follow_request_exist(requester_id, requestee_id):
+            self.follower_repository.deny_follow_request(requester_id, requestee_id)
+            return f"Follow request by {requester_id} declined!"
+        else:
+            raise BadRequestError(f"The given follow request does not exist!")
 
     def get_received_follow_requests(self, user_id):
         response = self.follower_repository.fetch_received_follow_requests(user_id)
