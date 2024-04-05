@@ -57,27 +57,13 @@ class LocationRiddlesService:
             )
         return response
 
-    def get_location_riddles_feed(self, event, user_id):
-        # TODO: Implement API call to findme-user service to get the list of users that the current user follows
-        event_dict = dict(event)
-        event_dict["path"] = "/users"
-        client = boto3.client("lambda", region_name="eu-central-2")
-        response = client.invoke(FunctionName="findme-microservices-local-findme-users", Payload=json.dumps(event_dict))
+    def get_location_riddles_feed(self, event, user):
+        following_users = self.__get_following_users_list(event, user)
 
-        streaming_body = response['Payload']
-        payload_bytes = streaming_body.read()
-        payload_str = payload_bytes.decode('utf-8')
-        payload_dict = json.loads(payload_str)
-
-        print(payload_dict)
-        # the above code shows a way to call another service to get the list of users that the current user follows.
-        # currently set to get /users as the /following endpoint is not implemented in the findme-users service
-
-        following_users = ["660e5fc5de3e93a3b75f51a8", "0FhpaZeIjhSG1lwNR3RWPI20VgLgU5rk@clients"]
         response = []
-        for user_id in following_users:
+        for user in following_users:
             try:
-                response.extend(self.get_location_riddles_for_user(user_id))
+                response.extend(self.get_location_riddles_for_user(user["user_id"]))
             except NotFoundError:
                 continue
         return response
@@ -94,3 +80,17 @@ class LocationRiddlesService:
         self.image_bucket_repository.delete_image_from_s3(key)
         self.location_riddle_repository.delete_location_riddle_from_db(location_riddle_id)
         return {"message": "Location riddle deleted successfully"}
+
+    def __get_following_users_list(self, event, user_id):
+        event_dict = dict(event)
+        event_dict["path"] = f"/users/{user_id}/follow"
+        client = boto3.client("lambda", region_name="eu-central-2")
+        response = client.invoke(FunctionName="findme-microservices-local-findme-users", Payload=json.dumps(event_dict))
+
+        streaming_body = response['Payload']
+        payload_bytes = streaming_body.read()
+        payload_str = payload_bytes.decode('utf-8')
+        payload_dict = json.loads(payload_str)
+        user_connections = json.loads(payload_dict['body'])
+
+        return user_connections['following']
