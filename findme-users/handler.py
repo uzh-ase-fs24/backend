@@ -76,7 +76,7 @@ def get_similar_users():
 @authorizer.requires_auth(app=app)
 def follow_user(user_id: Annotated[int, Path(lt=999)]):
     requestee_id = app.context.get('claims').get('sub')
-    if '|' in user_id:
+    if '|' in requestee_id:
         requestee_id = requestee_id.split("|")[1]
     return follower_service.create_follower_request(requestee_id, user_id)
 
