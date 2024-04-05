@@ -9,10 +9,16 @@ from aws_lambda_powertools.event_handler.openapi.params import Path
 from aws_lambda_powertools.logging import correlation_paths
 from aws_lambda_powertools.shared.types import Annotated
 from aws_lambda_powertools.utilities.typing import LambdaContext
+from aws_lambda_powertools.event_handler.exceptions import (
+    BadRequestError,
+)
 
 from findme.authorization import Authorizer
 
 from src.UserService import UserService
+from src.FollowerService import FollowerService
+from src.entities.UserConnections import UserConnections
+
 
 tracer = Tracer()
 logger = Logger()
@@ -25,6 +31,8 @@ authorizer = Authorizer(
     auth0_audience=os.environ.get("AUTH0_AUDIENCE"),
 )
 user_service = UserService()
+
+follower_service = FollowerService()
 
 
 @app.post("/users")
@@ -43,6 +51,7 @@ def post_user():
 def get_user(user_id: Annotated[int, Path(lt=999)]):
     return user_service.get_user(user_id)
 
+
 @app.get("/users")
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
@@ -53,10 +62,77 @@ def get_individual_user():
     return user_service.get_user(user_id)
 
 
+@app.get("/users/search")
+@tracer.capture_method
+@authorizer.requires_auth(app=app)
+def get_similar_users():
+    username = app.current_event.query_string_parameters.get("username")
+    user_id = app.context.get('claims').get('sub')
+    if '|' in user_id:
+        user_id = user_id.split("|")[1]
+    return user_service.get_similar_users(username, user_id)
+
+
+@app.put("/users/<user_id>/follow")
+@tracer.capture_method
+@authorizer.requires_auth(app=app)
+def follow_user(user_id: Annotated[int, Path(lt=999)]):
+    requestee_id = app.context.get('claims').get('sub')
+    if '|' in requestee_id:
+        requestee_id = requestee_id.split("|")[1]
+    if not user_service.does_user_with_user_id_exist(user_id):
+        raise BadRequestError(f"User with user id {user_id} does not exist!")
+    return follower_service.create_follower_request(requestee_id, user_id)
+
+
+@app.patch("/users/<requester_id>/follow")
+@tracer.capture_method
+@authorizer.requires_auth(app=app)
+def update_follow_user(requester_id: Annotated[int, Path(lt=999)]):
+    requestee_id = app.context.get('claims').get('sub')
+    if '|' in requestee_id:
+        requestee_id = requestee_id.split("|")[1]
+    action = app.current_event.query_string_parameters.get("action")
+    if action == "accept":
+        return follower_service.accept_follow_request(requester_id, requestee_id)
+    if action == "decline":
+        return follower_service.deny_follow_request(requester_id, requestee_id)
+    else:
+        raise BadRequestError(f"Action {action} does not exist, please provide a valid value (accept/decline)")
+
+
+@app.get("/users/follow")
+@tracer.capture_method
+@authorizer.requires_auth(app=app)
+def get_received_follow_requests():
+    user_id = app.context.get('claims').get('sub')
+    if '|' in user_id:
+        user_id = user_id.split("|")[1]
+    return follower_service.get_received_follow_requests(user_id)
+
+
+@app.get("/users/<user_id>/follow")
+@tracer.capture_method
+@authorizer.requires_auth(app=app)
+def get_user_connections(user_id: Annotated[int, Path(lt=999)]):
+    connections = follower_service.get_user_connections(user_id)
+    user_connections = UserConnections()
+
+    for follower in connections['followers']:
+        follower_item = user_service.get_user(follower)
+        user_connections.followers.append(follower_item)
+
+    for following in connections['following']:
+        following_item = user_service.get_user(following)
+        user_connections.following.append(following_item)
+
+    return user_connections
+
+
 @app.put("/users")
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
-def get_user():
+def update_user():
     user_id = app.context.get('claims').get('sub')
     if '|' in user_id:
         user_id = user_id.split("|")[1]

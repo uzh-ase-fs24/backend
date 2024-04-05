@@ -84,6 +84,52 @@ functions:
           method: put
           cors:
             origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
+      - http:
+          path: /users/search
+          method: get
+          cors:
+            origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
+          request:
+            parameters:
+              querystrings:
+                username: true
+                type: false
+      - http:
+          path: /users/{user_id}/follow
+          method: put
+          cors:
+            origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
+          request:
+            parameters:
+              paths:
+                id: true
+      - http:
+          path: /users/{user_id}/follow
+          method: patch
+          cors:
+            origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
+          request:
+            parameters:
+              paths:
+                id: true
+              querystrings:
+                action: true
+                type: false
+      - http:
+          path: /users/{user_id}/follow
+          method: get
+          cors:
+            origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
+          request:
+            parameters:
+              paths:
+                id: true
+      - http:
+          path: /users/follow
+          method: get
+          cors:
+            origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
+
   findme-location-riddles:
     handler: handler.lambda_handler
     module: findme-location-riddles
@@ -124,7 +170,7 @@ functions:
           cors:
             origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
 
-resources: # CloudFormation template syntax from here on.
+resources:
   extensions: ${file(./sls-config-${opt:stage}.yml), null}
   Resources:
 
@@ -139,14 +185,62 @@ resources: # CloudFormation template syntax from here on.
       Properties:
         TableName: usersTable
         AttributeDefinitions:
+          - AttributeName: partition_key
+            AttributeType: S
+          - AttributeName: username
+            AttributeType: S
           - AttributeName: user_id
             AttributeType: S
+        BillingMode: PAY_PER_REQUEST
         KeySchema:
-          - AttributeName: user_id
+          - AttributeName: partition_key
             KeyType: HASH
-        ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
+          - AttributeName: username
+            KeyType: RANGE
+        GlobalSecondaryIndexes:
+          - IndexName: UserIdIndex
+            KeySchema:
+              - AttributeName: user_id
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+
+    FollowerTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: FollowerTable
+        AttributeDefinitions:
+          - AttributeName: partition_key # REQUEST / FOLLOWERS / FOLLOWING
+            AttributeType: S
+          - AttributeName: sort_key # ID
+            AttributeType: S
+          - AttributeName: requestee_id
+            AttributeType: S
+          - AttributeName: requester_id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: partition_key
+            KeyType: HASH
+          - AttributeName: sort_key
+            KeyType: RANGE
+        BillingMode: PAY_PER_REQUEST
+        GlobalSecondaryIndexes:
+          - IndexName: RequesterIDIndex
+            KeySchema:
+              - AttributeName: requester_id
+                KeyType: HASH
+              - AttributeName: sort_key
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+          - IndexName: RequesteeIDIndex
+            KeySchema:
+              - AttributeName: requestee_id
+                KeyType: HASH
+              - AttributeName: sort_key
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
 
     locationRiddleTable:
       Type: AWS::DynamoDB::Table
