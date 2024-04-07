@@ -4,23 +4,24 @@ from typing import List
 from pydantic import parse_obj_as
 from src.FollowerRepository import FollowerRepository
 from src.entities.FollowRequest import FollowRequest
-from src.entities.UserConnections import UserConnections
 
 from aws_lambda_powertools.event_handler.exceptions import (
     BadRequestError,
 )
 
 
+
 class FollowerService:
     def __init__(self):
         self.follower_repository = FollowerRepository()
 
-    def create_follower_request(self, requester_id, requestee_id):
+    def create_follower_request(self, username, requester_id, requestee_id):
         if requester_id == requestee_id:
             raise BadRequestError(
                 f"It is not possible to create the follow request since requester ({requester_id}) and requestee ({requestee_id}) are the same person!")
 
         follow_request = FollowRequest(
+            username=username,
             requester_id=requester_id,
             requestee_id=requestee_id,
             status='pending',
@@ -48,6 +49,7 @@ class FollowerService:
     def get_received_follow_requests(self, user_id):
         response = self.follower_repository.fetch_received_follow_requests(user_id)
         follow_requests = parse_obj_as(List[FollowRequest], response['Items'])
+
         return follow_requests
 
     def get_user_connections(self, user_id):

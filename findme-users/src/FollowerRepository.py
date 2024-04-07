@@ -32,6 +32,7 @@ class FollowerRepository:
                     'sort_key': f"{follow_request.requester_id}#{follow_request.requestee_id}",
                     'requester_id': follow_request.requester_id,
                     'requestee_id': follow_request.requestee_id,
+                    'username': follow_request.username,
                     'status': 'pending',
                     'timestamp': follow_request.timestamp.isoformat()
                 }
@@ -109,10 +110,16 @@ class FollowerRepository:
             response = self.table.query(
                 IndexName='RequesteeIDIndex',
                 KeyConditionExpression='requestee_id = :requestee_id',
+                FilterExpression='#status = :status_val',
                 ExpressionAttributeValues={
-                    ':requestee_id': f"{user_id}"
+                    ':requestee_id': f"{user_id}",
+                    ':status_val': "pending"
+                },
+                ExpressionAttributeNames={
+                    '#status': 'status'
                 }
             )
+            print(response['Items'])
             return response
         except ClientError as e:
             print(e)

@@ -77,12 +77,14 @@ def get_similar_users():
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
 def follow_user(user_id: Annotated[int, Path(lt=999)]):
-    requestee_id = app.context.get('claims').get('sub')
-    if '|' in requestee_id:
-        requestee_id = requestee_id.split("|")[1]
+    requester_id = app.context.get('claims').get('sub')
+    if '|' in requester_id:
+        requester_id = requester_id.split("|")[1]
     if not user_service.does_user_with_user_id_exist(user_id):
         raise BadRequestError(f"User with user id {user_id} does not exist!")
-    return follower_service.create_follower_request(requestee_id, user_id)
+    # TODO Not so nice
+    username = user_service.get_user(user_id).username
+    return follower_service.create_follower_request(username, requester_id, user_id)
 
 
 @app.patch("/users/<requester_id>/follow")
