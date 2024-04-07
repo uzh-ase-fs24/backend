@@ -25,7 +25,7 @@ class UserService:
 
     def update_user(self, data, user_id):
         try:
-            user_data = {**data, "user_id": user_id}
+            user_data = {**data, "user_id": user_id, "username": self.user_repository.get_user_by_user_id_from_db(user_id).username}
             user = User(**user_data)
         except ValidationError as e:
             raise BadRequestError(f"unable to update user with provided parameters. {e}")
