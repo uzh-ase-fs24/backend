@@ -39,10 +39,14 @@ follower_service = FollowerService()
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
 def post_user():
-    user_id = app.context.get('claims').get('sub')
-    if '|' in user_id:
-        user_id = user_id.split("|")[1]
-    return user_service.post_user(app.current_event.json_body, user_id)
+    return user_service.post_user(app.current_event.json_body, __get_id(app))
+
+
+@app.put("/users")
+@tracer.capture_method
+@authorizer.requires_auth(app=app)
+def update_user():
+    return user_service.update_user(app.current_event.json_body, __get_id(app))
 
 
 @app.get("/users/<user_id>")
@@ -56,10 +60,7 @@ def get_user(user_id: Annotated[int, Path(lt=999)]):
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
 def get_individual_user():
-    user_id = app.context.get('claims').get('sub')
-    if '|' in user_id:
-        user_id = user_id.split("|")[1]
-    return user_service.get_user(user_id)
+    return user_service.get_user(__get_id(app))
 
 
 @app.get("/users/search")
@@ -67,19 +68,14 @@ def get_individual_user():
 @authorizer.requires_auth(app=app)
 def get_similar_users():
     username = app.current_event.query_string_parameters.get("username")
-    user_id = app.context.get('claims').get('sub')
-    if '|' in user_id:
-        user_id = user_id.split("|")[1]
-    return user_service.get_similar_users(username, user_id)
+    return user_service.get_similar_users(username, __get_id(app))
 
 
 @app.put("/users/<user_id>/follow")
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
 def follow_user(user_id: Annotated[int, Path(lt=999)]):
-    requester_id = app.context.get('claims').get('sub')
-    if '|' in requester_id:
-        requester_id = requester_id.split("|")[1]
+    requester_id = __get_id(app)
     if not user_service.does_user_with_user_id_exist(user_id):
         raise BadRequestError(f"User with user id {user_id} does not exist!")
     # TODO Not so nice
@@ -91,9 +87,7 @@ def follow_user(user_id: Annotated[int, Path(lt=999)]):
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
 def update_follow_user(requester_id: Annotated[int, Path(lt=999)]):
-    requestee_id = app.context.get('claims').get('sub')
-    if '|' in requestee_id:
-        requestee_id = requestee_id.split("|")[1]
+    requestee_id = __get_id(app)
     action = app.current_event.query_string_parameters.get("action")
 
     print(f"Requester: ${requester_id}")
@@ -112,10 +106,7 @@ def update_follow_user(requester_id: Annotated[int, Path(lt=999)]):
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
 def get_received_follow_requests():
-    user_id = app.context.get('claims').get('sub')
-    if '|' in user_id:
-        user_id = user_id.split("|")[1]
-    return follower_service.get_received_follow_requests(user_id)
+    return follower_service.get_received_follow_requests(__get_id(app))
 
 
 @app.get("/users/<user_id>/follow")
@@ -136,14 +127,11 @@ def get_user_connections(user_id: Annotated[int, Path(lt=999)]):
     return user_connections
 
 
-@app.put("/users")
-@tracer.capture_method
-@authorizer.requires_auth(app=app)
-def update_user():
+def __get_id(app):
     user_id = app.context.get('claims').get('sub')
     if '|' in user_id:
         user_id = user_id.split("|")[1]
-    return user_service.update_user(app.current_event.json_body, user_id)
+    return user_id
 
 
 # You can continue to use other utilities just as before

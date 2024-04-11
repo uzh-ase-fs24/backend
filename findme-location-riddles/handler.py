@@ -36,20 +36,14 @@ location_riddles_service = LocationRiddlesService(location_riddle_repository, im
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
 def post_location_riddles():
-    user_id = app.context.get('claims').get('sub')
-    if '|' in user_id:
-        user_id = user_id.split("|")[1]
-    return location_riddles_service.post_location_riddle(app.current_event.json_body['image'], user_id)
+    return location_riddles_service.post_location_riddle(app.current_event.json_body['image'], __get_id(app))
 
 
 @app.get("/location-riddles")  # get all location riddles of users I follow
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
 def get_location_riddles_by_user():
-    user_id = app.context.get('claims').get('sub')
-    if '|' in user_id:
-        user_id = user_id.split("|")[1]
-    return location_riddles_service.get_location_riddles_feed(app.current_event, user_id)
+    return location_riddles_service.get_location_riddles_feed(app.current_event, __get_id(app))
 
 
 @app.get("/location-riddles/user/<user_id>")
@@ -63,10 +57,7 @@ def get_location_riddles_by_user(user_id: Annotated[int, Path(lt=999)]):
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
 def get_location_riddles_by_user():
-    user_id = app.context.get('claims').get('sub')
-    if '|' in user_id:
-        user_id = user_id.split("|")[1]
-    return location_riddles_service.get_location_riddles_for_user(user_id)
+    return location_riddles_service.get_location_riddles_for_user(__get_id(app))
 
 
 @app.get("/location-riddles/<location_riddle_id>")
@@ -80,10 +71,14 @@ def get_location_riddles_by_location_riddle_id(location_riddle_id: Annotated[int
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
 def delete_location_riddles_by_location_riddle_id(location_riddle_id: Annotated[int, Path(lt=999)]):
+    return location_riddles_service.delete_location_riddle(location_riddle_id, __get_id(app))
+
+
+def __get_id(app):
     user_id = app.context.get('claims').get('sub')
     if '|' in user_id:
         user_id = user_id.split("|")[1]
-    return location_riddles_service.delete_location_riddle(location_riddle_id, user_id)
+    return user_id
 
 
 @logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST)
