@@ -7,9 +7,10 @@ from aws_lambda_powertools.event_handler.exceptions import (
 from botocore.exceptions import ClientError
 from pydantic import ValidationError
 from src.entities.User import User
+from src.base.AbstractUserRepository import AbstractUserRepository
 
 
-class UserRepository:
+class UserRepository(AbstractUserRepository):
     def __init__(self):
         self.dynamodb = boto3.resource('dynamodb', region_name='eu-central-2')
         self.table = self.dynamodb.Table('usersTable')

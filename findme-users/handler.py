@@ -15,6 +15,8 @@ from aws_lambda_powertools.event_handler.exceptions import (
 
 from findme.authorization import Authorizer
 
+from src.UserRepository import UserRepository
+from src.FollowerRepository import FollowerRepository
 from src.UserService import UserService
 from src.FollowerService import FollowerService
 from src.entities.UserConnections import UserConnections
@@ -30,9 +32,11 @@ authorizer = Authorizer(
     auth0_domain=os.environ.get("AUTH0_DOMAIN"),
     auth0_audience=os.environ.get("AUTH0_AUDIENCE"),
 )
-user_service = UserService()
 
-follower_service = FollowerService()
+user_repository = UserRepository()
+user_service = UserService(user_repository)
+follower_repository = FollowerRepository()
+follower_service = FollowerService(follower_repository)
 
 
 @app.post("/users")

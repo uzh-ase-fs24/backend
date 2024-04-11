@@ -2,13 +2,12 @@ from aws_lambda_powertools.event_handler.exceptions import (
     BadRequestError,
 )
 from pydantic import ValidationError
-from src.UserRepository import UserRepository
 from src.entities.User import User
 
 
 class UserService:
-    def __init__(self):
-        self.user_repository = UserRepository()
+    def __init__(self, user_repository):
+        self.user_repository = user_repository
 
     def post_user(self, data, user_id):
         try:
