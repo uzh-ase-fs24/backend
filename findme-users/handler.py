@@ -71,7 +71,10 @@ def get_individual_user():
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
 def get_similar_users():
-    username = app.current_event.query_string_parameters.get("username")
+    try:
+        username = app.current_event.query_string_parameters.get("username")
+    except AttributeError:
+        return []
     return user_service.get_similar_users(username, __get_id(app))
 
 
