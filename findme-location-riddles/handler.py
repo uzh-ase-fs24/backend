@@ -67,6 +67,15 @@ def get_location_riddles_by_location_riddle_id(location_riddle_id: Annotated[int
     return location_riddles_service.get_location_riddle(location_riddle_id)
 
 
+@app.patch("/location-riddles/<location_riddle_id>/rate")
+@tracer.capture_method
+@authorizer.requires_auth(app=app)
+def rate_location_riddle(location_riddle_id: Annotated[int, Path(lt=999)]):
+    user_id = __get_id(app)
+    score = app.current_event.query_string_parameters.get("score")
+    return {"user_id": user_id, "score": score, "location_riddle_id": location_riddle_id}
+
+
 @app.delete("/location-riddles/<location_riddle_id>")
 @tracer.capture_method
 @authorizer.requires_auth(app=app)

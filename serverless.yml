@@ -158,21 +158,45 @@ functions:
           method: get
           cors:
             origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
+          request:
+            parameters:
+              paths:
+                id: true
       - http:
           path: /location-riddles/user/{user_id}
           method: get
           cors:
             origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
+          request:
+            parameters:
+              paths:
+                id: true
       - http:
           path: /location-riddles/user
           method: get
           cors:
             origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
       - http:
+          path: /location-riddles/{location_riddle_id}/rate
+          method: patch
+          cors:
+            origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
+          request:
+            parameters:
+              paths:
+                id: true
+              querystrings:
+                score: true
+                type: false
+      - http:
           path: /location-riddles/{location_riddle_id}
           method: delete
           cors:
             origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
+          request:
+            parameters:
+              paths:
+                id: true
 
 resources:
   extensions: ${file(./sls-config-${opt:stage}.yml), null}
