@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 
-class AbstractBucketRepository(ABC):
+class AbstractImageBucketRepository(ABC):
 
     @abstractmethod
     def post_image_to_s3(self, image_base64, key):

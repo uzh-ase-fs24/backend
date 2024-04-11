@@ -1,13 +1,13 @@
 import unittest
 from src.LocationRiddlesService import LocationRiddlesService
 from src.test.MockImageBucketRepository import MockImageBucketRepository
-from src.test.MockLocationRiddleRepository import MockLocationRiddleRepository
+from src.test.MockLocationRiddlesRepository import MockLocationRiddlesRepository
 
 
 class TestLocationRiddleService(unittest.TestCase):
     def setUp(self):
         self.image_bucket_repository = MockImageBucketRepository()
-        self.location_riddle_repository = MockLocationRiddleRepository()
+        self.location_riddle_repository = MockLocationRiddlesRepository()
         self.location_riddles_service = LocationRiddlesService(self.location_riddle_repository, self.image_bucket_repository)
 
     def test_post_location_riddle(self):

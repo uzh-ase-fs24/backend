@@ -14,7 +14,7 @@ from findme.authorization import Authorizer
 
 from src.LocationRiddlesService import LocationRiddlesService
 from src.ImageBucketRepository import ImageBucketRepository
-from src.LocationRiddleRepository import LocationRiddleRepository
+from src.LocationRiddlesRepository import LocationRiddlesRepository
 
 tracer = Tracer()
 logger = Logger()
@@ -28,7 +28,7 @@ authorizer = Authorizer(
 )
 
 image_bucket_repository = ImageBucketRepository()
-location_riddle_repository = LocationRiddleRepository()
+location_riddle_repository = LocationRiddlesRepository()
 location_riddles_service = LocationRiddlesService(location_riddle_repository, image_bucket_repository)
 
 
