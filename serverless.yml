@@ -22,6 +22,7 @@ custom:
       frontendOrigin: http://localhost:8100
       auth0Domain: findme-dev.eu.auth0.com
       auth0Audience: https://findme-dev.eu.auth0.com/api/v2/
+      userFunctionName: findme-microservices-findme-users
 
     local:
       host: http://localhost
@@ -29,6 +30,7 @@ custom:
       frontendOrigin: http://localhost:8100
       auth0Domain: findme-dev.eu.auth0.com
       auth0Audience: https://findme-dev.eu.auth0.com/api/v2/
+      userFunctionName: findme-microservices-local-findme-users
 
     local-no-mount:
       host: http://localhost
@@ -36,6 +38,7 @@ custom:
       frontendOrigin: http://localhost:8100
       auth0Domain: findme-dev.eu.auth0.com
       auth0Audience: https://findme-dev.eu.auth0.com/api/v2/
+      userFunctionName: findme-microservices-local-no-mount-findme-users
 
 package:
   individually: true
@@ -138,6 +141,7 @@ functions:
       FRONTEND_ORIGIN: ${self:custom.stage.${opt:stage}.frontendOrigin}
       AUTH0_DOMAIN: ${self:custom.stage.${opt:stage}.auth0Domain}
       AUTH0_AUDIENCE: ${self:custom.stage.${opt:stage}.auth0Audience}
+      USER_FUNCTION_NAME: ${self:custom.stage.${opt:stage}.userFunctionName}
     events:
       - http:
           path: /location-riddles
