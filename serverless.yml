@@ -155,13 +155,18 @@ functions:
           cors:
             origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
       - http:
-          path: /location-riddles/{location_riddle_id}
-          method: delete
+          path: /location-riddles/user/{user_id}
+          method: get
           cors:
             origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
       - http:
-          path: /location-riddles/user/{user_id}
+          path: /location-riddles/user
           method: get
+          cors:
+            origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
+      - http:
+          path: /location-riddles/{location_riddle_id}
+          method: delete
           cors:
             origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
 
