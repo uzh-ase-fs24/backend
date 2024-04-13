@@ -32,8 +32,8 @@ class FollowerRepository:
                     'sort_key': f"{follow_request.requester_id}#{follow_request.requestee_id}",
                     'requester_id': follow_request.requester_id,
                     'requestee_id': follow_request.requestee_id,
-                    'username': follow_request.username,
-                    'status': 'pending',
+                    'requester_username': follow_request.requester_username,
+                    'request_status': 'pending',
                     'timestamp': follow_request.timestamp.isoformat()
                 }
             )
@@ -50,31 +50,31 @@ class FollowerRepository:
                     'partition_key': f"REQUEST",
                     'sort_key': f"{requester_id}#{requestee_id}"
                 },
-                UpdateExpression="set #status = :s",
+                UpdateExpression="SET request_status = :s",
                 ExpressionAttributeValues={
                     ':s': 'accepted'
                 },
-                ExpressionAttributeNames={
-                    '#status': 'status'
-                }
+                ReturnValues="ALL_NEW"
             )
+
 
             # relation is uni-directional
             # sort_key: "requestee" has the follower "requester"
-            self.table.put_item(
+            follower = self.table.put_item(
                 Item={
                     'partition_key': f"FOLLOWERS",
                     'sort_key': f"{requestee_id}#{requester_id}",
-                    'timestamp': datetime.now().isoformat()
+                    'timestamp': datetime.now().isoformat(),
                 }
             )
+
             # Store mirrored for efficient queries
             # sort_key: "requester" is following "requestee"
             self.table.put_item(
                 Item={
                     'partition_key': f"FOLLOWING",
                     'sort_key': f"{requester_id}#{requestee_id}",
-                    'timestamp': datetime.now().isoformat()
+                    'timestamp': datetime.now().isoformat(),
                 }
             )
 
@@ -91,12 +91,9 @@ class FollowerRepository:
                     'partition_key': f"REQUEST",
                     'sort_key': f"{requester_id}#{requestee_id}"
                 },
-                UpdateExpression="set #status = :s",
+                UpdateExpression="set request_status = :s",
                 ExpressionAttributeValues={
                     ':s': 'declined'
-                },
-                ExpressionAttributeNames={
-                    '#status': 'status'
                 },
                 ReturnValues="UPDATED_NEW"
             )
@@ -109,17 +106,14 @@ class FollowerRepository:
         try:
             response = self.table.query(
                 IndexName='RequesteeIDIndex',
-                KeyConditionExpression='requestee_id = :requestee_id',
-                FilterExpression='#status = :status_val',
+                KeyConditionExpression='requestee_id = :requestee_id AND partition_key = :partition_key',
+                FilterExpression='request_status = :status_val',
                 ExpressionAttributeValues={
                     ':requestee_id': f"{user_id}",
-                    ':status_val': "pending"
+                    ':status_val': "pending",
+                    ':partition_key': "REQUEST"
                 },
-                ExpressionAttributeNames={
-                    '#status': 'status'
-                }
             )
-            print(response['Items'])
             return response
         except ClientError as e:
             print(e)
@@ -149,7 +143,8 @@ class FollowerRepository:
                     ':user_id': follow_request_id
                 }
             )
-            return 'Items' in follow_request and len(follow_request['Items']) == 1 and follow_request['Items'][0]['status'] == 'pending'
+            return 'Items' in follow_request and len(follow_request['Items']) == 1 and follow_request['Items'][0][
+                'request_status'] == 'pending'
         except ClientError as e:
             print(e)
             raise BadRequestError(f"Couldn't fetch follow request. {e}")

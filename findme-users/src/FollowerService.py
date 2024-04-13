@@ -15,16 +15,16 @@ class FollowerService:
     def __init__(self):
         self.follower_repository = FollowerRepository()
 
-    def create_follower_request(self, username, requester_id, requestee_id):
+    def create_follower_request(self, requester_username, requester_id, requestee_id):
         if requester_id == requestee_id:
             raise BadRequestError(
                 f"It is not possible to create the follow request since requester ({requester_id}) and requestee ({requestee_id}) are the same person!")
 
         follow_request = FollowRequest(
-            username=username,
+            requester_username=requester_username,
             requester_id=requester_id,
             requestee_id=requestee_id,
-            status='pending',
+            request_status='pending',
             timestamp=datetime.now()
         )
 

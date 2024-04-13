@@ -83,8 +83,8 @@ def follow_user(user_id: Annotated[int, Path(lt=999)]):
     if not user_service.does_user_with_user_id_exist(user_id):
         raise BadRequestError(f"User with user id {user_id} does not exist!")
     # TODO Not so nice
-    username = user_service.get_user(user_id).username
-    return follower_service.create_follower_request(username, requester_id, user_id)
+    requester_username = user_service.get_user(requester_id).username
+    return follower_service.create_follower_request(requester_username, requester_id, user_id)
 
 
 @app.patch("/users/<requester_id>/follow")
@@ -95,6 +95,11 @@ def update_follow_user(requester_id: Annotated[int, Path(lt=999)]):
     if '|' in requestee_id:
         requestee_id = requestee_id.split("|")[1]
     action = app.current_event.query_string_parameters.get("action")
+
+    print(f"Requester: ${requester_id}")
+    print(f"Requestee: ${requestee_id}")
+
+
     if action == "accept":
         return follower_service.accept_follow_request(requester_id, requestee_id)
     if action == "decline":
