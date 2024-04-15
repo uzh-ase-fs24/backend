@@ -1,6 +1,7 @@
 import uuid
 import json
 import boto3
+import os
 
 from aws_lambda_powertools.event_handler.exceptions import (
     BadRequestError,
@@ -85,7 +86,7 @@ class LocationRiddlesService:
         event_dict = dict(event)
         event_dict["path"] = f"/users/{user_id}/follow"
         client = boto3.client("lambda", region_name="eu-central-2")
-        response = client.invoke(FunctionName="findme-microservices-local-findme-users", Payload=json.dumps(event_dict))
+        response = client.invoke(FunctionName=os.environ["USER_FUNCTION_NAME"], Payload=json.dumps(event_dict))
 
         streaming_body = response['Payload']
         payload_bytes = streaming_body.read()
