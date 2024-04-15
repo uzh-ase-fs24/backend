@@ -229,7 +229,7 @@ resources:
             KeySchema:
               - AttributeName: requester_id
                 KeyType: HASH
-              - AttributeName: sort_key
+              - AttributeName: partition_key
                 KeyType: RANGE
             Projection:
               ProjectionType: ALL
@@ -237,7 +237,7 @@ resources:
             KeySchema:
               - AttributeName: requestee_id
                 KeyType: HASH
-              - AttributeName: sort_key
+              - AttributeName: partition_key
                 KeyType: RANGE
             Projection:
               ProjectionType: ALL

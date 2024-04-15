@@ -25,7 +25,6 @@ class UserRepository:
     def update_user_in_db(self, user):
         if not self.does_user_with_user_id_exist(user.user_id):
             raise NotFoundError(f"No User with user_id: {user.user_id} found")
-        user.username = self.get_user_by_user_id_from_db(user.user_id).username
 
         return self.__put_user_to_db(user)
 
