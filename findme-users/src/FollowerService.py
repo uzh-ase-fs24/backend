@@ -35,14 +35,14 @@ class FollowerService:
     def accept_follow_request(self, requester_id, requestee_id):
         if self.follower_repository.does_follow_request_exist(requester_id, requestee_id):
             self.follower_repository.accept_follow_request(requester_id, requestee_id)
-            return f"Follow request by {requester_id} accepted!"
+            return { "result": f"Follow request by {requester_id} accepted!"}
         else:
             raise BadRequestError(f"The given follow request does not exist!")
 
     def deny_follow_request(self, requester_id, requestee_id):
         if self.follower_repository.does_follow_request_exist(requester_id, requestee_id):
             self.follower_repository.deny_follow_request(requester_id, requestee_id)
-            return f"Follow request by {requester_id} declined!"
+            return { "result": f"Follow request by {requester_id} declined!"}
         else:
             raise BadRequestError(f"The given follow request does not exist!")
 
