@@ -25,6 +25,18 @@ class Comment:
         }
 
 
+class Guess:
+    def __init__(self, user_id: str, guess: list):
+        self.user_id = user_id
+        self.guess = guess
+
+    def dict(self):
+        return {
+            "user_id": self.user_id,
+            "guess": self.guess
+        }
+
+
 class LocationRiddle:
     def __init__(self):
         self.location_riddle_id = "mock_location_riddle_id"
@@ -66,8 +78,12 @@ class MockLocationRiddlesRepository(AbstractLocationRiddlesRepository):
         self.mock_data.update_avg_rating()
         return self.mock_data
 
-    def update_location_riddle_rating_in_db(self, location_riddle_id, user_id, comment):
+    def update_location_riddle_comments_in_db(self, location_riddle_id, user_id, comment):
         self.mock_data.comments.append(Comment(user_id, comment))
+        return self.mock_data
+
+    def update_location_riddle_guesses_in_db(self, location_riddle_id, user_id, guess):
+        self.mock_data.guesses.append(Guess(user_id, guess))
         return self.mock_data
 
     def delete_location_riddle_from_db(self, location_riddle_id):

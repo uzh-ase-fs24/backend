@@ -46,7 +46,7 @@ def post_location_riddles():
 @authorizer.requires_auth(app=app)
 def post_guess_to_location_riddle(location_riddle_id: Annotated[int, Path(lt=999)]):
     return location_riddles_service.guess_location_riddle(location_riddle_id, __get_id(app),
-                                                            app.current_event.json_body['guess'])
+                                                          app.current_event.json_body['guess'])
 
 
 @app.post("/location-riddles/<location_riddle_id>/comment")

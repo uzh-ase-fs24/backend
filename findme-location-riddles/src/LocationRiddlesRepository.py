@@ -8,7 +8,7 @@ from aws_lambda_powertools.event_handler.exceptions import (
 from boto3.dynamodb.conditions import Key
 from botocore.exceptions import ClientError
 from pydantic import ValidationError
-from src.LocationRiddle import LocationRiddle
+from src.LocationRiddle import LocationRiddle, Guess, Rating, Comment
 from src.base.AbstractLocationRiddlesRepository import AbstractLocationRiddlesRepository
 
 
@@ -74,10 +74,15 @@ class LocationRiddlesRepository(AbstractLocationRiddlesRepository):
 
     def update_location_riddle_rating_in_db(self, location_riddle_id, user_id, rating):
         try:
+            rating = Rating(user_id=user_id, rating=rating)
+        except ValidationError as e:
+            raise BadRequestError(f"unable to update location_riddle with provided parameters. {e}")
+
+        try:
             self.table.update_item(
                 Key={"location_riddle_id": location_riddle_id},
                 UpdateExpression="SET ratings = list_append(ratings, :i)",
-                ExpressionAttributeValues={":i": [{"user_id": user_id, "rating": rating}]},
+                ExpressionAttributeValues={":i": [rating.dict()]},
             )
         except ClientError as e:
             print(f"Error updating location_riddle rating in DynamoDB: {e}")
@@ -86,14 +91,36 @@ class LocationRiddlesRepository(AbstractLocationRiddlesRepository):
 
     def update_location_riddle_comments_in_db(self, location_riddle_id, user_id, comment):
         try:
+            comment = Comment(user_id=user_id, comment=comment)
+        except ValidationError as e:
+            raise BadRequestError(f"unable to update location_riddle with provided parameters. {e}")
+
+        try:
             self.table.update_item(
                 Key={"location_riddle_id": location_riddle_id},
                 UpdateExpression="SET comments = list_append(comments, :i)",
-                ExpressionAttributeValues={":i": [{"user_id": user_id, "comment": comment}]},
+                ExpressionAttributeValues={":i": [comment.dict()]},
             )
         except ClientError as e:
             print(f"Error updating location_riddle comments in DynamoDB: {e}")
             raise BadRequestError(f"Error updating location_riddle comments in DynamoDB: {e}")
+        return self.get_location_riddle_by_location_riddle_id_from_db(location_riddle_id)
+
+    def update_location_riddle_guesses_in_db(self, location_riddle_id, user_id, guess):
+        try:
+            guess = Guess(user_id=user_id, guess=[Decimal(str(coord)) for coord in guess])
+        except ValidationError as e:
+            raise BadRequestError(f"unable to update location_riddle with provided parameters. {e}")
+
+        try:
+            self.table.update_item(
+                Key={"location_riddle_id": location_riddle_id},
+                UpdateExpression="SET guesses = list_append(guesses, :i)",
+                ExpressionAttributeValues={":i": [guess.dict()]},
+            )
+        except ClientError as e:
+            print(f"Error updating location_riddle guesses in DynamoDB: {e}")
+            raise BadRequestError(f"Error updating location_riddle guesses in DynamoDB: {e}")
         return self.get_location_riddle_by_location_riddle_id_from_db(location_riddle_id)
 
     def delete_location_riddle_from_db(self, location_riddle_id):

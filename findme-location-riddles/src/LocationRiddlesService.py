@@ -93,6 +93,27 @@ class LocationRiddlesService:
 
         return response.dict(exclude={"ratings"})
 
+    def guess_location_riddle(self, location_riddle_id, user_id, guess):
+        location_riddle = self.location_riddle_repository.get_location_riddle_by_location_riddle_id_from_db(
+            location_riddle_id
+        )
+
+        if location_riddle.user_id == user_id:
+            raise BadRequestError("User cannot guess their own location riddle")
+        for guess_entry in location_riddle.guesses:
+            if guess_entry.user_id == user_id:
+                raise BadRequestError("User has already guessed this location riddle")
+        # TODO: check if requesting user is following the user_id
+
+        try:
+            response = self.location_riddle_repository.update_location_riddle_guesses_in_db(
+                location_riddle_id, user_id, guess
+            )
+        except Exception as e:
+            raise BadRequestError(e)
+
+        return response.dict(exclude={"ratings"})
+
     def comment_location_riddle(self, location_riddle_id, user_id, comment):
         try:
             response = self.location_riddle_repository.update_location_riddle_comments_in_db(
