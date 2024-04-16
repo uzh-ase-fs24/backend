@@ -1,8 +1,19 @@
 from src.base.AbstractLocationRiddlesRepository import AbstractLocationRiddlesRepository
 
 
-class LocationRiddle:
+class Rating:
+    def __init__(self, user_id: str, rating: int):
+        self.user_id = user_id
+        self.rating = rating
 
+    def dict(self):
+        return {
+            "user_id": self.user_id,
+            "rating": self.rating
+        }
+
+
+class LocationRiddle:
     def __init__(self):
         self.location_riddle_id = "mock_location_riddle_id"
         self.user_id = "mock_user_id"
@@ -10,16 +21,18 @@ class LocationRiddle:
         self.comments = []
         self.guesses = []
         self.created_at = 1234567890
+        self.average_rating = None
 
-    def dict(self):
+    def dict(self, exclude=set()):
         return {
-            "location_riddle_id": self.location_riddle_id,
-            "user_id": self.user_id,
-            "ratings": self.ratings,
-            "comments": self.comments,
-            "guesses": self.guesses,
-            "created_at": self.created_at
+            attr: value for attr, value in self.__dict__.items() if attr not in exclude
         }
+
+    def update_avg_rating(self):
+        if len(self.ratings) == 0:
+            self.average_rating = None
+            return
+        self.average_rating = sum([rating.rating for rating in self.ratings]) / len(self.ratings)
 
 
 class MockLocationRiddlesRepository(AbstractLocationRiddlesRepository):
@@ -33,6 +46,11 @@ class MockLocationRiddlesRepository(AbstractLocationRiddlesRepository):
         return [self.mock_data]
 
     def get_location_riddle_by_location_riddle_id_from_db(self, location_riddle_id):
+        return self.mock_data
+
+    def update_location_riddle_rating_in_db(self, location_riddle_id, user_id, rating):
+        self.mock_data.ratings.append(Rating(user_id, rating))
+        self.mock_data.update_avg_rating()
         return self.mock_data
 
     def delete_location_riddle_from_db(self, location_riddle_id):
