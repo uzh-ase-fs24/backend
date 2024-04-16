@@ -36,7 +36,7 @@ class LocationRiddlesService:
         key = f"location-riddles/{location_riddle.location_riddle_id}.png"
         location_riddle_image = self.image_bucket_repository.get_image_from_s3(key)
 
-        return location_riddle.dict() | {"location_riddle_image": location_riddle_image}
+        return location_riddle.dict(exclude={"ratings"}) | {"location_riddle_image": location_riddle_image}
 
     def get_location_riddles_for_user(self, user_id):
         # TODO: check if requesting user is following the user_id
@@ -56,7 +56,7 @@ class LocationRiddlesService:
                 location_riddle.dict()
                 | {"location_riddle_image": location_riddle_image}
             )
-        return response
+        return response.dict(exclude={"ratings"})
 
     def get_location_riddles_feed(self, event, user):
         following_users = self.__get_following_users_list(event, user)
@@ -91,7 +91,7 @@ class LocationRiddlesService:
         except Exception as e:
             raise BadRequestError(e)
 
-        return response
+        return response.dict(exclude={"ratings"})
 
     def delete_location_riddle(self, location_riddle_id, user_id):
         location_riddle = self.location_riddle_repository.get_location_riddle_by_location_riddle_id_from_db(
