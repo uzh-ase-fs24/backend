@@ -186,7 +186,7 @@ functions:
               paths:
                 id: true
               querystrings:
-                score: true
+                rating: true
                 type: false
       - http:
           path: /location-riddles/{location_riddle_id}

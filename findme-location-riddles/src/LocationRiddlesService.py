@@ -69,7 +69,10 @@ class LocationRiddlesService:
                 continue
         return response
 
-    def rate_location_riddle(self, location_riddle_id, user_id, score):
+    def rate_location_riddle(self, location_riddle_id, user_id, rating):
+        if not isinstance(rating, int) and not 1 <= rating <= 5:
+            raise BadRequestError("Rating must be a number between 1 and 5")
+
         location_riddle = self.location_riddle_repository.get_location_riddle_by_location_riddle_id_from_db(
             location_riddle_id
         )
@@ -83,7 +86,7 @@ class LocationRiddlesService:
 
         try:
             response = self.location_riddle_repository.update_location_riddle_rating_in_db(
-                location_riddle_id, user_id, score
+                location_riddle_id, user_id, rating
             )
         except Exception as e:
             raise BadRequestError(e)
