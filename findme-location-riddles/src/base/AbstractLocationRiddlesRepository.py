@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 class AbstractLocationRiddlesRepository(ABC):
 
     @abstractmethod
-    def write_location_riddle_to_db(self, id, user_id):
+    def write_location_riddle_to_db(self, id, user_id, location):
         pass
 
     @abstractmethod
