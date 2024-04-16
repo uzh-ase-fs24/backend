@@ -1,4 +1,4 @@
-from src.base.AbstractDbRepository import AbstractDbRepository
+from src.base.AbstractLocationRiddlesRepository import AbstractLocationRiddlesRepository
 
 
 class LocationRiddle:
@@ -22,7 +22,7 @@ class LocationRiddle:
         }
 
 
-class MockLocationRiddleRepository(AbstractDbRepository):
+class MockLocationRiddlesRepository(AbstractLocationRiddlesRepository):
     def __init__(self):
         self.mock_data = LocationRiddle()
 

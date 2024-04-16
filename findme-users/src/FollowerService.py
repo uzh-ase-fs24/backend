@@ -2,7 +2,6 @@ from datetime import datetime
 from typing import List
 
 from pydantic import parse_obj_as
-from src.FollowerRepository import FollowerRepository
 from src.entities.FollowRequest import FollowRequest
 
 from aws_lambda_powertools.event_handler.exceptions import (
@@ -12,8 +11,8 @@ from aws_lambda_powertools.event_handler.exceptions import (
 
 
 class FollowerService:
-    def __init__(self):
-        self.follower_repository = FollowerRepository()
+    def __init__(self, follower_repository):
+        self.follower_repository = follower_repository
 
     def create_follower_request(self, requester_username, requester_id, requestee_id):
         if requester_id == requestee_id:

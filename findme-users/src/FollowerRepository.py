@@ -8,8 +8,10 @@ from boto3.dynamodb.conditions import Attr
 from botocore.exceptions import ClientError
 from pydantic import ValidationError
 
+from src.base.AbstractFollowerRepository import AbstractFollowerRepository
 
-class FollowerRepository:
+
+class FollowerRepository(AbstractFollowerRepository):
     def __init__(self):
         self.dynamodb = boto3.resource('dynamodb', region_name='eu-central-2')
         self.table = self.dynamodb.Table('FollowerTable')
