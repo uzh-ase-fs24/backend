@@ -50,7 +50,14 @@ class LocationRiddle:
 
     def dict(self, exclude=set()):
         return {
-            attr: value for attr, value in self.__dict__.items() if attr not in exclude
+            attr:
+                [item.dict() if hasattr(item, 'dict') and callable(item.dict) else item for item in value]
+                if isinstance(value, list)
+                else value.dict()
+                if hasattr(value, 'dict') and callable(value.dict)
+                else value
+            for attr, value in self.__dict__.items()
+            if attr not in exclude
         }
 
     def update_avg_rating(self):
