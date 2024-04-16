@@ -93,6 +93,16 @@ class LocationRiddlesService:
 
         return response.dict(exclude={"ratings"})
 
+    def comment_location_riddle(self, location_riddle_id, user_id, comment):
+        try:
+            response = self.location_riddle_repository.update_location_riddle_comments_in_db(
+                location_riddle_id, user_id, comment
+            )
+        except Exception as e:
+            raise BadRequestError(e)
+
+        return response.dict(exclude={"ratings"})
+
     def delete_location_riddle(self, location_riddle_id, user_id):
         location_riddle = self.location_riddle_repository.get_location_riddle_by_location_riddle_id_from_db(
             location_riddle_id

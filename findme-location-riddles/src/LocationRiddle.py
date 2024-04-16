@@ -10,12 +10,17 @@ class Rating(BaseModel):
     rating: int
 
 
+class Comment(BaseModel):
+    user_id: str
+    comment: str
+
+
 class LocationRiddle(BaseModel):
     location_riddle_id: str
     user_id: str
     location: List[Decimal]
     ratings: List[Rating] = []
-    comments: list = []
+    comments: List[Comment] = []
     guesses: list = []
     created_at: int = int(datetime.now().timestamp())
     average_rating: Optional[float] = None

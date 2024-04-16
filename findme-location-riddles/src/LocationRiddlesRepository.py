@@ -84,6 +84,18 @@ class LocationRiddlesRepository(AbstractLocationRiddlesRepository):
             raise BadRequestError(f"Error updating location_riddle rating in DynamoDB: {e}")
         return self.get_location_riddle_by_location_riddle_id_from_db(location_riddle_id)
 
+    def update_location_riddle_comments_in_db(self, location_riddle_id, user_id, comment):
+        try:
+            self.table.update_item(
+                Key={"location_riddle_id": location_riddle_id},
+                UpdateExpression="SET comments = list_append(comments, :i)",
+                ExpressionAttributeValues={":i": [{"user_id": user_id, "comment": comment}]},
+            )
+        except ClientError as e:
+            print(f"Error updating location_riddle comments in DynamoDB: {e}")
+            raise BadRequestError(f"Error updating location_riddle comments in DynamoDB: {e}")
+        return self.get_location_riddle_by_location_riddle_id_from_db(location_riddle_id)
+
     def delete_location_riddle_from_db(self, location_riddle_id):
         try:
             self.table.delete_item(Key={"location_riddle_id": location_riddle_id})

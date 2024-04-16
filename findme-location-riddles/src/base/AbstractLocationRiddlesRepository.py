@@ -20,5 +20,9 @@ class AbstractLocationRiddlesRepository(ABC):
         pass
 
     @abstractmethod
+    def update_location_riddle_comments_in_db(self, location_riddle_id, user_id, comment):
+        pass
+
+    @abstractmethod
     def delete_location_riddle_from_db(self, location_riddle_id):
         pass
