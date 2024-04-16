@@ -28,6 +28,12 @@ class LocationRiddle:
             attr: value for attr, value in self.__dict__.items() if attr not in exclude
         }
 
+    def update_avg_rating(self):
+        if len(self.ratings) == 0:
+            self.average_rating = None
+            return
+        self.average_rating = sum([rating.rating for rating in self.ratings]) / len(self.ratings)
+
 
 class MockLocationRiddlesRepository(AbstractLocationRiddlesRepository):
     def __init__(self):
@@ -40,6 +46,11 @@ class MockLocationRiddlesRepository(AbstractLocationRiddlesRepository):
         return [self.mock_data]
 
     def get_location_riddle_by_location_riddle_id_from_db(self, location_riddle_id):
+        return self.mock_data
+
+    def update_location_riddle_rating_in_db(self, location_riddle_id, user_id, rating):
+        self.mock_data.ratings.append(Rating(user_id, rating))
+        self.mock_data.update_avg_rating()
         return self.mock_data
 
     def delete_location_riddle_from_db(self, location_riddle_id):
