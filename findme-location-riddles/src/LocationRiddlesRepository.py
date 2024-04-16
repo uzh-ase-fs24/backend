@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 import boto3
 from aws_lambda_powertools.event_handler.exceptions import (
     BadRequestError,
@@ -15,10 +17,11 @@ class LocationRiddlesRepository(AbstractLocationRiddlesRepository):
         self.dynamodb = boto3.resource("dynamodb", region_name="eu-central-2")
         self.table = self.dynamodb.Table("locationRiddleTable")
 
-    def write_location_riddle_to_db(self, user_id, location_riddle_id):
+    def write_location_riddle_to_db(self, user_id, location_riddle_id, location):
         location_riddle_data = {
             "location_riddle_id": location_riddle_id,
             "user_id": user_id,
+            "location": [Decimal(str(coord)) for coord in location]
         }
 
         try:
@@ -30,7 +33,7 @@ class LocationRiddlesRepository(AbstractLocationRiddlesRepository):
 
         try:
             self.table.put_item(Item=location_riddle.dict())
-        except ClientError as e:
+        except Exception as e:
             print(f"Error writing location_riddle to DynamoDB: {e}")
             raise BadRequestError(f"Error writing location_riddle to DynamoDB: {e}")
 

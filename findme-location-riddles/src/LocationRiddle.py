@@ -2,6 +2,7 @@ from datetime import datetime
 
 from pydantic import BaseModel
 from typing import List, Optional
+from decimal import Decimal
 
 
 class Rating(BaseModel):
@@ -12,6 +13,7 @@ class Rating(BaseModel):
 class LocationRiddle(BaseModel):
     location_riddle_id: str
     user_id: str
+    location: List[Decimal]
     ratings: List[Rating] = []
     comments: list = []
     guesses: list = []

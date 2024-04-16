@@ -14,13 +14,13 @@ class LocationRiddlesService:
         self.image_bucket_repository = image_bucket_repository
         self.location_riddle_repository = location_riddle_repository
 
-    def post_location_riddle(self, image_base64, user_id):
+    def post_location_riddle(self, image_base64, location, user_id):
         location_riddle_id = str(uuid.uuid4())
         image_path = f"location-riddles/{location_riddle_id}.png"
 
         try:
             self.location_riddle_repository.write_location_riddle_to_db(
-                user_id, location_riddle_id
+                user_id, location_riddle_id, location
             )
         except Exception as e:
             raise BadRequestError(e)

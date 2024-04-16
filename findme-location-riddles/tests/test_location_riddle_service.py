@@ -11,14 +11,16 @@ class TestLocationRiddleService(unittest.TestCase):
         self.location_riddles_service = LocationRiddlesService(self.location_riddle_repository, self.image_bucket_repository)
 
     def test_post_location_riddle(self):
-        self.assertEqual(self.location_riddles_service.post_location_riddle("mock_image_base64", "mock_user_id"),
+        self.assertEqual(self.location_riddles_service.post_location_riddle("mock_image_base64",
+                                                                            "mock_user_id",
+                                                                            [0.0, 0.0]),
                          {"message": "Mock image upload successful"})
 
     def test_get_location_riddle(self):
         self.assertEqual(self.location_riddles_service.get_location_riddle("mock_location_riddle_id"),
                          {
                              "location_riddle_id": "mock_location_riddle_id",
-                             "user_id": "mock_user_id", "comments": [],
+                             "user_id": "mock_user_id", "location": [0.0, 0.0], "comments": [],
                              "guesses": [], "created_at": 1234567890, "average_rating": None,
                              "location_riddle_image": {"image_base64": "mock_image_base64",
                                                        "Content-Type": "image/png"}
@@ -28,7 +30,7 @@ class TestLocationRiddleService(unittest.TestCase):
         self.assertEqual(self.location_riddles_service.get_location_riddles_for_user("mock_user_id"),
                          [{
                              "location_riddle_id": "mock_location_riddle_id",
-                             "user_id": "mock_user_id", "comments": [],
+                             "user_id": "mock_user_id",  "location": [0.0, 0.0], "comments": [],
                              "guesses": [], "created_at": 1234567890, "average_rating": None,
                              "location_riddle_image": {"image_base64": "mock_image_base64",
                                                        "Content-Type": "image/png"}
@@ -44,7 +46,7 @@ class TestLocationRiddleService(unittest.TestCase):
                                                                             "mock_user2_id", 3),
                          {
                              "location_riddle_id": "mock_location_riddle_id",
-                             "user_id": "mock_user_id", "comments": [],
+                             "user_id": "mock_user_id",  "location": [0.0, 0.0], "comments": [],
                              "guesses": [], "created_at": 1234567890, "average_rating": 3
                          })
 
@@ -57,7 +59,7 @@ class TestLocationRiddleService(unittest.TestCase):
                                                                             "mock_user3_id", 2),
                          {
                              "location_riddle_id": "mock_location_riddle_id",
-                             "user_id": "mock_user_id", "comments": [],
+                             "user_id": "mock_user_id",  "location": [0.0, 0.0], "comments": [],
                              "guesses": [], "created_at": 1234567890, "average_rating": 2.5
                          })
 

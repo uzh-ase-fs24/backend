@@ -17,6 +17,7 @@ class LocationRiddle:
     def __init__(self):
         self.location_riddle_id = "mock_location_riddle_id"
         self.user_id = "mock_user_id"
+        self.location = [0.0, 0.0]
         self.ratings = []
         self.comments = []
         self.guesses = []
@@ -39,7 +40,7 @@ class MockLocationRiddlesRepository(AbstractLocationRiddlesRepository):
     def __init__(self):
         self.mock_data = LocationRiddle()
 
-    def write_location_riddle_to_db(self, user_id, location_riddle_id):
+    def write_location_riddle_to_db(self, user_id, location_riddle_id, location):
         pass
 
     def get_all_location_riddles_by_user_id(self, user_id):
