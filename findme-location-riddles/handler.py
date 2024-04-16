@@ -36,7 +36,9 @@ location_riddles_service = LocationRiddlesService(location_riddle_repository, im
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
 def post_location_riddles():
-    return location_riddles_service.post_location_riddle(app.current_event.json_body['image'], __get_id(app))
+    return location_riddles_service.post_location_riddle(app.current_event.json_body['image'],
+                                                         app.current_event.json_body['location'],
+                                                         __get_id(app))
 
 
 @app.get("/location-riddles")  # get all location riddles of users I follow
