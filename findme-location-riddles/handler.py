@@ -9,6 +9,9 @@ from aws_lambda_powertools.logging import correlation_paths
 from aws_lambda_powertools.shared.types import Annotated
 from aws_lambda_powertools.event_handler.openapi.params import Path
 from aws_lambda_powertools.utilities.typing import LambdaContext
+from aws_lambda_powertools.event_handler.exceptions import (
+    BadRequestError
+)
 
 from findme.authorization import Authorizer
 
@@ -36,8 +39,8 @@ location_riddles_service = LocationRiddlesService(location_riddle_repository, im
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
 def post_location_riddles():
-    return location_riddles_service.post_location_riddle(app.current_event.json_body['image'],
-                                                         app.current_event.json_body['location'],
+    return location_riddles_service.post_location_riddle(__get_attribute("image", app),
+                                                         __get_attribute("location", app),
                                                          __get_id(app))
 
 
@@ -46,7 +49,7 @@ def post_location_riddles():
 @authorizer.requires_auth(app=app)
 def post_guess_to_location_riddle(location_riddle_id: Annotated[int, Path(lt=999)]):
     return location_riddles_service.guess_location_riddle(location_riddle_id, __get_id(app),
-                                                          app.current_event.json_body['guess'])
+                                                          __get_attribute("guess", app))
 
 
 @app.post("/location-riddles/<location_riddle_id>/comment")
@@ -54,7 +57,7 @@ def post_guess_to_location_riddle(location_riddle_id: Annotated[int, Path(lt=999
 @authorizer.requires_auth(app=app)
 def post_comment_to_location_riddle(location_riddle_id: Annotated[int, Path(lt=999)]):
     return location_riddles_service.comment_location_riddle(location_riddle_id, __get_id(app),
-                                                            app.current_event.json_body['comment'])
+                                                            __get_attribute("comment", app))
 
 
 @app.get("/location-riddles")  # get all location riddles of users I follow
@@ -90,7 +93,7 @@ def get_location_riddles_by_location_riddle_id(location_riddle_id: Annotated[int
 @authorizer.requires_auth(app=app)
 def rate_location_riddle(location_riddle_id: Annotated[int, Path(lt=999)]):
     return location_riddles_service.rate_location_riddle(location_riddle_id, __get_id(app),
-                                                         app.current_event.json_body['rating'])
+                                                         __get_attribute("rating", app))
 
 
 @app.delete("/location-riddles/<location_riddle_id>")
@@ -105,6 +108,13 @@ def __get_id(app):
     if '|' in user_id:
         user_id = user_id.split("|")[1]
     return user_id
+
+
+def __get_attribute(attribute, app):
+    try:
+        return app.current_event.json_body[attribute]
+    except KeyError:
+        raise BadRequestError(f"Missing attribute {attribute} in request body")
 
 
 @logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST)
