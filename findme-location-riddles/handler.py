@@ -73,7 +73,7 @@ def get_location_riddles_by_location_riddle_id(location_riddle_id: Annotated[int
 def rate_location_riddle(location_riddle_id: Annotated[int, Path(lt=999)]):
     user_id = __get_id(app)
     return location_riddles_service.rate_location_riddle(location_riddle_id, user_id,
-                                                         int(app.current_event.json_body['rating']))
+                                                         app.current_event.json_body['rating'])
 
 
 @app.delete("/location-riddles/<location_riddle_id>")

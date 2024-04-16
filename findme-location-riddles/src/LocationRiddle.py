@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional
 
 
 class Rating(BaseModel):
@@ -16,7 +16,7 @@ class LocationRiddle(BaseModel):
     comments: list = []
     guesses: list = []
     created_at: int = int(datetime.now().timestamp())
-    average_rating: float = None
+    average_rating: Optional[float] = None
 
     def __init__(self, **data):
         super().__init__(**data)

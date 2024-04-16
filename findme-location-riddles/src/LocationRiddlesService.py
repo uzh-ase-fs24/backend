@@ -53,10 +53,10 @@ class LocationRiddlesService:
             key = f"location-riddles/{location_riddle.location_riddle_id}.png"
             location_riddle_image = self.image_bucket_repository.get_image_from_s3(key)
             response.append(
-                location_riddle.dict()
+                location_riddle.dict(exclude={"ratings"})
                 | {"location_riddle_image": location_riddle_image}
             )
-        return response.dict(exclude={"ratings"})
+        return response
 
     def get_location_riddles_feed(self, event, user):
         following_users = self.__get_following_users_list(event, user)
@@ -70,7 +70,7 @@ class LocationRiddlesService:
         return response
 
     def rate_location_riddle(self, location_riddle_id, user_id, rating):
-        if not isinstance(rating, int) and not 1 <= rating <= 5:
+        if not (isinstance(rating, int) and 1 <= rating <= 5):
             raise BadRequestError("Rating must be a number between 1 and 5")
 
         location_riddle = self.location_riddle_repository.get_location_riddle_by_location_riddle_id_from_db(
@@ -79,8 +79,8 @@ class LocationRiddlesService:
 
         if location_riddle.user_id == user_id:
             raise BadRequestError("User cannot rate their own location riddle")
-        for rating in location_riddle.ratings:
-            if rating.user_id == user_id:
+        for rating_entry in location_riddle.ratings:
+            if rating_entry.user_id == user_id:
                 raise BadRequestError("User has already rated this location riddle")
         # TODO: check if requesting user is following the user_id
 
