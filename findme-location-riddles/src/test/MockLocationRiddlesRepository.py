@@ -1,8 +1,19 @@
 from src.base.AbstractLocationRiddlesRepository import AbstractLocationRiddlesRepository
 
 
-class LocationRiddle:
+class Rating:
+    def __init__(self, user_id: str, rating: int):
+        self.user_id = user_id
+        self.rating = rating
 
+    def dict(self):
+        return {
+            "user_id": self.user_id,
+            "rating": self.rating
+        }
+
+
+class LocationRiddle:
     def __init__(self):
         self.location_riddle_id = "mock_location_riddle_id"
         self.user_id = "mock_user_id"
@@ -10,15 +21,11 @@ class LocationRiddle:
         self.comments = []
         self.guesses = []
         self.created_at = 1234567890
+        self.average_rating = None
 
-    def dict(self):
+    def dict(self, exclude=set()):
         return {
-            "location_riddle_id": self.location_riddle_id,
-            "user_id": self.user_id,
-            "ratings": self.ratings,
-            "comments": self.comments,
-            "guesses": self.guesses,
-            "created_at": self.created_at
+            attr: value for attr, value in self.__dict__.items() if attr not in exclude
         }
 
 
