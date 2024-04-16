@@ -33,9 +33,6 @@ class LocationRiddlesRepository(AbstractLocationRiddlesRepository):
 
         try:
             self.table.put_item(Item=location_riddle.dict())
-        except ClientError as e:
-            print(f"Error writing location_riddle to DynamoDB: {e}")
-            raise BadRequestError(f"Error writing location_riddle to DynamoDB: {e}")
         except Exception as e:
             print(f"Error writing location_riddle to DynamoDB: {e}")
             raise BadRequestError(f"Error writing location_riddle to DynamoDB: {e}")
