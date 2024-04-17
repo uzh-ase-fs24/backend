@@ -1,23 +1,11 @@
 from datetime import datetime
-
 from pydantic import BaseModel
 from typing import List, Optional
 from decimal import Decimal
 
-
-class Rating(BaseModel):
-    user_id: str
-    rating: int
-
-
-class Comment(BaseModel):
-    user_id: str
-    comment: str
-
-
-class Guess(BaseModel):
-    user_id: str
-    guess: List[Decimal]
+from src.entities.Rating import Rating
+from src.entities.Comment import Comment
+from src.entities.Guess import Guess
 
 
 class LocationRiddle(BaseModel):

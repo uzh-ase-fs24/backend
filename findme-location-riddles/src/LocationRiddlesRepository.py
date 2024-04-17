@@ -8,7 +8,10 @@ from aws_lambda_powertools.event_handler.exceptions import (
 from boto3.dynamodb.conditions import Key
 from botocore.exceptions import ClientError
 from pydantic import ValidationError
-from src.LocationRiddle import LocationRiddle, Guess, Rating, Comment
+from src.entities.LocationRiddle import LocationRiddle
+from src.entities.Rating import Rating
+from src.entities.Comment import Comment
+from src.entities.Guess import Guess
 from src.base.AbstractLocationRiddlesRepository import AbstractLocationRiddlesRepository
 
 
