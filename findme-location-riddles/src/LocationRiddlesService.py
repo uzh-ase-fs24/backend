@@ -7,6 +7,7 @@ from aws_lambda_powertools.event_handler.exceptions import (
     BadRequestError,
     NotFoundError,
 )
+from src.helpers.CalculateScore import calculate_score_and_distance
 
 
 class LocationRiddlesService:
@@ -109,7 +110,15 @@ class LocationRiddlesService:
         except Exception as e:
             raise BadRequestError(e)
 
-        return response.dict(exclude={"ratings"})
+        score, distance = calculate_score_and_distance(
+            map(float, tuple(location_riddle.location)),
+            map(float, tuple(guess))
+        )
+
+        return {
+            "location_riddle": response.dict(exclude={"ratings"}),
+            "guess_result": {"distance": distance, "received_score": score}
+        }
 
     def comment_location_riddle(self, location_riddle_id, user_id, comment):
         try:

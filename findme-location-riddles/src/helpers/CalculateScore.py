@@ -3,7 +3,7 @@ from src.helpers.CalculateDistance import haversine_distance
 
 # TODO The current implementation allows to adjust the scoring algorithm quite easily. It is to be investigated by
 #  UAT tests whether a linear curve is suitable
-def calculate_score(actual_coord, guessed_coord, max_score=10000, distance_penalty=100):
+def calculate_score_and_distance(actual_coord, guessed_coord, max_score=10000, distance_penalty=100):
     """
     Calculate a score based on the distance between the actual and guessed coordinates. The greater the distance, the lower the score.
 
@@ -20,4 +20,4 @@ def calculate_score(actual_coord, guessed_coord, max_score=10000, distance_penal
 
     # Calculate score, simple linear penalty
     score = max(0, max_score - distance * distance_penalty)
-    return score
+    return score, distance
