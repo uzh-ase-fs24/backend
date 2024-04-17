@@ -20,12 +20,14 @@ class UserService:
                                                       .get_user_by_user_id_from_db(user_id).username})
 
     def get_similar_users(self, username_prefix, user_id):
-        users = self.user_repository.get_users_by_username_prefix(username_prefix)
-        if len(users) == 0:
+        users = list(filter(lambda user: user.user_id != user_id,
+                            self.user_repository
+                            .get_users_by_username_prefix(username_prefix)))
+        if not users:
             raise NotFoundError(
-                f"No location riddles for user with user_id: {user_id} found"
+                f"No users found with username prefix {username_prefix}!"
             )
-        return list(filter(lambda user: user.user_id != user_id, users))
+        return users
 
     def does_user_with_user_id_exist(self, user_id):
         return self.user_repository.does_user_with_user_id_exist(user_id)
