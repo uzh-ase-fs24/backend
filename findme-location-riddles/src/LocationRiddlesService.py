@@ -70,9 +70,6 @@ class LocationRiddlesService:
         return response
 
     def rate_location_riddle(self, location_riddle_id, user_id, rating):
-        if not (isinstance(rating, int) and 1 <= rating <= 5):
-            raise BadRequestError("Rating must be a number between 1 and 5")
-
         location_riddle = self.location_riddle_repository.get_location_riddle_by_location_riddle_id_from_db(
             location_riddle_id
         )
