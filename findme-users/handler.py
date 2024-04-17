@@ -108,11 +108,9 @@ def get_similar_users():
         Description: Retrieves users from the database whose usernames start with a given prefix.
         Returns: A list of users with similar usernames.
     """
-    try:
-        username = app.current_event.query_string_parameters.get("username")
-    except AttributeError:
-        return []
-    return user_service.get_similar_users(username, __get_id(app))
+    return user_service.get_similar_users(
+        app.current_event.query_string_parameters.get("username"),
+        __get_id(app))
 
 
 @app.put("/users/<user_id>/follow")
