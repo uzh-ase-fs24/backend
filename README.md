@@ -1,10 +1,18 @@
-# findme backend
+# findMe backend
 
-The backend consists of three microservices
+This repository contains the backend for the `findMe` application. `findMe` is a social media platform where users can follow each other and engage in a unique game of location riddles. 
 
-- findme-location-riddles
-- findme-scores
-- findme-users
+In this game, users post photos containing a geolocation. Other users then have to guess as precisely as possible where the photo was taken. The closer the guess, the higher the score. This creates a fun and engaging way for users to test their geographical knowledge and observational skills.
+
+The backend is composed of three microservices:
+
+- `findme-location-riddles`: Handles the creation and management of location riddles.
+- `findme-scores`: Manages the scoring system based on how accurately users guess the locations.
+- `findme-users`: Manages user profiles, including follow relationships.
+
+Each microservice is developed using Python, and they are all deployed using Docker and Serverless. The backend API can be accessed locally for development purposes.
+
+Please refer to the sections below for detailed instructions on local development setup, hot reloading, common problems, how to get a token for development, and how to run tests.
 
 ## Local Development
 
@@ -54,17 +62,19 @@ in e.g findme-users/ you will see the change after saving without redeploying.
   resources, double-check that the names match to the ones in `.serverless/cloudformation-template-update-stack.json`
 =======
 in e.g findme-users/ you will instantly see the change after saving.
-
-### Token
-To get a token for developing use the following curl command:
-`curl --request POST \
-  --url https://findme-dev.eu.auth0.com/oauth/token \
-  --header 'content-type: application/json' \
-  --data '{"client_id":"0FhpaZeIjhSG1lwNR3RWPI20VgLgU5rk",
-            "client_secret":<client_secret>,
-            "audience":"https://findme-dev.eu.auth0.com/api/v2/","grant_type":"client_credentials"}'
 `
 
 ### Testing
 To run the tests for the microservices, navigate to the respective directory and run ` python -m unittest discover -s tests` to run the tests.
 (If the virtual environment hasn't been activated yet, you can do so by running the command ` source .venv/bin/activate`.)
+
+
+### Token
+To get a token for developing use the following curl command:
+```
+curl --request POST \
+  --url https://findme-dev.eu.auth0.com/oauth/token \
+  --header 'content-type: application/json' \
+  --data '{"client_id":"0FhpaZeIjhSG1lwNR3RWPI20VgLgU5rk",
+            "client_secret":<client_secret>,
+            "audience":"https://findme-dev.eu.auth0.com/api/v2/","grant_type":"client_credentials"}'
