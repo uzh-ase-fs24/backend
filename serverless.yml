@@ -2,6 +2,7 @@ service: findme-microservices
 
 frameworkVersion: "3"
 
+	
 custom:
   localstack:
     stages:
@@ -61,8 +62,13 @@ functions:
     environment:
       FRONTEND_ORIGIN: ${self:custom.stage.${opt:stage}.frontendOrigin}
       AUTH0_DOMAIN: ${self:custom.stage.${opt:stage}.auth0Domain}
-      AUTH0_AUDIENCE: ${self:custom.stage.${opt:stage}.auth0Audience}
+      AUTH0_AUDIENCE: ${self:custom.stage.${opt:stage, 'dev'}.auth0Audience}
     events:
+      - http:
+          path: /users/swagger
+          method: get
+          cors:
+            origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
       - http:
           path: /users/{user_id}
           method: get
@@ -72,6 +78,7 @@ functions:
             parameters:
               paths:
                 id: true
+          documentation: ${file(api-doc.yml):endpoints.findme-users}
       - http:
           path: /users
           method: get
@@ -140,9 +147,14 @@ functions:
     environment:
       FRONTEND_ORIGIN: ${self:custom.stage.${opt:stage}.frontendOrigin}
       AUTH0_DOMAIN: ${self:custom.stage.${opt:stage}.auth0Domain}
-      AUTH0_AUDIENCE: ${self:custom.stage.${opt:stage}.auth0Audience}
+      AUTH0_AUDIENCE: ${self:custom.stage.${opt:stage, 'local'}.auth0Audience}
       USER_FUNCTION_NAME: ${self:custom.stage.${opt:stage}.userFunctionName}
     events:
+      - http:
+          path: /location-riddles/swagger
+          method: get
+          cors:
+            origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
       - http:
           path: /location-riddles
           method: post

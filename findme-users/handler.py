@@ -1,5 +1,7 @@
 import sys
 
+
+
 sys.path.insert(0, "/var/task/.venv/lib/python3.12/site-packages")
 import os
 
@@ -12,7 +14,8 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
 from aws_lambda_powertools.event_handler.exceptions import (
     BadRequestError,
 )
-
+from aws_lambda_powertools.utilities.parser import event_parser
+from typing import List
 from findme.authorization import Authorizer
 
 from src.UserRepository import UserRepository
@@ -20,13 +23,15 @@ from src.FollowerRepository import FollowerRepository
 from src.UserService import UserService
 from src.FollowerService import FollowerService
 from src.entities.UserConnections import UserConnections
+from src.entities.FollowRequest import FollowRequest
 
 
 tracer = Tracer()
 logger = Logger()
 
 cors_config = CORSConfig(allow_origin=os.environ.get("FRONTEND_ORIGIN"))
-app = APIGatewayRestResolver(cors=cors_config)
+app = APIGatewayRestResolver(cors=cors_config, enable_validation=True)
+app.enable_swagger(path="/users/swagger")
 
 authorizer = Authorizer(
     auth0_domain=os.environ.get("AUTH0_DOMAIN"),
@@ -42,6 +47,7 @@ follower_service = FollowerService(follower_repository)
 @app.post("/users")
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
+@event_parser
 def post_user():
     """
         Endpoint: POST /users
@@ -59,6 +65,7 @@ def post_user():
 @app.put("/users")
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
+@event_parser
 def update_user():
     """
         Endpoint: PUT /users
@@ -75,6 +82,7 @@ def update_user():
 @app.get("/users/<user_id>")
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
+@event_parser
 def get_user(user_id: Annotated[int, Path(lt=999)]):
     """
         Endpoint: GET /users/<user_id>
@@ -88,6 +96,7 @@ def get_user(user_id: Annotated[int, Path(lt=999)]):
 @app.get("/users")
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
+@event_parser
 def get_individual_user():
     """
         Endpoint: GET /users
@@ -101,6 +110,7 @@ def get_individual_user():
 @app.get("/users/search")
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
+@event_parser
 def get_similar_users():
     """
         Endpoint: GET /users/search
@@ -116,7 +126,8 @@ def get_similar_users():
 @app.put("/users/<user_id>/follow")
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
-def follow_user(user_id: Annotated[int, Path(lt=999)]):
+@event_parser
+def follow_user(user_id: Annotated[int, Path(lt=999)]) -> FollowRequest:
     """
         Endpoint: PUT /users/{user_id}/follow
         Body: None
@@ -134,6 +145,7 @@ def follow_user(user_id: Annotated[int, Path(lt=999)]):
 @app.patch("/users/<requester_id>/follow")
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
+@event_parser
 def update_follow_user(requester_id: Annotated[int, Path(lt=999)]):
     """
         Endpoint: PATCH /users/{user_id}/follow?action={accept | decline}
@@ -155,7 +167,8 @@ def update_follow_user(requester_id: Annotated[int, Path(lt=999)]):
 @app.get("/users/follow")
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
-def get_received_follow_requests():
+@event_parser
+def get_received_follow_requests() -> List[FollowRequest]:
     """
         Endpoint: GET /users/follow
         Body: None
@@ -168,7 +181,8 @@ def get_received_follow_requests():
 @app.get("/users/<user_id>/follow")
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
-def get_user_connections(user_id: Annotated[int, Path(lt=999)]):
+@event_parser
+def get_user_connections(user_id: Annotated[int, Path(lt=999)]) -> UserConnections:
     """
         Endpoint: GET /users/user_id/follow
         Body: None

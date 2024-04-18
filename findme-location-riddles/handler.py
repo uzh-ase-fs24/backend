@@ -23,7 +23,8 @@ tracer = Tracer()
 logger = Logger()
 
 cors_config = CORSConfig(allow_origin=os.environ.get("FRONTEND_ORIGIN"))
-app = APIGatewayRestResolver(cors=cors_config)
+app = APIGatewayRestResolver(cors=cors_config, enable_validation=True)
+app.enable_swagger(path="/location-riddles/swagger")
 
 authorizer = Authorizer(
     auth0_domain=os.environ.get("AUTH0_DOMAIN"),
