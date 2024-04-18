@@ -1,0 +1,35 @@
+name: Run Python test suite
+
+on:
+  push:
+    branches-ignore:
+      - '*'
+  pull_request:
+    branches-ignore:
+      - '*'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+      name: Check out repository code
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+
+    - name: Run tests in findme-location-riddles
+      run: |
+        ls
+        cd findme-location-riddles
+        python -m pip install -r requirements.txt
+        python3 -m unittest discover -s tests
+
+    - name: Run tests in findme-users
+      run: |
+        cd findme-users
+        python -m pip install -r requirements.txt
+        python3 -m unittest discover -s tests
