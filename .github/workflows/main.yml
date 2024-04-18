@@ -2,11 +2,12 @@ name: Run Python test suite
 
 on:
   push:
-    branches-ignore:
-      - '*'
+    branches:
+      - '**'  # This will trigger the workflow on push to any branch
   pull_request:
-    branches-ignore:
-      - '*'
+    branches:
+      - '**'  # This will trigger the workflow on pull requests to any branch
+  workflow_dispatch:  # This allows manual triggering
 
 jobs:
   test:
