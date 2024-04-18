@@ -3,7 +3,7 @@ import unittest
 from src.helpers.CalculateDistance import haversine_distance
 
 
-class TestCalculateScore(unittest.TestCase):
+class TestCalculateDistance(unittest.TestCase):
     def setUp(self):
         self.location_zurich = (47.3781750, 8.5391383)  # Zurich Hauptbahnhof
         self.location_st_gallen = (47.4223234, 9.3680846)  # St. Gallen Hauptbahnhof
