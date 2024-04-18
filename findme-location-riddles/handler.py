@@ -39,6 +39,15 @@ location_riddles_service = LocationRiddlesService(location_riddle_repository, im
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
 def post_location_riddles():
+    """
+        Endpoint: POST /location-riddles
+        Body: {
+            "image": <image_file>,
+            "location": <coordinate_list> e.g. [12.345, 67.890]
+        }
+        Description: Creates a new location riddle with the provided image and location.
+        Returns: A message indicating the successful upload of the location riddle.
+    """
     return location_riddles_service.post_location_riddle(__get_attribute("image", app),
                                                          __get_attribute("location", app),
                                                          __get_id(app))
@@ -48,6 +57,14 @@ def post_location_riddles():
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
 def post_guess_to_location_riddle(location_riddle_id: Annotated[int, Path(lt=999)]):
+    """
+        Endpoint: POST /location-riddles/<location_riddle_id>/guess
+        Body: {
+            "guess": <coordinate_list> e.g. [12.345, 67.890]
+        }
+        Description: Submits a guess for a specific location riddle.
+        Returns: The updated location riddle with the new guess.
+    """
     return location_riddles_service.guess_location_riddle(location_riddle_id, __get_id(app),
                                                           __get_attribute("guess", app))
 
@@ -56,14 +73,28 @@ def post_guess_to_location_riddle(location_riddle_id: Annotated[int, Path(lt=999
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
 def post_comment_to_location_riddle(location_riddle_id: Annotated[int, Path(lt=999)]):
+    """
+        Endpoint: POST /location-riddles/<location_riddle_id>/comment
+        Body: {
+            "comment": <comment_string>
+        }
+        Description: Adds a comment to a specific location riddle.
+        Returns: The updated location riddle with the new comment.
+    """
     return location_riddles_service.comment_location_riddle(location_riddle_id, __get_id(app),
                                                             __get_attribute("comment", app))
 
 
-@app.get("/location-riddles")  # get all location riddles of users I follow
+@app.get("/location-riddles")
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
-def get_location_riddles_by_user():
+def get_location_riddles():
+    """
+        Endpoint: GET /location-riddles
+        Body: None
+        Description: Retrieves all location riddles of all users I follow.
+        Returns: A list of location riddles.
+    """
     return location_riddles_service.get_location_riddles_feed(app.current_event, __get_id(app))
 
 
@@ -71,6 +102,12 @@ def get_location_riddles_by_user():
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
 def get_location_riddles_by_user(user_id: Annotated[int, Path(lt=999)]):
+    """
+        Endpoint: GET /location-riddles/user/<user_id>
+        Body: None
+        Description: Retrieves all location riddles for a specific user.
+        Returns: A list of location riddles.
+    """
     return location_riddles_service.get_location_riddles_for_user(user_id)
 
 
@@ -78,6 +115,12 @@ def get_location_riddles_by_user(user_id: Annotated[int, Path(lt=999)]):
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
 def get_location_riddles_by_user():
+    """
+        Endpoint: GET /location-riddles/user
+        Body: None
+        Description: Retrieves all location riddles for the current user.
+        Returns: A list of location riddles.
+    """
     return location_riddles_service.get_location_riddles_for_user(__get_id(app))
 
 
@@ -85,6 +128,12 @@ def get_location_riddles_by_user():
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
 def get_location_riddles_by_location_riddle_id(location_riddle_id: Annotated[int, Path(lt=999)]):
+    """
+        Endpoint: GET /location-riddles/<location_riddle_id>
+        Body: None
+        Description: Retrieves a specific location riddle by its ID.
+        Returns: The requested location riddle.
+    """
     return location_riddles_service.get_location_riddle(location_riddle_id)
 
 
@@ -92,6 +141,14 @@ def get_location_riddles_by_location_riddle_id(location_riddle_id: Annotated[int
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
 def rate_location_riddle(location_riddle_id: Annotated[int, Path(lt=999)]):
+    """
+        Endpoint: PATCH /location-riddles/<location_riddle_id>/rate
+        Body: {
+            "rating": <rating_integer>
+        }
+        Description: Rates a specific location riddle.
+        Returns: The updated location riddle with the new rating.
+    """
     return location_riddles_service.rate_location_riddle(location_riddle_id, __get_id(app),
                                                          __get_attribute("rating", app))
 
@@ -100,6 +157,12 @@ def rate_location_riddle(location_riddle_id: Annotated[int, Path(lt=999)]):
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
 def delete_location_riddles_by_location_riddle_id(location_riddle_id: Annotated[int, Path(lt=999)]):
+    """
+        Endpoint: DELETE /location-riddles/<location_riddle_id>
+        Body: None
+        Description: Deletes a specific location riddle by its ID.
+        Returns: A message indicating the successful deletion of the location riddle.
+    """
     return location_riddles_service.delete_location_riddle(location_riddle_id, __get_id(app))
 
 

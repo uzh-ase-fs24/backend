@@ -43,6 +43,16 @@ follower_service = FollowerService(follower_repository)
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
 def post_user():
+    """
+        Endpoint: POST /users
+        Body: {
+                        "first_name": <first_name>,
+                        "last_name": "<last_name>",
+                        "username": <username>
+                    }
+        Description: Creates a new user in the database.
+        Returns: The created user including the user_id.
+    """
     return user_service.post_user(app.current_event.json_body, __get_id(app))
 
 
@@ -50,6 +60,15 @@ def post_user():
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
 def update_user():
+    """
+        Endpoint: PUT /users
+        Body: {
+                        "first_name": <first_name>,
+                        "last_name": "<last_name>"
+                    }
+        Description: Updates an existing user in the database.
+        Returns: The result of the user update operation.
+    """
     return user_service.update_user(app.current_event.json_body, __get_id(app))
 
 
@@ -57,6 +76,12 @@ def update_user():
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
 def get_user(user_id: Annotated[int, Path(lt=999)]):
+    """
+        Endpoint: GET /users/<user_id>
+        Body: None
+        Description: Retrieves a user from the database by user_id.
+        Returns: The user data.
+    """
     return user_service.get_user(user_id)
 
 
@@ -64,6 +89,12 @@ def get_user(user_id: Annotated[int, Path(lt=999)]):
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
 def get_individual_user():
+    """
+        Endpoint: GET /users
+        Body: None
+        Description: Retrieves the authenticated user's data from the database.
+        Returns: The authenticated user's data.
+    """
     return user_service.get_user(__get_id(app))
 
 
@@ -71,11 +102,15 @@ def get_individual_user():
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
 def get_similar_users():
-    try:
-        username = app.current_event.query_string_parameters.get("username")
-    except AttributeError:
-        return []
-    return user_service.get_similar_users(username, __get_id(app))
+    """
+        Endpoint: GET /users/search
+        Body: None
+        Description: Retrieves users from the database whose usernames start with a given prefix.
+        Returns: A list of users with similar usernames.
+    """
+    return user_service.get_similar_users(
+        app.current_event.query_string_parameters.get("username"),
+        __get_id(app))
 
 
 @app.put("/users/<user_id>/follow")
