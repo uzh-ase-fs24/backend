@@ -142,12 +142,12 @@ def get_location_riddles_by_location_riddle_id(location_riddle_id: Annotated[int
     return location_riddles_service.get_location_riddle(location_riddle_id)
 
 
-@app.patch("/location-riddles/<location_riddle_id>/rate")
+@app.post("/location-riddles/<location_riddle_id>/rate")
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
 def rate_location_riddle(location_riddle_id: Annotated[int, Path(lt=999)]):
     """
-        Endpoint: PATCH /location-riddles/<location_riddle_id>/rate
+        Endpoint: POST /location-riddles/<location_riddle_id>/rate
         Body: {
             "rating": <rating_integer>
         }
