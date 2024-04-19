@@ -60,11 +60,15 @@ in e.g findme-users/ you will see the change after saving without redeploying.
 - double-check the absolute path in the `sls-config-local.yml` file
 - The properties in the `sls-config-local.yml` file have to be named exactly like serverless names the cloudformation
   resources, double-check that the names match to the ones in `.serverless/cloudformation-template-update-stack.json`
-=======
-in e.g findme-users/ you will instantly see the change after saving.
-`
 
 ### Testing
+> :warning: Caution: We have to use a different virtual environment while testing as during the setup, because we run the tests locally on our device and do not mount them into the lambda function.
+> To do this either create a seperate venv outside or replace the one inside the microservice directory.
+>
+>`python -m venv .venv`
+>
+>`.venv/bin/pip install -r <path_to>/requirements.txt`
+
 To run the tests for the microservices, navigate to the respective directory and run ` python -m unittest discover -s tests` to run the tests.
 (If the virtual environment hasn't been activated yet, you can do so by running the command ` source .venv/bin/activate`.)
 
