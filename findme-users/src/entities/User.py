@@ -16,3 +16,13 @@ class User(BaseModel):
         if self._scores and isinstance(self._scores[0], Score):
             self.average_score = sum(score.score for score in self._scores) / len(self._scores)
 
+
+class PostUserDTO(BaseModel):
+    username: str
+    first_name: str
+    last_name: str
+
+
+class PutUserDTO(BaseModel):
+    first_name: str
+    last_name: str

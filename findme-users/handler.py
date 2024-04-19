@@ -22,7 +22,7 @@ from src.UserService import UserService
 from src.FollowerService import FollowerService
 from src.entities.UserConnections import UserConnections
 from src.entities.FollowRequest import FollowRequest
-from src.entities.User import User
+from src.entities.User import User, PostUserDTO, PutUserDTO
 
 tracer = Tracer()
 logger = Logger()
@@ -45,8 +45,8 @@ follower_service = FollowerService(follower_repository)
 @app.post("/users")
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
-@event_parser
-def post_user() -> User:
+@event_parser(model=PostUserDTO)
+def post_user(user: PostUserDTO) -> User:
     """
         Endpoint: POST /users
         Body: {
@@ -57,14 +57,14 @@ def post_user() -> User:
         Description: Creates a new user in the database.
         Returns: The created user including the user_id.
     """
-    return user_service.post_user(app.current_event.json_body, __get_id(app))
+    return user_service.post_user(user, __get_id(app))
 
 
 @app.put("/users")
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
-@event_parser
-def update_user() -> User:
+@event_parser(model=PutUserDTO)
+def update_user(user: PutUserDTO) -> User:
     """
         Endpoint: PUT /users
         Body: {
@@ -74,7 +74,7 @@ def update_user() -> User:
         Description: Updates an existing user in the database.
         Returns: The result of the user update operation.
     """
-    return user_service.update_user(app.current_event.json_body, __get_id(app))
+    return user_service.update_user(user, __get_id(app))
 
 
 @app.get("/users/<user_id>")
