@@ -8,6 +8,7 @@ from botocore.exceptions import ClientError
 from pydantic import ValidationError
 from src.entities.User import User
 from src.base.AbstractUserRepository import AbstractUserRepository
+from src.entities.Score import Score
 
 
 class UserRepository(AbstractUserRepository):
@@ -42,7 +43,7 @@ class UserRepository(AbstractUserRepository):
     def get_user_by_user_id_from_db(self, user_id):
         response = self.table.query(
             IndexName="UserIdIndex",
-            ProjectionExpression="user_id, username, first_name, last_name",
+            ProjectionExpression="user_id, username, first_name, last_name, scores",
             KeyConditionExpression=Key('user_id').eq(user_id)
         )
         if not response.get('Items') or not response.get('Items')[0]:
@@ -74,6 +75,27 @@ class UserRepository(AbstractUserRepository):
             raise BadRequestError(f"unable to create user with provided parameters. {e}")
 
         return users
+
+    def update_user_score_in_db(self, user_id, location_riddle_id, score):
+        try:
+            score = Score(location_riddle_id=location_riddle_id, score=score)
+        except ValidationError as e:
+            raise BadRequestError(f"unable to update the user with provided parameters. {e}")
+
+        try:
+            self.table.update_item(
+                Key={
+                    'partition_key': 'USER',
+                    'username': self.get_user_by_user_id_from_db(user_id).username
+                },
+                UpdateExpression="SET scores = list_append(scores, :i)",
+                ExpressionAttributeValues={":i": [score.dict()]},
+            )
+        except ClientError as e:
+            print(f"Error updating user scores in DynamoDB: {e}")
+            raise BadRequestError(f"Error updating user scores in DynamoDB: {e}")
+
+        return self.get_user_by_user_id_from_db(user_id)
 
     def does_user_with_user_id_exist(self, user_id):
         response = self.table.query(

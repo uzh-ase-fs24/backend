@@ -98,6 +98,24 @@ def get_individual_user():
     return user_service.get_user(__get_id(app))
 
 
+@app.post("/users/score")
+@tracer.capture_method
+@authorizer.requires_auth(app=app)
+def rate_location_riddle():
+    """
+        Endpoint: POST /users/score
+        Body: {
+            "score": <score_integer>
+            "location_riddle_id": <location_riddle_id>
+        }
+        Description: Write achieved score to the user.
+        Returns: The user with the updated score avg.
+    """
+    return user_service.write_guessing_score_to_user(__get_id(app),
+                                                     __get_attribute("location_riddle_id", app),
+                                                     __get_attribute("score", app),)
+
+
 @app.get("/users/search")
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
@@ -194,6 +212,13 @@ def __get_id(app):
     if '|' in user_id:
         user_id = user_id.split("|")[1]
     return user_id
+
+
+def __get_attribute(attribute, app):
+    try:
+        return app.current_event.json_body[attribute]
+    except KeyError:
+        raise BadRequestError(f"Missing attribute {attribute} in request body")
 
 
 # You can continue to use other utilities just as before

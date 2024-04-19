@@ -83,6 +83,11 @@ functions:
           cors:
             origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
       - http:
+          path: /users/score
+          method: post
+          cors:
+            origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
+      - http:
           path: /users
           method: put
           cors:

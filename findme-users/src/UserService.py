@@ -1,5 +1,6 @@
 from aws_lambda_powertools.event_handler.exceptions import (
     NotFoundError,
+    BadRequestError,
 )
 
 
@@ -21,6 +22,16 @@ class UserService:
                                                        "username": self.user_repository
                                                       .get_user_by_user_id_from_db(user_id).username})
                 .dict(exclude={"scores"}))
+
+    def write_guessing_score_to_user(self, user_id, location_riddle_id, score):
+        try:
+            response = self.user_repository.update_user_score_in_db(
+                user_id, location_riddle_id, score
+            )
+        except Exception as e:
+            raise BadRequestError(e)
+
+        return response.dict(exclude={"scores"})
 
     def get_similar_users(self, username_prefix, user_id):
         users = list(filter(lambda user: user.user_id != user_id,
