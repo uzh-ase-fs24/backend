@@ -70,7 +70,9 @@ def post_guess_to_location_riddle(location_riddle_id: Annotated[int, Path(lt=999
             "guess_result": {"distance": <distance>, "received_score": <score>}
             }
     """
-    return location_riddles_service.guess_location_riddle(location_riddle_id, __get_id(app),
+    return location_riddles_service.guess_location_riddle(app.current_event,
+                                                          location_riddle_id,
+                                                          __get_id(app),
                                                           __get_attribute("guess", app))
 
 

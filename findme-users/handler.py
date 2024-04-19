@@ -216,6 +216,7 @@ def __get_id(app):
 
 def __get_attribute(attribute, app):
     try:
+        print(f"{attribute} {app.current_event.json_body[attribute]}")
         return app.current_event.json_body[attribute]
     except KeyError:
         raise BadRequestError(f"Missing attribute {attribute} in request body")
