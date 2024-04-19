@@ -8,6 +8,8 @@ from boto3.dynamodb.conditions import Attr
 from botocore.exceptions import ClientError
 from pydantic import ValidationError
 
+from src.entities.FollowRequest import FollowRequest
+from src.entities.UserConnections import UserConnectionsIDs
 from src.base.AbstractFollowerRepository import AbstractFollowerRepository
 
 
@@ -16,18 +18,23 @@ class FollowerRepository(AbstractFollowerRepository):
         self.dynamodb = boto3.resource('dynamodb', region_name='eu-central-2')
         self.table = self.dynamodb.Table('FollowerTable')
 
-    def create_follow_request(self, follow_request):
+    def create_follow_request(self, follow_request_data: dict) -> FollowRequest:
         try:
-            # Check if follow request already exists
-            existing_request = self.table.scan(
-                FilterExpression=Attr('partition_key').eq(
-                    f"REQUEST") & Attr('sort_key').eq(
-                    f"{follow_request.requester_id}#{follow_request.requestee_id}")
-            )['Items']
+            follow_request = FollowRequest(**follow_request_data)
+        except ValidationError as e:
+            raise BadRequestError(f"unable to create follow request with provided parameters. {e}")
 
-            if existing_request:
-                raise BadRequestError("Follow request already exists")
+        # Check if follow request already exists
+        existing_request = self.table.scan(
+            FilterExpression=Attr('partition_key').eq(
+                f"REQUEST") & Attr('sort_key').eq(
+                f"{follow_request.requester_id}#{follow_request.requestee_id}")
+        )['Items']
 
+        if existing_request:
+            raise BadRequestError("Follow request already exists")
+
+        try:
             response = self.table.put_item(
                 Item={
                     'partition_key': "REQUEST",
@@ -39,15 +46,17 @@ class FollowerRepository(AbstractFollowerRepository):
                     'timestamp': follow_request.timestamp.isoformat()
                 }
             )
-            return response
+        except ClientError as e:
+            raise BadRequestError(f"Error saving user to DynamoDB: {e}")
 
-        except ValidationError as e:
-            print(e)
-            raise BadRequestError(f"Unable to create follow request DB {e}")
+        return FollowRequest(**response)
 
-    def accept_follow_request(self, requester_id, requestee_id):
+    def accept_follow_request(self, requester_id: str, requestee_id: str) -> FollowRequest:
+        if not self.does_follow_request_exist(requester_id, requestee_id):
+            raise BadRequestError(f"The follow request from user ${requester_id} does not exist!")
+
         try:
-            self.table.update_item(
+            response = self.table.update_item(
                 Key={
                     'partition_key': f"REQUEST",
                     'sort_key': f"{requester_id}#{requestee_id}"
@@ -59,10 +68,9 @@ class FollowerRepository(AbstractFollowerRepository):
                 ReturnValues="ALL_NEW"
             )
 
-
             # relation is uni-directional
             # sort_key: "requestee" has the follower "requester"
-            follower = self.table.put_item(
+            self.table.put_item(
                 Item={
                     'partition_key': f"FOLLOWERS",
                     'sort_key': f"{requestee_id}#{requester_id}",
@@ -79,13 +87,15 @@ class FollowerRepository(AbstractFollowerRepository):
                     'timestamp': datetime.now().isoformat(),
                 }
             )
+        except ClientError as e:
+            raise BadRequestError(f"Error saving user to DynamoDB: {e}")
 
+        return FollowRequest(**response)
 
-        except ValidationError as e:
-            print(e)
-            raise BadRequestError(f"Unable to accept follow request. {e}")
+    def decline_follow_request(self, requester_id: str, requestee_id: str) -> FollowRequest:
+        if not self.does_follow_request_exist(requester_id, requestee_id):
+            raise BadRequestError(f"The follow request from user ${requester_id} does not exist!")
 
-    def decline_follow_request(self, requester_id: str, requestee_id: str):
         try:
             # Update the follow request status to 'declined'
             response = self.table.update_item(
@@ -99,12 +109,12 @@ class FollowerRepository(AbstractFollowerRepository):
                 },
                 ReturnValues="UPDATED_NEW"
             )
-            return response
         except Exception as e:
-            print(e)
             raise BadRequestError(f"Unable to deny follow request. {e}")
 
-    def fetch_received_follow_requests(self, user_id: str):
+        return FollowRequest(**response)
+
+    def fetch_received_follow_requests(self, user_id: str) -> list[FollowRequest]:
         try:
             response = self.table.query(
                 IndexName='RequesteeIDIndex',
@@ -116,12 +126,12 @@ class FollowerRepository(AbstractFollowerRepository):
                     ':partition_key': "REQUEST"
                 },
             )
-            return response
         except ClientError as e:
-            print(e)
             raise BadRequestError(f"Unable to fetch received follow requests. {e}")
 
-    def fetch_sent_follow_requests(self, user_id: str):
+        return [FollowRequest(**item) for item in response['Items']]
+
+    def fetch_sent_follow_requests(self, user_id: str) -> list[FollowRequest]:
         try:
             response = self.table.query(
                 IndexName='RequesterIDIndex',
@@ -130,12 +140,12 @@ class FollowerRepository(AbstractFollowerRepository):
                     ':requester_id': f"{user_id}"
                 }
             )
-            return response
         except ClientError as e:
-            print(e)
             raise BadRequestError(f"Unable to fetch received follow requests. {e}")
 
-    def does_follow_request_exist(self, requester_id, requestee_id):
+        return [FollowRequest(**item) for item in response['items']]
+
+    def does_follow_request_exist(self, requester_id: str, requestee_id: str) -> bool:
         follow_request_id = f"{requester_id}#{requestee_id}"
         try:
             follow_request = self.table.query(
@@ -145,13 +155,13 @@ class FollowerRepository(AbstractFollowerRepository):
                     ':user_id': follow_request_id
                 }
             )
-            return 'Items' in follow_request and len(follow_request['Items']) == 1 and follow_request['Items'][0][
-                'request_status'] == 'pending'
         except ClientError as e:
-            print(e)
             raise BadRequestError(f"Couldn't fetch follow request. {e}")
 
-    def get_following(self, user_id: str):
+        return 'Items' in follow_request and len(follow_request['Items']) == 1 and follow_request['Items'][0][
+            'request_status'] == 'pending'
+
+    def __get_following_ids(self, user_id: str) -> list[int]:
         try:
             following_response = self.table.query(
                 KeyConditionExpression="partition_key = :partition_key AND begins_with(sort_key, :user_id)",
@@ -160,21 +170,25 @@ class FollowerRepository(AbstractFollowerRepository):
                     ':user_id': user_id
                 }
             )
-            return following_response
-        except Exception as e:
-            print(e)
+        except ClientError as e:
             raise BadRequestError(f"Unable to retrieve user connections. {e}")
+        return [item['sort_key'].split("#")[1] for item in following_response['Items']]
 
-    def get_followers(self, user_id: str):
+    def __get_followers_ids(self, user_id: str) -> list[int]:
         try:
-            following_response = self.table.query(
+            follower_response = self.table.query(
                 KeyConditionExpression="partition_key = :partition_key AND begins_with(sort_key, :user_id)",
                 ExpressionAttributeValues={
                     ':partition_key': "FOLLOWERS",
                     ':user_id': user_id
                 }
             )
-            return following_response
-        except Exception as e:
-            print(e)
+        except ClientError as e:
             raise BadRequestError(f"Unable to retrieve user connections. {e}")
+        return [item['sort_key'].split("#")[1] for item in follower_response['Items']]
+
+    def get_user_connections(self, user_id: str) -> UserConnectionsIDs:
+        return UserConnectionsIDs(
+            **{'followers': self.__get_followers_ids(user_id),
+               'following': self.__get_following_ids(user_id)}
+        )

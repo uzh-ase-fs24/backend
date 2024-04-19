@@ -78,7 +78,6 @@ functions:
             parameters:
               paths:
                 id: true
-          documentation: ${file(api-doc.yml):endpoints.findme-users}
       - http:
           path: /users
           method: get

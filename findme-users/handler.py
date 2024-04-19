@@ -1,7 +1,5 @@
 import sys
 
-
-
 sys.path.insert(0, "/var/task/.venv/lib/python3.12/site-packages")
 import os
 
@@ -24,7 +22,7 @@ from src.UserService import UserService
 from src.FollowerService import FollowerService
 from src.entities.UserConnections import UserConnections
 from src.entities.FollowRequest import FollowRequest
-
+from src.entities.User import User
 
 tracer = Tracer()
 logger = Logger()
@@ -48,7 +46,7 @@ follower_service = FollowerService(follower_repository)
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
 @event_parser
-def post_user():
+def post_user() -> User:
     """
         Endpoint: POST /users
         Body: {
@@ -66,7 +64,7 @@ def post_user():
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
 @event_parser
-def update_user():
+def update_user() -> User:
     """
         Endpoint: PUT /users
         Body: {
@@ -83,7 +81,7 @@ def update_user():
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
 @event_parser
-def get_user(user_id: Annotated[int, Path(lt=999)]):
+def get_user(user_id: Annotated[str, Path(lt=999)]) -> User:
     """
         Endpoint: GET /users/<user_id>
         Body: None
@@ -97,7 +95,7 @@ def get_user(user_id: Annotated[int, Path(lt=999)]):
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
 @event_parser
-def get_individual_user():
+def get_individual_user() -> User:
     """
         Endpoint: GET /users
         Body: None
@@ -111,7 +109,7 @@ def get_individual_user():
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
 @event_parser
-def get_similar_users():
+def get_similar_users() -> List[User]:
     """
         Endpoint: GET /users/search
         Body: None
@@ -127,7 +125,7 @@ def get_similar_users():
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
 @event_parser
-def follow_user(user_id: Annotated[int, Path(lt=999)]) -> FollowRequest:
+def follow_user(user_id: Annotated[str, Path(lt=999)]) -> FollowRequest:
     """
         Endpoint: PUT /users/{user_id}/follow
         Body: None
@@ -146,7 +144,7 @@ def follow_user(user_id: Annotated[int, Path(lt=999)]) -> FollowRequest:
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
 @event_parser
-def update_follow_user(requester_id: Annotated[int, Path(lt=999)]):
+def update_follow_user(requester_id: Annotated[str, Path(lt=999)]) -> FollowRequest:
     """
         Endpoint: PATCH /users/{user_id}/follow?action={accept | decline}
         Body: None
@@ -182,24 +180,18 @@ def get_received_follow_requests() -> List[FollowRequest]:
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
 @event_parser
-def get_user_connections(user_id: Annotated[int, Path(lt=999)]) -> UserConnections:
+def get_user_connections(user_id: Annotated[str, Path(lt=999)]) -> UserConnections:
     """
         Endpoint: GET /users/user_id/follow
         Body: None
         Description: Retrieves all connections (followers, following) of a specific user
         Returns: Dictionary containing one list for followers and one for following. Each list contains of 0-many user objects.
     """
-    connections = follower_service.get_user_connections(user_id)
-    user_connections = UserConnections()
-
-    for follower in connections['followers']:
-        follower_item = user_service.get_user(follower)
-        user_connections.followers.append(follower_item)
-
-    for following in connections['following']:
-        following_item = user_service.get_user(following)
-        user_connections.following.append(following_item)
-
+    connections_ids = follower_service.get_user_connections(user_id)
+    user_connections = UserConnections(
+        followers=[user_service.get_user(follower) for follower in connections_ids['followers']],
+        following=[user_service.get_user(following) for following in connections_ids['following']]
+    )
     return user_connections
 
 

@@ -8,11 +8,11 @@ class User(BaseModel):
     username: str
     first_name: str
     last_name: str
-    scores: List[Score] = []
+    _scores: List[Score] = []
     average_score: Optional[float] = None
 
     def __init__(self, **data):
         super().__init__(**data)
-        if self.scores and isinstance(self.scores[0], Score):
-            self.average_score = sum(score.score for score in self.scores) / len(self.scores)
+        if self._scores and isinstance(self._scores[0], Score):
+            self.average_score = sum(score.score for score in self._scores) / len(self._scores)
 

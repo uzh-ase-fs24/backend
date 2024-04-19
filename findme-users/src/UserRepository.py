@@ -15,7 +15,7 @@ class UserRepository(AbstractUserRepository):
         self.dynamodb = boto3.resource('dynamodb', region_name='eu-central-2')
         self.table = self.dynamodb.Table('usersTable')
 
-    def post_user_to_db(self, user_data):
+    def post_user_to_db(self, user_data: dict) -> User:
         try:
             user = User(**user_data)
         except ValidationError as e:
@@ -28,7 +28,7 @@ class UserRepository(AbstractUserRepository):
 
         return self.__put_user_to_db(user)
 
-    def update_user_in_db(self, user_data):
+    def update_user_in_db(self, user_data: dict) -> User:
         try:
             user = User(**user_data)
         except ValidationError as e:
@@ -39,7 +39,7 @@ class UserRepository(AbstractUserRepository):
 
         return self.__put_user_to_db(user)
 
-    def get_user_by_user_id_from_db(self, user_id):
+    def get_user_by_user_id_from_db(self, user_id: str) -> User:
         response = self.table.query(
             IndexName="UserIdIndex",
             ProjectionExpression="user_id, username, first_name, last_name",
@@ -53,7 +53,7 @@ class UserRepository(AbstractUserRepository):
         except ValidationError as e:
             raise BadRequestError(f"unable to create user with provided parameters. {e}")
 
-    def get_users_by_username_prefix(self, username_prefix):
+    def get_users_by_username_prefix(self, username_prefix: str) -> [User]:
         response = self.table.query(
             ProjectionExpression="user_id, username, first_name, last_name",
             KeyConditionExpression=Key('partition_key').eq("USER") & Key('username').begins_with(username_prefix)
@@ -75,7 +75,7 @@ class UserRepository(AbstractUserRepository):
 
         return users
 
-    def does_user_with_user_id_exist(self, user_id):
+    def does_user_with_user_id_exist(self, user_id: str) -> bool:
         response = self.table.query(
             IndexName="UserIdIndex",
             KeyConditionExpression=Key('user_id').eq(user_id),
@@ -83,14 +83,14 @@ class UserRepository(AbstractUserRepository):
         )
         return 'Items' in response and len(response['Items']) > 0
 
-    def __does_user_with_username_exist(self, username):
+    def __does_user_with_username_exist(self, username: str) -> bool:
         response = self.table.query(
             KeyConditionExpression=Key('partition_key').eq('USER') & Key('username').eq(username),
             ProjectionExpression="user_id, username, first_name, last_name"
         )
         return 'Items' in response and len(response['Items']) > 0
 
-    def __put_user_to_db(self, user):
+    def __put_user_to_db(self, user: User) -> User:
         try:
             user = user.dict()
             user['partition_key'] = "USER"
