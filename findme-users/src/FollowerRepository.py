@@ -35,7 +35,7 @@ class FollowerRepository(AbstractFollowerRepository):
             raise BadRequestError("Follow request already exists")
 
         try:
-            response = self.table.put_item(
+            self.table.put_item(
                 Item={
                     'partition_key': "REQUEST",
                     'sort_key': f"{follow_request.requester_id}#{follow_request.requestee_id}",
@@ -44,12 +44,12 @@ class FollowerRepository(AbstractFollowerRepository):
                     'requester_username': follow_request.requester_username,
                     'request_status': 'pending',
                     'timestamp': follow_request.timestamp.isoformat()
-                }
+                },
             )
         except ClientError as e:
             raise BadRequestError(f"Error saving user to DynamoDB: {e}")
 
-        return FollowRequest(**response)
+        return follow_request
 
     def accept_follow_request(self, requester_id: str, requestee_id: str) -> FollowRequest:
         if not self.does_follow_request_exist(requester_id, requestee_id):
@@ -90,7 +90,7 @@ class FollowerRepository(AbstractFollowerRepository):
         except ClientError as e:
             raise BadRequestError(f"Error saving user to DynamoDB: {e}")
 
-        return FollowRequest(**response)
+        return FollowRequest(**response['Attributes'])
 
     def decline_follow_request(self, requester_id: str, requestee_id: str) -> FollowRequest:
         if not self.does_follow_request_exist(requester_id, requestee_id):
@@ -112,7 +112,7 @@ class FollowerRepository(AbstractFollowerRepository):
         except Exception as e:
             raise BadRequestError(f"Unable to deny follow request. {e}")
 
-        return FollowRequest(**response)
+        return FollowRequest(**response['Attributes'])
 
     def fetch_received_follow_requests(self, user_id: str) -> list[FollowRequest]:
         try:
@@ -143,7 +143,7 @@ class FollowerRepository(AbstractFollowerRepository):
         except ClientError as e:
             raise BadRequestError(f"Unable to fetch received follow requests. {e}")
 
-        return [FollowRequest(**item) for item in response['items']]
+        return [FollowRequest(**item) for item in response['Items']]
 
     def does_follow_request_exist(self, requester_id: str, requestee_id: str) -> bool:
         follow_request_id = f"{requester_id}#{requestee_id}"

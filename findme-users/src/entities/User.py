@@ -17,12 +17,12 @@ class User(BaseModel):
             self.average_score = sum(score.score for score in self._scores) / len(self._scores)
 
 
-class PostUserDTO(BaseModel):
+class UserPostDTO(BaseModel):
     username: str
     first_name: str
     last_name: str
 
 
-class PutUserDTO(BaseModel):
+class UserPutDTO(BaseModel):
     first_name: str
     last_name: str

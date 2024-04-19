@@ -12,7 +12,6 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
 from aws_lambda_powertools.event_handler.exceptions import (
     BadRequestError,
 )
-from aws_lambda_powertools.utilities.parser import event_parser
 from typing import List
 from findme.authorization import Authorizer
 
@@ -22,7 +21,7 @@ from src.UserService import UserService
 from src.FollowerService import FollowerService
 from src.entities.UserConnections import UserConnections
 from src.entities.FollowRequest import FollowRequest
-from src.entities.User import User, PostUserDTO, PutUserDTO
+from src.entities.User import User, UserPostDTO, UserPutDTO
 
 tracer = Tracer()
 logger = Logger()
@@ -41,12 +40,11 @@ user_service = UserService(user_repository)
 follower_repository = FollowerRepository()
 follower_service = FollowerService(follower_repository)
 
-
+# TODO Beautify: constructor required for swagger but unused
 @app.post("/users")
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
-@event_parser(model=PostUserDTO)
-def post_user(user: PostUserDTO) -> User:
+def post_user(user: UserPostDTO) -> User:
     """
         Endpoint: POST /users
         Body: {
@@ -57,14 +55,14 @@ def post_user(user: PostUserDTO) -> User:
         Description: Creates a new user in the database.
         Returns: The created user including the user_id.
     """
-    return user_service.post_user(user, __get_id(app))
+
+    return user_service.post_user(app.current_event.json_body, __get_id(app))
 
 
 @app.put("/users")
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
-@event_parser(model=PutUserDTO)
-def update_user(user: PutUserDTO) -> User:
+def update_user(user: UserPutDTO) -> User:
     """
         Endpoint: PUT /users
         Body: {
@@ -74,13 +72,12 @@ def update_user(user: PutUserDTO) -> User:
         Description: Updates an existing user in the database.
         Returns: The result of the user update operation.
     """
-    return user_service.update_user(user, __get_id(app))
+    return user_service.update_user(app.current_event.json_body, __get_id(app))
 
 
 @app.get("/users/<user_id>")
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
-@event_parser
 def get_user(user_id: Annotated[str, Path(lt=999)]) -> User:
     """
         Endpoint: GET /users/<user_id>
@@ -94,7 +91,6 @@ def get_user(user_id: Annotated[str, Path(lt=999)]) -> User:
 @app.get("/users")
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
-@event_parser
 def get_individual_user() -> User:
     """
         Endpoint: GET /users
@@ -108,7 +104,6 @@ def get_individual_user() -> User:
 @app.get("/users/search")
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
-@event_parser
 def get_similar_users() -> List[User]:
     """
         Endpoint: GET /users/search
@@ -124,8 +119,7 @@ def get_similar_users() -> List[User]:
 @app.put("/users/<user_id>/follow")
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
-@event_parser
-def follow_user(user_id: Annotated[str, Path(lt=999)]) -> FollowRequest:
+def follow_user(user_id: Annotated[str, Path()]) -> FollowRequest:
     """
         Endpoint: PUT /users/{user_id}/follow
         Body: None
@@ -143,8 +137,7 @@ def follow_user(user_id: Annotated[str, Path(lt=999)]) -> FollowRequest:
 @app.patch("/users/<requester_id>/follow")
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
-@event_parser
-def update_follow_user(requester_id: Annotated[str, Path(lt=999)]) -> FollowRequest:
+def update_follow_user(requester_id: Annotated[str, Path()]) -> FollowRequest:
     """
         Endpoint: PATCH /users/{user_id}/follow?action={accept | decline}
         Body: None
@@ -165,7 +158,6 @@ def update_follow_user(requester_id: Annotated[str, Path(lt=999)]) -> FollowRequ
 @app.get("/users/follow")
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
-@event_parser
 def get_received_follow_requests() -> List[FollowRequest]:
     """
         Endpoint: GET /users/follow
@@ -179,7 +171,6 @@ def get_received_follow_requests() -> List[FollowRequest]:
 @app.get("/users/<user_id>/follow")
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
-@event_parser
 def get_user_connections(user_id: Annotated[str, Path(lt=999)]) -> UserConnections:
     """
         Endpoint: GET /users/user_id/follow
