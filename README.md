@@ -78,3 +78,10 @@ curl --request POST \
   --data '{"client_id":"0FhpaZeIjhSG1lwNR3RWPI20VgLgU5rk",
             "client_secret":<client_secret>,
             "audience":"https://findme-dev.eu.auth0.com/api/v2/","grant_type":"client_credentials"}'
+```
+
+
+### Documentation
+For the detailed api documentation start the application as described above and visit the following endpoints:
+  - `{your_application_url}/users/swagger`
+  - `{your_application_url}/location-riddles/swagger`
