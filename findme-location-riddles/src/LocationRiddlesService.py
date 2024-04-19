@@ -24,7 +24,7 @@ class LocationRiddlesService:
                 user_id, location_riddle_id, location
             )
         except Exception as e:
-            raise BadRequestError(e)
+            raise BadRequestError(f"{e}")
 
         return self.image_bucket_repository.post_image_to_s3(image_base64, image_path)
 
@@ -87,11 +87,11 @@ class LocationRiddlesService:
                 location_riddle_id, user_id, rating
             )
         except Exception as e:
-            raise BadRequestError(e)
+            raise BadRequestError(f"{e}")
 
         return response.dict(exclude={"ratings"})
 
-    def guess_location_riddle(self, location_riddle_id, user_id, guess):
+    def guess_location_riddle(self, event, location_riddle_id, user_id, guess):
         location_riddle = self.location_riddle_repository.get_location_riddle_by_location_riddle_id_from_db(
             location_riddle_id
         )
@@ -108,12 +108,17 @@ class LocationRiddlesService:
                 location_riddle_id, user_id, guess
             )
         except Exception as e:
-            raise BadRequestError(e)
+            raise BadRequestError(f"{e}")
 
         score, distance = calculate_score_and_distance(
             map(float, tuple(location_riddle.location)),
             map(float, tuple(guess))
         )
+
+        try:
+            self.__write_score_to_user_in_user_db(event, location_riddle_id, int(score))
+        except Exception as e:
+            print(f"There was an error writing the score to the user db: {e}")
 
         return {
             "location_riddle": response.dict(exclude={"ratings"}),
@@ -126,7 +131,7 @@ class LocationRiddlesService:
                 location_riddle_id, user_id, comment
             )
         except Exception as e:
-            raise BadRequestError(e)
+            raise BadRequestError(f"{e}")
 
         return response.dict(exclude={"ratings"})
 
@@ -156,3 +161,11 @@ class LocationRiddlesService:
         user_connections = json.loads(payload_dict['body'])
 
         return user_connections['following']
+
+    def __write_score_to_user_in_user_db(self, event, location_riddle_id, score):
+        event_dict = dict(event)
+        event_dict["path"] = f"/users/score"
+        event_dict["body"] = json.dumps({"score": score, "location_riddle_id": location_riddle_id})
+        print(event_dict)
+        client = boto3.client("lambda", region_name="eu-central-2")
+        _ = client.invoke(FunctionName=os.environ["USER_FUNCTION_NAME"], Payload=json.dumps(event_dict))
