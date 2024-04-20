@@ -22,6 +22,7 @@ class FollowerRepository(AbstractFollowerRepository):
         try:
             follow_request = FollowRequest(**follow_request_data)
         except ValidationError as e:
+            print(f"unable to create follow request with provided parameters. {e}")
             raise BadRequestError(f"unable to create follow request with provided parameters. {e}")
 
         # Check if follow request already exists
@@ -47,6 +48,7 @@ class FollowerRepository(AbstractFollowerRepository):
                 },
             )
         except ClientError as e:
+            print(f"Error saving user to DynamoDB: {e}")
             raise BadRequestError(f"Error saving user to DynamoDB: {e}")
 
         return follow_request
@@ -88,6 +90,7 @@ class FollowerRepository(AbstractFollowerRepository):
                 }
             )
         except ClientError as e:
+            print(f"Error saving user to DynamoDB: {e}")
             raise BadRequestError(f"Error saving user to DynamoDB: {e}")
 
         return FollowRequest(**response['Attributes'])
@@ -110,6 +113,7 @@ class FollowerRepository(AbstractFollowerRepository):
                 ReturnValues="UPDATED_NEW"
             )
         except Exception as e:
+            print(f"Unable to deny follow request. {e}")
             raise BadRequestError(f"Unable to deny follow request. {e}")
 
         return FollowRequest(**response['Attributes'])
@@ -127,6 +131,7 @@ class FollowerRepository(AbstractFollowerRepository):
                 },
             )
         except ClientError as e:
+            print(f"Unable to fetch received follow requests. {e}")
             raise BadRequestError(f"Unable to fetch received follow requests. {e}")
 
         return [FollowRequest(**item) for item in response['Items']]
@@ -141,6 +146,7 @@ class FollowerRepository(AbstractFollowerRepository):
                 }
             )
         except ClientError as e:
+            print(f"Unable to fetch received follow requests. {e}")
             raise BadRequestError(f"Unable to fetch received follow requests. {e}")
 
         return [FollowRequest(**item) for item in response['Items']]
@@ -156,6 +162,7 @@ class FollowerRepository(AbstractFollowerRepository):
                 }
             )
         except ClientError as e:
+            print(f"Couldn't fetch follow request. {e}")
             raise BadRequestError(f"Couldn't fetch follow request. {e}")
 
         return 'Items' in follow_request and len(follow_request['Items']) == 1 and follow_request['Items'][0][
@@ -171,6 +178,7 @@ class FollowerRepository(AbstractFollowerRepository):
                 }
             )
         except ClientError as e:
+            print(f"Unable to retrieve user connections. {e}")
             raise BadRequestError(f"Unable to retrieve user connections. {e}")
         return [item['sort_key'].split("#")[1] for item in following_response['Items']]
 
@@ -184,6 +192,7 @@ class FollowerRepository(AbstractFollowerRepository):
                 }
             )
         except ClientError as e:
+            print(f"Unable to retrieve user connections. {e}")
             raise BadRequestError(f"Unable to retrieve user connections. {e}")
         return [item['sort_key'].split("#")[1] for item in follower_response['Items']]
 
