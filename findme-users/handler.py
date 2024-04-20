@@ -21,7 +21,7 @@ from src.UserService import UserService
 from src.FollowerService import FollowerService
 from src.entities.UserConnections import UserConnections
 from src.entities.FollowRequest import FollowRequest
-from src.entities.User import User, UserPostDTO, UserPutDTO
+from src.entities.User import  UserDTO, UserPostDTO, UserPutDTO
 from src.entities.Score import Score
 
 tracer = Tracer()
@@ -45,7 +45,7 @@ follower_service = FollowerService(follower_repository)
 @app.post("/users")
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
-def post_user(user: UserPostDTO) -> User:
+def post_user(user: UserPostDTO) -> UserDTO:
     """
         Endpoint: POST /users
         Body: {
@@ -63,7 +63,7 @@ def post_user(user: UserPostDTO) -> User:
 @app.put("/users")
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
-def update_user(user: UserPutDTO) -> User:
+def update_user(user: UserPutDTO) -> UserDTO:
     """
         Endpoint: PUT /users
         Body: {
@@ -79,7 +79,7 @@ def update_user(user: UserPutDTO) -> User:
 @app.get("/users/<user_id>")
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
-def get_user(user_id: Annotated[str, Path(lt=999)]) -> User:
+def get_user(user_id: Annotated[str, Path(lt=999)]) -> UserDTO:
     """
         Endpoint: GET /users/<user_id>
         Body: None
@@ -92,7 +92,7 @@ def get_user(user_id: Annotated[str, Path(lt=999)]) -> User:
 @app.get("/users")
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
-def get_individual_user() -> User:
+def get_individual_user() -> UserDTO:
     """
         Endpoint: GET /users
         Body: None
@@ -105,7 +105,7 @@ def get_individual_user() -> User:
 @app.post("/users/score")
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
-def post_score_to_user(score: Score) -> User:
+def post_score_to_user(score: Score) -> UserDTO:
     """
         Endpoint: POST /users/score
         Body: {
@@ -123,7 +123,7 @@ def post_score_to_user(score: Score) -> User:
 @app.get("/users/search")
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
-def get_similar_users() -> List[User]:
+def get_similar_users() -> List[UserDTO]:
     """
         Endpoint: GET /users/search
         Body: None
