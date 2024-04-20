@@ -29,16 +29,26 @@ class UserRepository(AbstractUserRepository):
 
         return self.__put_user_to_db(user)
 
-    def update_user_in_db(self, user_data: dict) -> User:
+    def update_user_in_db(self, user_id: str, user_data: dict) -> User:
+        if not self.does_user_with_user_id_exist(user_id):
+            raise NotFoundError(f"No User with user_id: {user_id} found")
+
         try:
-            user = User(**user_data)
-        except ValidationError as e:
-            raise BadRequestError(f"unable to update user with provided parameters. {e}")
+            self.table.update_item(
+                Key={
+                    'partition_key': 'USER',
+                    'username': self.get_user_by_user_id_from_db(user_id).username
+                },
+                UpdateExpression="SET first_name = :fn, last_name = :ln",
+                ExpressionAttributeValues={
+                    ':fn': user_data.first_name,
+                    ':ln': user_data.last_name
+                },
+            )
+        except ClientError as e:
+            raise BadRequestError(f"Error updating user in DynamoDB: {e}")
 
-        if not self.does_user_with_user_id_exist(user.user_id):
-            raise NotFoundError(f"No User with user_id: {user.user_id} found")
-
-        return self.__put_user_to_db(user)
+        return self.get_user_by_user_id_from_db(user_id)
 
     def get_user_by_user_id_from_db(self, user_id: str) -> User:
         response = self.table.query(

@@ -2,9 +2,10 @@ from aws_lambda_powertools.event_handler.exceptions import (
     NotFoundError,
     BadRequestError,
 )
-
-from src.entities.User import User, UserDTO
+from pydantic import ValidationError
 from typing import List
+
+from src.entities.User import User, UserDTO, UserPutDTO
 
 
 class UserService:
@@ -18,10 +19,11 @@ class UserService:
         return self.user_repository.get_user_by_user_id_from_db(user_id).to_dto()
 
     def update_user(self, data: dict, user_id: str) -> UserDTO:
-        return (self.user_repository.update_user_in_db({**data,
-                                                        "user_id": user_id,
-                                                        "username": self.user_repository
-                                                       .get_user_by_user_id_from_db(user_id).username}).to_dto())
+        try:
+            user_put_dto = UserPutDTO(**data)
+        except ValidationError as e:
+            raise BadRequestError(f"unable to update user with provided parameters. {e}")
+        return self.user_repository.update_user_in_db(user_id, user_put_dto).to_dto()
 
     def write_guessing_score_to_user(self, user_id: str, location_riddle_id: str, score: int) -> UserDTO:
         try:
