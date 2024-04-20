@@ -98,6 +98,24 @@ def get_individual_user():
     return user_service.get_user(__get_id(app))
 
 
+@app.post("/users/score")
+@tracer.capture_method
+@authorizer.requires_auth(app=app)
+def rate_location_riddle():
+    """
+        Endpoint: POST /users/score
+        Body: {
+            "score": <score_integer>
+            "location_riddle_id": <location_riddle_id>
+        }
+        Description: Write achieved score to the user.
+        Returns: The user with the updated score avg.
+    """
+    return user_service.write_guessing_score_to_user(__get_id(app),
+                                                     __get_attribute("location_riddle_id", app),
+                                                     __get_attribute("score", app),)
+
+
 @app.get("/users/search")
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
@@ -117,6 +135,12 @@ def get_similar_users():
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
 def follow_user(user_id: Annotated[int, Path(lt=999)]):
+    """
+        Endpoint: PUT /users/{user_id}/follow
+        Body: None
+        Description: Send a follow request to the user with the ID provided in the path
+        Returns: The created FollowRequest with the status 'pending'
+    """
     requester_id = __get_id(app)
     if not user_service.does_user_with_user_id_exist(user_id):
         raise BadRequestError(f"User with user id {user_id} does not exist!")
@@ -129,17 +153,19 @@ def follow_user(user_id: Annotated[int, Path(lt=999)]):
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
 def update_follow_user(requester_id: Annotated[int, Path(lt=999)]):
+    """
+        Endpoint: PATCH /users/{user_id}/follow?action={accept | decline}
+        Body: None
+        Description: Accept or decline the follow request by the user provided in the path
+        Returns: A json confirming the accepting or declining of the follow request
+    """
     requestee_id = __get_id(app)
     action = app.current_event.query_string_parameters.get("action")
-
-    print(f"Requester: ${requester_id}")
-    print(f"Requestee: ${requestee_id}")
-
 
     if action == "accept":
         return follower_service.accept_follow_request(requester_id, requestee_id)
     if action == "decline":
-        return follower_service.deny_follow_request(requester_id, requestee_id)
+        return follower_service.decline_follow_request(requester_id, requestee_id)
     else:
         raise BadRequestError(f"Action {action} does not exist, please provide a valid value (accept/decline)")
 
@@ -148,6 +174,12 @@ def update_follow_user(requester_id: Annotated[int, Path(lt=999)]):
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
 def get_received_follow_requests():
+    """
+        Endpoint: GET /users/follow
+        Body: None
+        Description: Searches for all pending follow requests based on the user's user token
+        Returns: A list of pending FollowRequest objects
+    """
     return follower_service.get_received_follow_requests(__get_id(app))
 
 
@@ -155,6 +187,12 @@ def get_received_follow_requests():
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
 def get_user_connections(user_id: Annotated[int, Path(lt=999)]):
+    """
+        Endpoint: GET /users/user_id/follow
+        Body: None
+        Description: Retrieves all connections (followers, following) of a specific user
+        Returns: Dictionary containing one list for followers and one for following. Each list contains of 0-many user objects.
+    """
     connections = follower_service.get_user_connections(user_id)
     user_connections = UserConnections()
 
@@ -174,6 +212,14 @@ def __get_id(app):
     if '|' in user_id:
         user_id = user_id.split("|")[1]
     return user_id
+
+
+def __get_attribute(attribute, app):
+    try:
+        print(f"{attribute} {app.current_event.json_body[attribute]}")
+        return app.current_event.json_body[attribute]
+    except KeyError:
+        raise BadRequestError(f"Missing attribute {attribute} in request body")
 
 
 # You can continue to use other utilities just as before

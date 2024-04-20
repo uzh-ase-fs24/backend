@@ -8,12 +8,16 @@ class User:
         self.first_name = first_name
         self.last_name = last_name
 
-    def dict(self):
+    def dict(self, exclude=set()):
         return {
-            "user_id": self.user_id,
-            "username": self.username,
-            "first_name": self.first_name,
-            "last_name": self.last_name,
+            attr:
+                [item.dict() if hasattr(item, 'dict') and callable(item.dict) else item for item in value]
+                if isinstance(value, list)
+                else value.dict()
+                if hasattr(value, 'dict') and callable(value.dict)
+                else value
+            for attr, value in self.__dict__.items()
+            if attr not in exclude
         }
 
 

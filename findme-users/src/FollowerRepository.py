@@ -85,7 +85,7 @@ class FollowerRepository(AbstractFollowerRepository):
             print(e)
             raise BadRequestError(f"Unable to accept follow request. {e}")
 
-    def deny_follow_request(self, requester_id: str, requestee_id: str):
+    def decline_follow_request(self, requester_id: str, requestee_id: str):
         try:
             # Update the follow request status to 'declined'
             response = self.table.update_item(

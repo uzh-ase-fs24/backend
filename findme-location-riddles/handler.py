@@ -63,9 +63,16 @@ def post_guess_to_location_riddle(location_riddle_id: Annotated[int, Path(lt=999
             "guess": <coordinate_list> e.g. [12.345, 67.890]
         }
         Description: Submits a guess for a specific location riddle.
-        Returns: The updated location riddle with the new guess.
+        Returns: The updated location riddle with the new guess
+            and the distance to the correct location and the achieved score in the format:
+            {
+            "location_riddle": {<location_riddle>},
+            "guess_result": {"distance": <distance>, "received_score": <score>}
+            }
     """
-    return location_riddles_service.guess_location_riddle(location_riddle_id, __get_id(app),
+    return location_riddles_service.guess_location_riddle(app.current_event,
+                                                          location_riddle_id,
+                                                          __get_id(app),
                                                           __get_attribute("guess", app))
 
 
@@ -137,12 +144,12 @@ def get_location_riddles_by_location_riddle_id(location_riddle_id: Annotated[int
     return location_riddles_service.get_location_riddle(location_riddle_id)
 
 
-@app.patch("/location-riddles/<location_riddle_id>/rate")
+@app.post("/location-riddles/<location_riddle_id>/rate")
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
 def rate_location_riddle(location_riddle_id: Annotated[int, Path(lt=999)]):
     """
-        Endpoint: PATCH /location-riddles/<location_riddle_id>/rate
+        Endpoint: POST /location-riddles/<location_riddle_id>/rate
         Body: {
             "rating": <rating_integer>
         }

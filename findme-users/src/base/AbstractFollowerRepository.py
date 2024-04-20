@@ -7,7 +7,7 @@ class AbstractFollowerRepository(ABC):
         pass
 
     @abstractmethod
-    def deny_follow_request(self, requester_id: str, requestee_id: str):
+    def decline_follow_request(self, requester_id: str, requestee_id: str):
         pass
 
     @abstractmethod

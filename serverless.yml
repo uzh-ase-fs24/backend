@@ -83,6 +83,11 @@ functions:
           cors:
             origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
       - http:
+          path: /users/score
+          method: post
+          cors:
+            origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
+      - http:
           path: /users
           method: put
           cors:
@@ -196,7 +201,7 @@ functions:
             origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
       - http:
           path: /location-riddles/{location_riddle_id}/rate
-          method: patch
+          method: post
           cors:
             origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
       - http:

@@ -6,6 +6,7 @@ from src.test.MockLocationRiddlesRepository import MockLocationRiddlesRepository
 
 class TestLocationRiddleService(unittest.TestCase):
     def setUp(self):
+        self.maxDiff = None
         self.image_bucket_repository = MockImageBucketRepository()
         self.location_riddle_repository = MockLocationRiddlesRepository()
         self.location_riddles_service = LocationRiddlesService(self.location_riddle_repository, self.image_bucket_repository)
@@ -89,11 +90,15 @@ class TestLocationRiddleService(unittest.TestCase):
             self.location_riddles_service.guess_location_riddle("mock_location_riddle_id",
                                                                 "mock_user2_id", [0.0, 0.0]),
             {
-                "location_riddle_id": "mock_location_riddle_id",
-                "user_id": "mock_user_id",  "location": [0.0, 0.0], "comments": [],
-                "guesses": [{'guess': [0.0, 0.0], 'user_id': 'mock_user2_id'}],
-                "created_at": 1234567890, "average_rating": None
-            })
+                "location_riddle": {
+                    "location_riddle_id": "mock_location_riddle_id",
+                    "user_id": "mock_user_id",  "location": [0.0, 0.0], "comments": [],
+                    "guesses": [{'guess': [0.0, 0.0], 'user_id': 'mock_user2_id'}],
+                    "created_at": 1234567890, "average_rating": None
+                },
+                "guess_result": {"distance": 0.0, "received_score": 10000.0}
+            }
+        )
 
         # Test that the user can not guess a location riddle twice
         with self.assertRaises(Exception):

@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "start": "cd .\\infrastructure\\apigateway\\ && sls deploy -s local-no-mount && cd ../.. && sls deploy -s local-no-mount"
+    "start": "cd ./infrastructure/apigateway/ && sls deploy -s local-no-mount && cd ../.. && sls deploy -s local-no-mount"
   },
   "devDependencies": {
     "serverless-localstack": "^1.2.0",

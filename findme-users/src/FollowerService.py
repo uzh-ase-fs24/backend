@@ -9,7 +9,6 @@ from aws_lambda_powertools.event_handler.exceptions import (
 )
 
 
-
 class FollowerService:
     def __init__(self, follower_repository):
         self.follower_repository = follower_repository
@@ -34,14 +33,14 @@ class FollowerService:
     def accept_follow_request(self, requester_id, requestee_id):
         if self.follower_repository.does_follow_request_exist(requester_id, requestee_id):
             self.follower_repository.accept_follow_request(requester_id, requestee_id)
-            return { "result": f"Follow request by {requester_id} accepted!"}
+            return {"result": f"Follow request by {requester_id} accepted!"}
         else:
             raise BadRequestError(f"The given follow request does not exist!")
 
-    def deny_follow_request(self, requester_id, requestee_id):
+    def decline_follow_request(self, requester_id, requestee_id):
         if self.follower_repository.does_follow_request_exist(requester_id, requestee_id):
-            self.follower_repository.deny_follow_request(requester_id, requestee_id)
-            return { "result": f"Follow request by {requester_id} declined!"}
+            self.follower_repository.decline_follow_request(requester_id, requestee_id)
+            return {"result": f"Follow request by {requester_id} declined!"}
         else:
             raise BadRequestError(f"The given follow request does not exist!")
 
@@ -60,4 +59,3 @@ class FollowerService:
         followers = [item['sort_key'].split("#")[1] for item in followers_response['Items']]
 
         return {'following': following, 'followers': followers}
-
