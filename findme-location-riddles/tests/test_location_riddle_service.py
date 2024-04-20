@@ -87,7 +87,7 @@ class TestLocationRiddleService(unittest.TestCase):
                                                                 "mock_user_id", [0.0, 0.0])
 
         self.assertEqual(
-            self.location_riddles_service.guess_location_riddle("mock_location_riddle_id",
+            self.location_riddles_service.guess_location_riddle("event", "mock_location_riddle_id",
                                                                 "mock_user2_id", [0.0, 0.0]),
             {
                 "location_riddle": {

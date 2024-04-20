@@ -13,10 +13,10 @@ class TestUserService(unittest.TestCase):
         user_data = {"username": "testuser", "first_name": "Test", "last_name": "User"}
         user_id = "1"
         result = self.user_service.post_user(user_data, user_id)
-        self.assertEqual(result["username"], "testuser")
-        self.assertEqual(result["first_name"], "Test")
-        self.assertEqual(result["last_name"], "User")
-        self.assertEqual(result["user_id"], "1")
+        self.assertEqual(result.username, "testuser")
+        self.assertEqual(result.first_name, "Test")
+        self.assertEqual(result.last_name, "User")
+        self.assertEqual(result.user_id, "1")
 
         # Test incorrect input
         user_data = {"username": "testuser_2", "first_name": "Test", "last_name": "User"}
@@ -37,7 +37,7 @@ class TestUserService(unittest.TestCase):
         # Test correct input
         user_id = "1"
         result = self.user_service.get_user(user_id)
-        self.assertEqual(result["user_id"], "1")
+        self.assertEqual(result.user_id, "1")
 
         # Test incorrect input
         user_id = "2"
@@ -54,7 +54,7 @@ class TestUserService(unittest.TestCase):
         user_data = {"username": "testuser", "first_name": "Updated", "last_name": "User"}
         user_id = "1"
         result = self.user_service.update_user(user_data, user_id)
-        self.assertEqual(result["first_name"], "Updated")
+        self.assertEqual(result.first_name, "Updated")
 
         # Test incorrect input
         user_id = "2"
@@ -80,7 +80,7 @@ class TestUserService(unittest.TestCase):
         username_prefix = "jane"
         result = self.user_service.get_similar_users(username_prefix, user_id)
         self.assertEqual(len(result), 1)
-        self.assertEqual(result[0]["username"], "janedoe")
+        self.assertEqual(result[0].username, "janedoe")
 
         # Test incorrect input
         username_prefix = "nonexistent"
