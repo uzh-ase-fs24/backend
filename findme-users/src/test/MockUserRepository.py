@@ -6,8 +6,7 @@ class MockUserRepository(AbstractUserRepository):
     def __init__(self):
         self.users = []
 
-    def post_user_to_db(self, user_data):
-        user = User(**user_data)
+    def post_user_to_db(self, user):
         if self.does_user_with_user_id_exist(user.user_id):
             raise ValueError(f"User with id {user.user_id} already has an account!")
         if self.__does_user_with_username_exist(user.username):
@@ -15,13 +14,13 @@ class MockUserRepository(AbstractUserRepository):
         self.users.append(user)
         return user
 
-    def update_user_in_db(self, user_data):
-        user = User(**user_data)
+    def update_user_in_db(self, user_id, user_put_dto):
         for i, u in enumerate(self.users):
-            if u.user_id == user.user_id:
-                self.users[i] = user
-                return user
-        raise ValueError(f"No User with user_id: {user.user_id} found")
+            if u.user_id == user_id:
+                self.users[i].first_name = user_put_dto.first_name
+                self.users[i].last_name = user_put_dto.last_name
+                return self.users[i]
+        raise ValueError(f"No User with user_id: {user_id} found")
 
     def get_user_by_user_id_from_db(self, user_id):
         for user in self.users:

@@ -51,7 +51,7 @@ class TestUserService(unittest.TestCase):
         _ = self.user_service.post_user(user_data, user_id)
 
         # Test correct input
-        user_data = {"username": "testuser", "first_name": "Updated", "last_name": "User"}
+        user_data = {"first_name": "Updated", "last_name": "User"}
         user_id = "1"
         result = self.user_service.update_user(user_data, user_id)
         self.assertEqual(result.first_name, "Updated")

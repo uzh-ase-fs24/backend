@@ -16,12 +16,7 @@ class UserRepository(AbstractUserRepository):
         self.dynamodb = boto3.resource('dynamodb', region_name='eu-central-2')
         self.table = self.dynamodb.Table('usersTable')
 
-    def post_user_to_db(self, user_data: dict) -> User:
-        try:
-            user = User(**user_data)
-        except ValidationError as e:
-            raise BadRequestError(f"unable to create user with provided parameters. {e}")
-
+    def post_user_to_db(self, user: User) -> User:
         if self.does_user_with_user_id_exist(user.user_id):
             raise BadRequestError(f"User with id {user.user_id} already has an account!")
         if self.__does_user_with_username_exist(user.username):
@@ -46,6 +41,7 @@ class UserRepository(AbstractUserRepository):
                 },
             )
         except ClientError as e:
+            print(f"Error updating user in DynamoDB: {e}")
             raise BadRequestError(f"Error updating user in DynamoDB: {e}")
 
         return self.get_user_by_user_id_from_db(user_id)
@@ -62,11 +58,12 @@ class UserRepository(AbstractUserRepository):
         try:
             return User(**response["Items"][0])
         except ValidationError as e:
+            print(f"unable to create user with provided parameters. {e}")
             raise BadRequestError(f"unable to create user with provided parameters. {e}")
 
     def get_users_by_username_prefix(self, username_prefix: str) -> [User]:
         response = self.table.query(
-            ProjectionExpression="user_id, username, first_name, last_name",
+            ProjectionExpression="user_id, username, first_name, last_name, scores",
             KeyConditionExpression=Key('partition_key').eq("USER") & Key('username').begins_with(username_prefix)
         )
         items = response["Items"]
@@ -82,16 +79,12 @@ class UserRepository(AbstractUserRepository):
         try:
             users = [User(**item) for item in items]
         except ValidationError as e:
+            print(f"unable to create user with provided parameters. {e}")
             raise BadRequestError(f"unable to create user with provided parameters. {e}")
 
         return users
 
-    def update_user_score_in_db(self, user_id: str, location_riddle_id: str, score: int) -> User:
-        try:
-            score = Score(location_riddle_id=location_riddle_id, score=score)
-        except ValidationError as e:
-            raise BadRequestError(f"unable to update the user with provided parameters. {e}")
-
+    def update_user_score_in_db(self, user_id: str, score: Score) -> User:
         try:
             self.table.update_item(
                 Key={
@@ -128,6 +121,7 @@ class UserRepository(AbstractUserRepository):
             user['partition_key'] = "USER"
             self.table.put_item(Item=user)
         except ClientError as e:
+            print(f"Error saving user to DynamoDB: {e}")
             raise BadRequestError(f"Error saving user to DynamoDB: {e}")
 
         return User(**user)

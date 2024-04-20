@@ -6,6 +6,7 @@ from pydantic import ValidationError
 from typing import List
 
 from src.entities.User import User, UserDTO, UserPutDTO
+from src.entities.Score import Score
 
 
 class UserService:
@@ -13,7 +14,13 @@ class UserService:
         self.user_repository = user_repository
 
     def post_user(self, data, user_id: str) -> UserDTO:
-        return self.user_repository.post_user_to_db({**data, "user_id": user_id}).to_dto()
+        try:
+            user = User(**{**data, "user_id": user_id})
+        except ValidationError as e:
+            print(f"unable to create user with provided parameters. {e}")
+            raise BadRequestError(f"unable to create user with provided parameters. {e}")
+
+        return self.user_repository.post_user_to_db(user).to_dto()
 
     def get_user(self, user_id: str) -> UserDTO:
         return self.user_repository.get_user_by_user_id_from_db(user_id).to_dto()
@@ -22,15 +29,23 @@ class UserService:
         try:
             user_put_dto = UserPutDTO(**data)
         except ValidationError as e:
+            print(f"unable to update user with provided parameters. {e}")
             raise BadRequestError(f"unable to update user with provided parameters. {e}")
         return self.user_repository.update_user_in_db(user_id, user_put_dto).to_dto()
 
     def write_guessing_score_to_user(self, user_id: str, location_riddle_id: str, score: int) -> UserDTO:
         try:
+            score = Score(location_riddle_id=location_riddle_id, score=score)
+        except ValidationError as e:
+            print(f"unable to update the user with provided parameters. {e}")
+            raise BadRequestError(f"unable to update the user with provided parameters. {e}")
+
+        try:
             updated_user = self.user_repository.update_user_score_in_db(
-                user_id, location_riddle_id, score
+                user_id, score
             )
         except Exception as e:
+            print(e)
             raise BadRequestError(e)
 
         return updated_user.to_dto()
