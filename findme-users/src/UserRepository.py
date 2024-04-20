@@ -76,7 +76,7 @@ class UserRepository(AbstractUserRepository):
 
         return users
 
-    def update_user_score_in_db(self, user_id, location_riddle_id, score):
+    def update_user_score_in_db(self, user_id: str, location_riddle_id: str, score: int) -> User:
         try:
             score = Score(location_riddle_id=location_riddle_id, score=score)
         except ValidationError as e:

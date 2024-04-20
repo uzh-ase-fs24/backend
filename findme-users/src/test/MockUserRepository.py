@@ -1,24 +1,5 @@
 from src.base.AbstractUserRepository import AbstractUserRepository
-
-
-class User:
-    def __init__(self, user_id, username, first_name, last_name):
-        self.user_id = user_id
-        self.username = username
-        self.first_name = first_name
-        self.last_name = last_name
-
-    def dict(self, exclude=set()):
-        return {
-            attr:
-                [item.dict() if hasattr(item, 'dict') and callable(item.dict) else item for item in value]
-                if isinstance(value, list)
-                else value.dict()
-                if hasattr(value, 'dict') and callable(value.dict)
-                else value
-            for attr, value in self.__dict__.items()
-            if attr not in exclude
-        }
+from src.entities.User import User
 
 
 class MockUserRepository(AbstractUserRepository):
@@ -50,6 +31,9 @@ class MockUserRepository(AbstractUserRepository):
 
     def get_users_by_username_prefix(self, username_prefix):
         return [user for user in self.users if user.username.startswith(username_prefix)]
+
+    def update_user_score_in_db(self, user_id, location_riddle_id, score):
+        return self.get_user_by_user_id_from_db(user_id)
 
     def does_user_with_user_id_exist(self, user_id):
         return any(user.user_id == user_id for user in self.users)

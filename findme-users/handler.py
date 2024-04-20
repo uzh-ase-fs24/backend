@@ -22,6 +22,7 @@ from src.FollowerService import FollowerService
 from src.entities.UserConnections import UserConnections
 from src.entities.FollowRequest import FollowRequest
 from src.entities.User import User, UserPostDTO, UserPutDTO
+from src.entities.Score import Score
 
 tracer = Tracer()
 logger = Logger()
@@ -104,7 +105,7 @@ def get_individual_user() -> User:
 @app.post("/users/score")
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
-def rate_location_riddle():
+def post_score_to_user(score: Score) -> User:
     """
         Endpoint: POST /users/score
         Body: {
@@ -213,7 +214,6 @@ def __get_id(app):
 
 def __get_attribute(attribute, app):
     try:
-        print(f"{attribute} {app.current_event.json_body[attribute]}")
         return app.current_event.json_body[attribute]
     except KeyError:
         raise BadRequestError(f"Missing attribute {attribute} in request body")

@@ -23,15 +23,15 @@ class UserService:
                                                         "username": self.user_repository
                                                        .get_user_by_user_id_from_db(user_id).username}))
 
-    def write_guessing_score_to_user(self, user_id, location_riddle_id, score):
+    def write_guessing_score_to_user(self, user_id: str, location_riddle_id: str, score: int) -> User:
         try:
-            response = self.user_repository.update_user_score_in_db(
+            updated_user = self.user_repository.update_user_score_in_db(
                 user_id, location_riddle_id, score
             )
         except Exception as e:
             raise BadRequestError(e)
 
-        return response.dict(exclude={"scores"})
+        return updated_user
 
     def get_similar_users(self, username_prefix: str, user_id: str) -> List[User]:
         users = list(filter(lambda user: user.user_id != user_id,
