@@ -8,11 +8,11 @@ class MockImageBucketRepository(AbstractImageBucketRepository):
             "Content-Type": "image/png"
         }
 
-    def post_image_to_s3(self, image_base64, key):
+    def post_image_to_s3(self, image_base64: str, key: str):
         return {"message": "Mock image upload successful"}
 
-    def get_image_from_s3(self, key):
+    def get_image_from_s3(self, key: str):
         return self.mock_data
 
-    def delete_image_from_s3(self, key):
+    def delete_image_from_s3(self, key: str):
         return {"message": "Mock image delete successful"}

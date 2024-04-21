@@ -57,7 +57,7 @@ def post_location_riddles():
 @app.post("/location-riddles/<location_riddle_id>/guess")
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
-def post_guess_to_location_riddle(location_riddle_id: Annotated[int, Path(lt=999)]):
+def post_guess_to_location_riddle(location_riddle_id: Annotated[str, Path()]):
     """
         Endpoint: POST /location-riddles/<location_riddle_id>/guess
         Body: {
@@ -80,7 +80,7 @@ def post_guess_to_location_riddle(location_riddle_id: Annotated[int, Path(lt=999
 @app.post("/location-riddles/<location_riddle_id>/comment")
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
-def post_comment_to_location_riddle(location_riddle_id: Annotated[int, Path(lt=999)]):
+def post_comment_to_location_riddle(location_riddle_id: Annotated[str, Path()]):
     """
         Endpoint: POST /location-riddles/<location_riddle_id>/comment
         Body: {
@@ -109,7 +109,7 @@ def get_location_riddles():
 @app.get("/location-riddles/user/<user_id>")
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
-def get_location_riddles_by_user(user_id: Annotated[int, Path(lt=999)]):
+def get_location_riddles_by_user(user_id: Annotated[str, Path()]):
     """
         Endpoint: GET /location-riddles/user/<user_id>
         Body: None
@@ -135,7 +135,7 @@ def get_location_riddles_by_user():
 @app.get("/location-riddles/<location_riddle_id>")
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
-def get_location_riddles_by_location_riddle_id(location_riddle_id: Annotated[int, Path(lt=999)]):
+def get_location_riddles_by_location_riddle_id(location_riddle_id: Annotated[str, Path()]):
     """
         Endpoint: GET /location-riddles/<location_riddle_id>
         Body: None
@@ -148,7 +148,7 @@ def get_location_riddles_by_location_riddle_id(location_riddle_id: Annotated[int
 @app.post("/location-riddles/<location_riddle_id>/rate")
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
-def rate_location_riddle(location_riddle_id: Annotated[int, Path(lt=999)]):
+def rate_location_riddle(location_riddle_id: Annotated[str, Path()]):
     """
         Endpoint: POST /location-riddles/<location_riddle_id>/rate
         Body: {
@@ -164,7 +164,7 @@ def rate_location_riddle(location_riddle_id: Annotated[int, Path(lt=999)]):
 @app.delete("/location-riddles/<location_riddle_id>")
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
-def delete_location_riddles_by_location_riddle_id(location_riddle_id: Annotated[int, Path(lt=999)]):
+def delete_location_riddles_by_location_riddle_id(location_riddle_id: Annotated[str, Path()]):
     """
         Endpoint: DELETE /location-riddles/<location_riddle_id>
         Body: None

@@ -34,11 +34,10 @@ class LocationRiddle(BaseModel):
         #     raise ValidationError('Longitude should be between -180 and 180')
         return v
 
-    def to_dto(self):
+    def to_dto(self, user_id: str):
+        if any(guess.user_id == user_id for guess in self.guesses):
+            return SolvedLocationRiddleDTO(**self.dict())
         return LocationRiddleDTO(**self.dict())
-
-    def to_solved_dto(self):
-        return SolvedLocationRiddleDTO(**self.dict())
 
 
 class SolvedLocationRiddleDTO(BaseModel):

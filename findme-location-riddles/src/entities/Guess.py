@@ -11,8 +11,9 @@ class Guess(BaseModel):
     def validate_coordinates(cls, v):
         if len(v) != 2:
             raise ValidationError('Coordinate should contain 2 values: latitude and longitude')
-        if not (-90 <= v[0] <= 90):
-            raise ValidationError('Latitude should be between -90 and 90')
-        if not (-180 <= v[1] <= 180):
-            raise ValidationError('Longitude should be between -180 and 180')
+        # ToDo: implement validation for latitude and longitude for coordinates used in frontend
+        # if not (-90 <= v[0] <= 90):
+        #     raise ValidationError('Latitude should be between -90 and 90')
+        # if not (-180 <= v[1] <= 180):
+        #     raise ValidationError('Longitude should be between -180 and 180')
         return v

@@ -190,7 +190,7 @@ def get_received_follow_requests() -> List[FollowRequest]:
 @app.get("/users/<user_id>/follow")
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
-def get_user_connections(user_id: Annotated[str, Path(lt=999)]) -> UserConnections:
+def get_user_connections(user_id: Annotated[str, Path()]) -> UserConnections:
     """
         Endpoint: GET /users/user_id/follow
         Body: None

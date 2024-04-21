@@ -19,26 +19,29 @@ class TestLocationRiddleService(unittest.TestCase):
             {"message": "Mock image upload successful"})
 
     def test_get_location_riddle(self):
-        self.assertEqual(
-            self.location_riddles_service.get_location_riddle("mock_location_riddle_id"),
-            {
-                "location_riddle_id": "mock_location_riddle_id",
-                "user_id": "mock_user_id", "location": [0.0, 0.0], "comments": [],
-                "guesses": [], "created_at": 1234567890, "average_rating": None,
-                "location_riddle_image": {"image_base64": "mock_image_base64",
-                                          "Content-Type": "image/png"}
-            })
+        location_riddle = self.location_riddles_service.get_location_riddle("mock_location_riddle_id")
+
+        self.assertEqual(location_riddle.location_riddle_id, "mock_location_riddle_id")
+        self.assertEqual(location_riddle.user_id, "mock_user_id")
+        self.assertEqual(location_riddle.location, [0.0, 0.0])
+        self.assertEqual(location_riddle.comments, [])
+        self.assertEqual(location_riddle.guesses, [])
+        self.assertEqual(location_riddle.average_rating, None)
+        self.assertEqual(location_riddle.location_riddle_image.image_base64, "mock_image_base64")
+        self.assertEqual(location_riddle.location_riddle_image.Content_Type, "image/png")
 
     def test_get_location_riddles_for_user(self):
-        self.assertEqual(
-            self.location_riddles_service.get_location_riddles_for_user("mock_user_id"),
-            [{
-                "location_riddle_id": "mock_location_riddle_id",
-                "user_id": "mock_user_id",  "location": [0.0, 0.0], "comments": [],
-                "guesses": [], "created_at": 1234567890, "average_rating": None,
-                "location_riddle_image": {"image_base64": "mock_image_base64",
-                                          "Content-Type": "image/png"}
-            }])
+        location_riddles = self.location_riddles_service.get_location_riddles_for_user("mock_user_id")
+        location_riddle = location_riddles[0]  # assuming there is at least one location riddle
+
+        self.assertEqual(location_riddle.location_riddle_id, "mock_location_riddle_id")
+        self.assertEqual(location_riddle.user_id, "mock_user_id")
+        self.assertEqual(location_riddle.location, [0.0, 0.0])
+        self.assertEqual(location_riddle.comments, [])
+        self.assertEqual(location_riddle.guesses, [])
+        self.assertEqual(location_riddle.average_rating, None)
+        self.assertEqual(location_riddle.location_riddle_image.image_base64, "mock_image_base64")
+        self.assertEqual(location_riddle.location_riddle_image.Content_Type, "image/png")
 
     def test_rate_location_riddle(self):
         # Test that the user can not rate its own location riddle
