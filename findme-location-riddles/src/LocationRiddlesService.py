@@ -32,6 +32,7 @@ class LocationRiddlesService:
         try:
             location_riddle = LocationRiddle(**location_riddle_data)
         except ValidationError as e:
+            print(f"unable to update location_riddle with provided parameters. {e}")
             raise BadRequestError(
                 f"unable to update location_riddle with provided parameters. {e}"
             )
@@ -39,7 +40,8 @@ class LocationRiddlesService:
         try:
             self.location_riddle_repository.write_location_riddle_to_db(location_riddle)
         except Exception as e:
-            raise BadRequestError(f"{e}")
+            print(e)
+            raise BadRequestError(e)
 
         image_path = f"location-riddles/{location_riddle.location_riddle_id}.png"
         return self.image_bucket_repository.post_image_to_s3(image_base64, image_path)
@@ -101,6 +103,7 @@ class LocationRiddlesService:
         try:
             rating = Rating(user_id=user_id, rating=rating)
         except ValidationError as e:
+            print(f"unable to update location_riddle with provided parameters. {e}")
             raise BadRequestError(f"unable to update location_riddle with provided parameters. {e}")
 
         try:
@@ -108,7 +111,8 @@ class LocationRiddlesService:
                 location_riddle_id, rating
             )
         except Exception as e:
-            raise BadRequestError(f"{e}")
+            print(e)
+            raise BadRequestError(e)
 
         return response.dict(exclude={"ratings"})
 
@@ -127,6 +131,7 @@ class LocationRiddlesService:
         try:
             guess = Guess(user_id=user_id, guess=[Decimal(str(coord)) for coord in guess])
         except ValidationError as e:
+            print(f"unable to update location_riddle with provided parameters. {e}")
             raise BadRequestError(f"unable to update location_riddle with provided parameters. {e}")
 
         try:
@@ -134,7 +139,8 @@ class LocationRiddlesService:
                 location_riddle_id, guess
             )
         except Exception as e:
-            raise BadRequestError(f"{e}")
+            print(e)
+            raise BadRequestError(e)
 
         score, distance = calculate_score_and_distance(
             map(float, tuple(location_riddle.location)),
@@ -155,6 +161,7 @@ class LocationRiddlesService:
         try:
             comment = Comment(user_id=user_id, comment=comment)
         except ValidationError as e:
+            print(f"unable to update location_riddle with provided parameters. {e}")
             raise BadRequestError(f"unable to update location_riddle with provided parameters. {e}")
 
         try:
@@ -162,7 +169,8 @@ class LocationRiddlesService:
                 location_riddle_id, comment
             )
         except Exception as e:
-            raise BadRequestError(f"{e}")
+            print(e)
+            raise BadRequestError(e)
 
         return response.dict(exclude={"ratings"})
 

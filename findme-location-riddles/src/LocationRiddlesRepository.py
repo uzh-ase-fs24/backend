@@ -44,6 +44,7 @@ class LocationRiddlesRepository(AbstractLocationRiddlesRepository):
         try:
             location_riddles = [LocationRiddle(**item) for item in items]
         except ValidationError as e:
+            print(f"Unable to read Data from DB {e}")
             raise BadRequestError(f"Unable to read Data from DB {e}")
 
         return location_riddles
@@ -58,6 +59,7 @@ class LocationRiddlesRepository(AbstractLocationRiddlesRepository):
         try:
             location_riddle = LocationRiddle(**response["Item"])
         except ValidationError as e:
+            print(f"Unable to read Data from DB {e}")
             raise BadRequestError(f"Unable to read Data from DB {e}")
 
         return location_riddle
