@@ -198,11 +198,14 @@ def get_user_connections(user_id: Annotated[str, Path()]) -> UserConnections:
         Returns: Dictionary containing one list for followers and one for following. Each list contains of 0-many user objects.
     """
     connections_ids = follower_service.get_user_connections(user_id)
-    user_connections = UserConnections(
-        followers=[user_service.get_user(follower) for follower in connections_ids['followers']],
-        following=[user_service.get_user(following) for following in connections_ids['following']]
+    followers = [user_service.get_user(follower) for follower in
+                 connections_ids.followers] if connections_ids.followers else []
+    following = [user_service.get_user(following) for following in
+                 connections_ids.following] if connections_ids.following else []
+    return UserConnections(
+        followers=followers,
+        following=following
     )
-    return user_connections
 
 
 def __get_id(app):

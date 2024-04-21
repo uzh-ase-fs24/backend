@@ -182,7 +182,7 @@ class FollowerRepository(AbstractFollowerRepository):
             raise BadRequestError(f"Unable to retrieve user connections. {e}")
         return [item['sort_key'].split("#")[1] for item in following_response['Items']]
 
-    def __get_followers_ids(self, user_id: str) -> list[int]:
+    def __get_followers_ids(self, user_id: str) -> list[str]:
         try:
             follower_response = self.table.query(
                 KeyConditionExpression="partition_key = :partition_key AND begins_with(sort_key, :user_id)",
