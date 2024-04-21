@@ -80,12 +80,12 @@ class LocationRiddlesService:
         following_users = self.__get_following_users_list(event, user_id)
 
         response = []
-        for user_id in following_users:
+        for following_user in following_users:
             try:
-                response.extend(self.get_location_riddles_for_user(user_id["user_id"]))
+                response.extend(self.get_location_riddles_for_user(user_id=following_user["user_id"], requester_id=user_id))
             except NotFoundError:
                 continue
-        return sorted(response, key=lambda riddle: riddle.timestamp, reverse=True)
+        return sorted(response, key=lambda riddle: riddle.created_at, reverse=True)
 
     def rate_location_riddle(self, location_riddle_id: str, user_id: str, rating: int) -> Union[LocationRiddleDTO, SolvedLocationRiddleDTO]:
         location_riddle = self.location_riddle_repository.get_location_riddle_by_location_riddle_id_from_db(
