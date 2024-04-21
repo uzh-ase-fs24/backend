@@ -46,7 +46,7 @@ class LocationRiddlesService:
         image_path = f"location-riddles/{location_riddle.location_riddle_id}.png"
         return self.image_bucket_repository.post_image_to_s3(image_base64, image_path)
 
-    def get_location_riddle(self, location_riddle_id: str) -> dict:
+    def get_location_riddle(self, location_riddle_id: str, user_id: str) -> Union[LocationRiddleDTO, SolvedLocationRiddleDTO]:
         # TODO: check if requesting user is following the user_id
         location_riddle = self.location_riddle_repository.get_location_riddle_by_location_riddle_id_from_db(
             location_riddle_id
@@ -55,9 +55,12 @@ class LocationRiddlesService:
         key = f"location-riddles/{location_riddle.location_riddle_id}.png"
         location_riddle_image = self.image_bucket_repository.get_image_from_s3(key)
 
-        return location_riddle.dict(exclude={"ratings"}) | {"location_riddle_image": location_riddle_image}
+        location_riddle_dto = location_riddle.to_dto(user_id=user_id)
+        location_riddle_dto.image_base64 = location_riddle_image
 
-    def get_location_riddles_for_user(self, user_id: str) -> list[dict]:
+        return location_riddle_dto
+
+    def get_location_riddles_for_user(self, user_id: str, requester_id: str) -> list[Union[LocationRiddleDTO, SolvedLocationRiddleDTO]]:
         # TODO: check if requesting user is following the user_id
         location_riddles = (
             self.location_riddle_repository.get_all_location_riddles_by_user_id(user_id)
@@ -67,17 +70,13 @@ class LocationRiddlesService:
                 f"No location riddles for user with user_id: {user_id} found"
             )
 
-        response = []
+        location_riddles = [location_riddle.to_dto(requester_id) for location_riddle in location_riddles]
         for location_riddle in location_riddles:
             key = f"location-riddles/{location_riddle.location_riddle_id}.png"
-            location_riddle_image = self.image_bucket_repository.get_image_from_s3(key)
-            response.append(
-                location_riddle.dict(exclude={"ratings"})
-                | {"location_riddle_image": location_riddle_image}
-            )
-        return response
+            location_riddle.image_base64 = self.image_bucket_repository.get_image_from_s3(key)
+        return location_riddles
 
-    def get_location_riddles_feed(self, event, user_id: str) -> list[dict]:
+    def get_location_riddles_feed(self, event, user_id: str) -> list[Union[LocationRiddleDTO, SolvedLocationRiddleDTO]]:
         following_users = self.__get_following_users_list(event, user_id)
 
         response = []
@@ -86,9 +85,9 @@ class LocationRiddlesService:
                 response.extend(self.get_location_riddles_for_user(user_id["user_id"]))
             except NotFoundError:
                 continue
-        return response
+        return sorted(response, key=lambda riddle: riddle.timestamp, reverse=True)
 
-    def rate_location_riddle(self, location_riddle_id: str, user_id: str, rating: int) -> dict:
+    def rate_location_riddle(self, location_riddle_id: str, user_id: str, rating: int) -> Union[LocationRiddleDTO, SolvedLocationRiddleDTO]:
         location_riddle = self.location_riddle_repository.get_location_riddle_by_location_riddle_id_from_db(
             location_riddle_id
         )
@@ -107,14 +106,14 @@ class LocationRiddlesService:
             raise BadRequestError(f"unable to update location_riddle with provided parameters. {e}")
 
         try:
-            response = self.location_riddle_repository.update_location_riddle_rating_in_db(
+            updated_location_riddle = self.location_riddle_repository.update_location_riddle_rating_in_db(
                 location_riddle_id, rating
             )
         except Exception as e:
             print(e)
             raise BadRequestError(e)
 
-        return response.dict(exclude={"ratings"})
+        return updated_location_riddle.to_dto(user_id)
 
     def guess_location_riddle(self, event, location_riddle_id: str, user_id: str, guess: list) -> dict:
         location_riddle = self.location_riddle_repository.get_location_riddle_by_location_riddle_id_from_db(
@@ -135,7 +134,7 @@ class LocationRiddlesService:
             raise BadRequestError(f"unable to update location_riddle with provided parameters. {e}")
 
         try:
-            response = self.location_riddle_repository.update_location_riddle_guesses_in_db(
+            updated_location_riddle = self.location_riddle_repository.update_location_riddle_guesses_in_db(
                 location_riddle_id, guess
             )
         except Exception as e:
@@ -143,7 +142,7 @@ class LocationRiddlesService:
             raise BadRequestError(e)
 
         score, distance = calculate_score_and_distance(
-            map(float, tuple(location_riddle.location)),
+            map(float, tuple(updated_location_riddle.location)),
             map(float, tuple(guess.guess))
         )
 
@@ -153,11 +152,11 @@ class LocationRiddlesService:
             print(f"There was an error writing the score to the user db: {e}")
 
         return {
-            "location_riddle": response.dict(exclude={"ratings"}),
+            "location_riddle": updated_location_riddle.to_dto(user_id).dict(),
             "guess_result": {"distance": distance, "received_score": score}
         }
 
-    def comment_location_riddle(self, location_riddle_id: str, user_id: str, comment: str) -> dict:
+    def comment_location_riddle(self, location_riddle_id: str, user_id: str, comment: str) -> Union[LocationRiddleDTO, SolvedLocationRiddleDTO]:
         try:
             comment = Comment(user_id=user_id, comment=comment)
         except ValidationError as e:
@@ -165,14 +164,14 @@ class LocationRiddlesService:
             raise BadRequestError(f"unable to update location_riddle with provided parameters. {e}")
 
         try:
-            response = self.location_riddle_repository.update_location_riddle_comments_in_db(
+            updated_location_riddle = self.location_riddle_repository.update_location_riddle_comments_in_db(
                 location_riddle_id, comment
             )
         except Exception as e:
             print(e)
             raise BadRequestError(e)
 
-        return response.dict(exclude={"ratings"})
+        return updated_location_riddle.to_dto(user_id)
 
     def delete_location_riddle(self, location_riddle_id: str, user_id: str) -> dict:
         location_riddle = self.location_riddle_repository.get_location_riddle_by_location_riddle_id_from_db(

@@ -116,7 +116,7 @@ def get_location_riddles_by_user(user_id: Annotated[str, Path()]):
         Description: Retrieves all location riddles for a specific user.
         Returns: A list of location riddles.
     """
-    return location_riddles_service.get_location_riddles_for_user(user_id)
+    return location_riddles_service.get_location_riddles_for_user(user_id, __get_id(app))
 
 
 @app.get("/location-riddles/user")
@@ -129,7 +129,7 @@ def get_location_riddles_by_user():
         Description: Retrieves all location riddles for the current user.
         Returns: A list of location riddles.
     """
-    return location_riddles_service.get_location_riddles_for_user(__get_id(app))
+    return location_riddles_service.get_location_riddles_for_user(__get_id(app), __get_id(app))
 
 
 @app.get("/location-riddles/<location_riddle_id>")
@@ -142,7 +142,7 @@ def get_location_riddles_by_location_riddle_id(location_riddle_id: Annotated[str
         Description: Retrieves a specific location riddle by its ID.
         Returns: The requested location riddle.
     """
-    return location_riddles_service.get_location_riddle(location_riddle_id)
+    return location_riddles_service.get_location_riddle(location_riddle_id, __get_id(app))
 
 
 @app.post("/location-riddles/<location_riddle_id>/rate")

@@ -16,7 +16,7 @@ class MockLocationRiddlesRepository(AbstractLocationRiddlesRepository):
         )
 
     def write_location_riddle_to_db(self, location_riddle: LocationRiddle):
-        pass
+        self.mock_data = location_riddle
 
     def get_all_location_riddles_by_user_id(self, user_id: str):
         return [self.mock_data]

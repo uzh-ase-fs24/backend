@@ -35,7 +35,7 @@ class LocationRiddle(BaseModel):
         return v
 
     def to_dto(self, user_id: str):
-        if any(guess.user_id == user_id for guess in self.guesses):
+        if any(guess.user_id == user_id for guess in self.guesses) or self.user_id == user_id:
             return SolvedLocationRiddleDTO(**self.dict())
         return LocationRiddleDTO(**self.dict())
 
@@ -49,6 +49,7 @@ class SolvedLocationRiddleDTO(BaseModel):
     guesses: List[Guess] = []
     created_at: int = int(datetime.now().timestamp())
     average_rating: Optional[float] = None
+    image_base64: Optional[str] = None
 
     def __init__(self, **data):
         location_riddle = LocationRiddle(**data)
@@ -70,6 +71,7 @@ class LocationRiddleDTO(BaseModel):
     user_id: str
     comments: List[Comment] = []
     created_at: int = int(datetime.now().timestamp())
+    image_base64: Optional[str] = None
 
     def __init__(self, **data):
         location_riddle = LocationRiddle(**data)

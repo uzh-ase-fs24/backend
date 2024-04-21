@@ -33,10 +33,7 @@ class ImageBucketRepository(AbstractImageBucketRepository):
         if image_data:
             encoded_image = base64.b64encode(image_data).decode('utf-8')
 
-            return {
-                "image_base64": encoded_image,
-                "Content-Type": "image/png"
-            }
+            return encoded_image
         else:
             raise BadRequestError("Failed to retrieve image from S3")
 

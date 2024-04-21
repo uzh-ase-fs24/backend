@@ -3,10 +3,7 @@ from src.base.AbstractImageBucketRepository import AbstractImageBucketRepository
 
 class MockImageBucketRepository(AbstractImageBucketRepository):
     def __init__(self):
-        self.mock_data = {
-            "image_base64": "mock_image_base64",
-            "Content-Type": "image/png"
-        }
+        self.mock_data = "mock_image_base64"
 
     def post_image_to_s3(self, image_base64: str, key: str):
         return {"message": "Mock image upload successful"}
