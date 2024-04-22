@@ -60,7 +60,5 @@ fi
 
 echo "Deployment of all services completed successfully."
 
-echo "Trying to insert default data to DynamoDB..."
-cd findme-users
-source .venv/bin/activate
-python insert_default_data_to_dynamodb.py
+echo "Adding default setup data..."
+sh infrastructure/default_setup/default_setup.sh

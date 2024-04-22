@@ -5,6 +5,8 @@ RUN apt-get update && apt-get install -y \
     netcat-openbsd \
  && npm install -g serverless
 
+RUN apt-get install -y jq
+RUN pip install awscli awscli-local
 
 WORKDIR /app
 
