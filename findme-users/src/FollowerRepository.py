@@ -9,7 +9,7 @@ from pydantic import ValidationError
 
 from .base.AbstractFollowerRepository import AbstractFollowerRepository
 from .entities.FollowRequest import FollowRequest
-from .entities.UserConnections import UserConnectionsIDs
+from .entities.UserConnections import UserConnectionsUsernames
 
 
 class FollowerRepository(AbstractFollowerRepository):
@@ -30,7 +30,7 @@ class FollowerRepository(AbstractFollowerRepository):
         existing_request = self.table.scan(
             FilterExpression=Attr("partition_key").eq("REQUEST")
             & Attr("sort_key").eq(
-                f"{follow_request.requester_id}#{follow_request.requestee_id}"
+                f"{follow_request.requester}#{follow_request.requestee}"
             )
         )["Items"]
 
@@ -41,10 +41,9 @@ class FollowerRepository(AbstractFollowerRepository):
             self.table.put_item(
                 Item={
                     "partition_key": "REQUEST",
-                    "sort_key": f"{follow_request.requester_id}#{follow_request.requestee_id}",
-                    "requester_id": follow_request.requester_id,
-                    "requestee_id": follow_request.requestee_id,
-                    "requester_username": follow_request.requester_username,
+                    "sort_key": f"{follow_request.requester}#{follow_request.requestee}",
+                    "requester": follow_request.requester,
+                    "requestee": follow_request.requestee,
                     "request_status": "pending",
                     "timestamp": follow_request.timestamp.isoformat(),
                 },
@@ -55,19 +54,17 @@ class FollowerRepository(AbstractFollowerRepository):
 
         return follow_request
 
-    def accept_follow_request(
-        self, requester_id: str, requestee_id: str
-    ) -> FollowRequest:
-        if not self.does_follow_request_exist(requester_id, requestee_id):
+    def accept_follow_request(self, requester: str, requestee: str) -> FollowRequest:
+        if not self.does_follow_request_exist(requester, requestee):
             raise BadRequestError(
-                f"The follow request from user ${requester_id} does not exist!"
+                f"The follow request from user ${requester} does not exist!"
             )
 
         try:
             response = self.table.update_item(
                 Key={
                     "partition_key": "REQUEST",
-                    "sort_key": f"{requester_id}#{requestee_id}",
+                    "sort_key": f"{requester}#{requestee}",
                 },
                 UpdateExpression="SET request_status = :s",
                 ExpressionAttributeValues={":s": "accepted"},
@@ -79,7 +76,7 @@ class FollowerRepository(AbstractFollowerRepository):
             self.table.put_item(
                 Item={
                     "partition_key": "FOLLOWERS",
-                    "sort_key": f"{requestee_id}#{requester_id}",
+                    "sort_key": f"{requestee}#{requester}",
                     "timestamp": datetime.now().isoformat(),
                 }
             )
@@ -89,7 +86,7 @@ class FollowerRepository(AbstractFollowerRepository):
             self.table.put_item(
                 Item={
                     "partition_key": "FOLLOWING",
-                    "sort_key": f"{requester_id}#{requestee_id}",
+                    "sort_key": f"{requester}#{requestee}",
                     "timestamp": datetime.now().isoformat(),
                 }
             )
@@ -99,12 +96,10 @@ class FollowerRepository(AbstractFollowerRepository):
 
         return FollowRequest(**response["Attributes"])
 
-    def decline_follow_request(
-        self, requester_id: str, requestee_id: str
-    ) -> FollowRequest:
-        if not self.does_follow_request_exist(requester_id, requestee_id):
+    def decline_follow_request(self, requester: str, requestee: str) -> FollowRequest:
+        if not self.does_follow_request_exist(requester, requestee):
             raise BadRequestError(
-                f"The follow request from user ${requester_id} does not exist!"
+                f"The follow request from user ${requester} does not exist!"
             )
 
         try:
@@ -112,7 +107,7 @@ class FollowerRepository(AbstractFollowerRepository):
             response = self.table.update_item(
                 Key={
                     "partition_key": "REQUEST",
-                    "sort_key": f"{requester_id}#{requestee_id}",
+                    "sort_key": f"{requester}#{requestee}",
                 },
                 UpdateExpression="set request_status = :s",
                 ExpressionAttributeValues={":s": "declined"},
@@ -124,14 +119,14 @@ class FollowerRepository(AbstractFollowerRepository):
 
         return FollowRequest(**response["Attributes"])
 
-    def fetch_received_follow_requests(self, user_id: str) -> list[FollowRequest]:
+    def fetch_received_follow_requests(self, username: str) -> list[FollowRequest]:
         try:
             response = self.table.query(
-                IndexName="RequesteeIDIndex",
-                KeyConditionExpression="requestee_id = :requestee_id AND partition_key = :partition_key",
+                IndexName="RequesteeIndex",
+                KeyConditionExpression="requestee = :requestee AND partition_key = :partition_key",
                 FilterExpression="request_status = :status_val",
                 ExpressionAttributeValues={
-                    ":requestee_id": f"{user_id}",
+                    ":requestee": username,
                     ":status_val": "pending",
                     ":partition_key": "REQUEST",
                 },
@@ -142,12 +137,12 @@ class FollowerRepository(AbstractFollowerRepository):
 
         return [FollowRequest(**item) for item in response["Items"]]
 
-    def fetch_sent_follow_requests(self, user_id: str) -> list[FollowRequest]:
+    def fetch_sent_follow_requests(self, username: str) -> list[FollowRequest]:
         try:
             response = self.table.query(
-                IndexName="RequesterIDIndex",
-                KeyConditionExpression="requester_id = :requester_id",
-                ExpressionAttributeValues={":requester_id": f"{user_id}"},
+                IndexName="RequesterIndex",
+                KeyConditionExpression="requester = :requester",
+                ExpressionAttributeValues={":requester": username},
             )
         except ClientError as e:
             print(f"Unable to fetch received follow requests. {e}")
@@ -155,14 +150,14 @@ class FollowerRepository(AbstractFollowerRepository):
 
         return [FollowRequest(**item) for item in response["Items"]]
 
-    def does_follow_request_exist(self, requester_id: str, requestee_id: str) -> bool:
-        follow_request_id = f"{requester_id}#{requestee_id}"
+    def does_follow_request_exist(self, requester: str, requestee: str) -> bool:
+        follow_request_id = f"{requester}#{requestee}"
         try:
             follow_request = self.table.query(
-                KeyConditionExpression="partition_key = :partition_key AND sort_key = :user_id",
+                KeyConditionExpression="partition_key = :partition_key AND sort_key = :follow_request_id",
                 ExpressionAttributeValues={
                     ":partition_key": "REQUEST",
-                    ":user_id": follow_request_id,
+                    ":follow_request_id": follow_request_id,
                 },
             )
         except ClientError as e:
@@ -175,13 +170,13 @@ class FollowerRepository(AbstractFollowerRepository):
             and follow_request["Items"][0]["request_status"] == "pending"
         )
 
-    def __get_following_ids(self, user_id: str) -> list[int]:
+    def __get_following_usernames(self, username: str) -> list[int]:
         try:
             following_response = self.table.query(
-                KeyConditionExpression="partition_key = :partition_key AND begins_with(sort_key, :user_id)",
+                KeyConditionExpression="partition_key = :partition_key AND begins_with(sort_key, :username)",
                 ExpressionAttributeValues={
                     ":partition_key": "FOLLOWING",
-                    ":user_id": user_id,
+                    ":username": username,
                 },
             )
         except ClientError as e:
@@ -189,13 +184,13 @@ class FollowerRepository(AbstractFollowerRepository):
             raise BadRequestError(f"Unable to retrieve user connections. {e}")
         return [item["sort_key"].split("#")[1] for item in following_response["Items"]]
 
-    def __get_followers_ids(self, user_id: str) -> list[str]:
+    def __get_followers_usernames(self, username: str) -> list[str]:
         try:
             follower_response = self.table.query(
-                KeyConditionExpression="partition_key = :partition_key AND begins_with(sort_key, :user_id)",
+                KeyConditionExpression="partition_key = :partition_key AND begins_with(sort_key, :username)",
                 ExpressionAttributeValues={
                     ":partition_key": "FOLLOWERS",
-                    ":user_id": user_id,
+                    ":username": username,
                 },
             )
         except ClientError as e:
@@ -203,10 +198,10 @@ class FollowerRepository(AbstractFollowerRepository):
             raise BadRequestError(f"Unable to retrieve user connections. {e}")
         return [item["sort_key"].split("#")[1] for item in follower_response["Items"]]
 
-    def get_user_connections(self, user_id: str) -> UserConnectionsIDs:
-        return UserConnectionsIDs(
+    def get_user_connections(self, username: str) -> UserConnectionsUsernames:
+        return UserConnectionsUsernames(
             **{
-                "followers": self.__get_followers_ids(user_id),
-                "following": self.__get_following_ids(user_id),
+                "followers": self.__get_followers_usernames(username),
+                "following": self.__get_following_usernames(username),
             }
         )

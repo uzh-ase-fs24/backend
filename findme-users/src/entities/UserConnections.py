@@ -9,6 +9,6 @@ class UserConnections(BaseModel):
     followers: Optional[List[UserDTO]] = []
 
 
-class UserConnectionsIDs(BaseModel):
+class UserConnectionsUsernames(BaseModel):
     following: List[str] = []
     followers: List[str] = []

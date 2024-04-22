@@ -5,7 +5,6 @@ from .Score import Score
 
 
 class User(BaseModel):
-    user_id: str
     username: str
     first_name: str
     last_name: str
@@ -24,7 +23,6 @@ class User(BaseModel):
 
 
 class UserDTO(BaseModel):
-    user_id: str
     username: str
     first_name: str
     last_name: str
@@ -33,7 +31,6 @@ class UserDTO(BaseModel):
     def __init__(self, **data):
         user = User(**data)
         super().__init__(
-            user_id=user.user_id,
             username=user.username,
             first_name=user.first_name,
             last_name=user.last_name,
@@ -42,7 +39,6 @@ class UserDTO(BaseModel):
 
 
 class UserPostDTO(BaseModel):
-    username: str
     first_name: str
     last_name: str
 
