@@ -95,8 +95,20 @@ curl --request POST \
             "audience":"https://findme-dev.eu.auth0.com/api/v2/","grant_type":"client_credentials"}'
 ```
 
-
 ### Documentation
+
 For the detailed api documentation start the application as described above and visit the following endpoints:
-  - `{your_application_url}/users/swagger`
-  - `{your_application_url}/location-riddles/swagger`
+
+- `{your_application_url}/users/swagger`
+- `{your_application_url}/location-riddles/swagger`
+
+### Tips and Tricks
+
+This file is a collection of useful tips and tricks which facilitate the development process.
+
+#### Inspecting table content
+
+- By running `awslocal dynamodb scan --table-name FollowerTable --region eu-central-2` in the terminal, one can inspect
+  the FollowerTable content
+- By running `awslocal dynamodb scan --table-name usersTable --region eu-central-2` in the terminal, one can inspect the
+  FollowerTable content
