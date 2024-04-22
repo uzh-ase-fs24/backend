@@ -1,16 +1,15 @@
-from datetime import datetime
-
 import boto3
 from aws_lambda_powertools.event_handler.exceptions import (
     BadRequestError,
 )
 from boto3.dynamodb.conditions import Attr
 from botocore.exceptions import ClientError
+from datetime import datetime
 from pydantic import ValidationError
 
-from src.entities.FollowRequest import FollowRequest
-from src.entities.UserConnections import UserConnectionsIDs
-from src.base.AbstractFollowerRepository import AbstractFollowerRepository
+from .base.AbstractFollowerRepository import AbstractFollowerRepository
+from .entities.FollowRequest import FollowRequest
+from .entities.UserConnections import UserConnectionsIDs
 
 
 class FollowerRepository(AbstractFollowerRepository):

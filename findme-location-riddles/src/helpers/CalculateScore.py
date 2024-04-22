@@ -1,4 +1,4 @@
-from src.helpers.CalculateDistance import haversine_distance
+from .CalculateDistance import haversine_distance
 
 
 # TODO The current implementation allows to adjust the scoring algorithm quite easily. It is to be investigated by

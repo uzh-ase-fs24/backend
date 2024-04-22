@@ -1,11 +1,11 @@
-import boto3
 import base64
-from botocore.exceptions import ClientError
+import boto3
 from aws_lambda_powertools.event_handler.exceptions import (
     BadRequestError,
-    NotFoundError,
 )
-from src.base.AbstractImageBucketRepository import AbstractImageBucketRepository
+from botocore.exceptions import ClientError
+
+from .base.AbstractImageBucketRepository import AbstractImageBucketRepository
 
 
 class ImageBucketRepository(AbstractImageBucketRepository):

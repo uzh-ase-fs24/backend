@@ -1,7 +1,8 @@
 import unittest
-from src.LocationRiddlesService import LocationRiddlesService
-from src.test.MockImageBucketRepository import MockImageBucketRepository
-from src.test.MockLocationRiddlesRepository import MockLocationRiddlesRepository
+
+from ..src.LocationRiddlesService import LocationRiddlesService
+from ..src.test.MockImageBucketRepository import MockImageBucketRepository
+from ..src.test.MockLocationRiddlesRepository import MockLocationRiddlesRepository
 
 
 class TestLocationRiddleService(unittest.TestCase):

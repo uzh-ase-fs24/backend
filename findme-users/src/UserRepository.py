@@ -1,14 +1,15 @@
 import boto3
-from boto3.dynamodb.conditions import Key
 from aws_lambda_powertools.event_handler.exceptions import (
     BadRequestError,
     NotFoundError,
 )
+from boto3.dynamodb.conditions import Key
 from botocore.exceptions import ClientError
 from pydantic import ValidationError
-from src.entities.User import User, UserPutDTO
-from src.base.AbstractUserRepository import AbstractUserRepository
-from src.entities.Score import Score
+
+from .base.AbstractUserRepository import AbstractUserRepository
+from .entities.Score import Score
+from .entities.User import User, UserPutDTO
 
 
 class UserRepository(AbstractUserRepository):

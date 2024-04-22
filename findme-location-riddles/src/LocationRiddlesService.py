@@ -1,21 +1,25 @@
-import uuid
-import json
 import boto3
+import json
 import os
-
-from typing import Union
-from decimal import Decimal
-from pydantic import ValidationError
+import uuid
 from aws_lambda_powertools.event_handler.exceptions import (
     BadRequestError,
     NotFoundError,
-    InternalServerError
+    InternalServerError,
 )
-from src.helpers.CalculateScore import calculate_score_and_distance
-from src.entities.LocationRiddle import LocationRiddle, LocationRiddleDTO, SolvedLocationRiddleDTO
-from src.entities.Rating import Rating
-from src.entities.Comment import Comment
-from src.entities.Guess import Guess
+from decimal import Decimal
+from pydantic import ValidationError
+from typing import Union
+
+from .entities.Comment import Comment
+from .entities.Guess import Guess
+from .entities.LocationRiddle import (
+    LocationRiddle,
+    LocationRiddleDTO,
+    SolvedLocationRiddleDTO,
+)
+from .entities.Rating import Rating
+from .helpers.CalculateScore import calculate_score_and_distance
 
 
 class LocationRiddlesService:

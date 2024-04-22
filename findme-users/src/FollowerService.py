@@ -1,12 +1,10 @@
-from datetime import datetime
-
-
-from src.entities.UserConnections import UserConnectionsIDs
-from src.entities.FollowRequest import FollowRequest
-
 from aws_lambda_powertools.event_handler.exceptions import (
     BadRequestError,
 )
+from datetime import datetime
+
+from .entities.FollowRequest import FollowRequest
+from .entities.UserConnections import UserConnectionsIDs
 
 
 class FollowerService:

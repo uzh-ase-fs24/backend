@@ -1,4 +1,4 @@
-from src.base.AbstractImageBucketRepository import AbstractImageBucketRepository
+from ..base.AbstractImageBucketRepository import AbstractImageBucketRepository
 
 
 class MockImageBucketRepository(AbstractImageBucketRepository):

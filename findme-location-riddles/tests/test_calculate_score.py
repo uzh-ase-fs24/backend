@@ -1,6 +1,6 @@
 import unittest
 
-from src.helpers.CalculateScore import calculate_score_and_distance
+from ..src.helpers.CalculateScore import calculate_score_and_distance
 
 
 class TestCalculateScore(unittest.TestCase):

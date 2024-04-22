@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
-from src.entities.User import User, UserPutDTO
+
+from ..entities.User import User, UserPutDTO
 
 
 class AbstractUserRepository(ABC):

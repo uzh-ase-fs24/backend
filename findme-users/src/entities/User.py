@@ -1,6 +1,7 @@
-from typing import List, Optional
 from pydantic import BaseModel
-from src.entities.Score import Score
+from typing import List, Optional
+
+from .Score import Score
 
 
 class User(BaseModel):

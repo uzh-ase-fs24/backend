@@ -1,8 +1,8 @@
-from src.base.AbstractLocationRiddlesRepository import AbstractLocationRiddlesRepository
-from src.entities.Rating import Rating
-from src.entities.Comment import Comment
-from src.entities.Guess import Guess
-from src.entities.LocationRiddle import LocationRiddle
+from ..base.AbstractLocationRiddlesRepository import AbstractLocationRiddlesRepository
+from ..entities.Comment import Comment
+from ..entities.Guess import Guess
+from ..entities.LocationRiddle import LocationRiddle
+from ..entities.Rating import Rating
 
 
 class MockLocationRiddlesRepository(AbstractLocationRiddlesRepository):

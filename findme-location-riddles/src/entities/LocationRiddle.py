@@ -1,11 +1,11 @@
 from datetime import datetime
+from decimal import Decimal
 from pydantic import BaseModel, field_validator, ValidationError
 from typing import List, Optional
-from decimal import Decimal
 
-from src.entities.Rating import Rating
-from src.entities.Comment import Comment
-from src.entities.Guess import Guess
+from .Comment import Comment
+from .Guess import Guess
+from .Rating import Rating
 
 
 class LocationRiddle(BaseModel):

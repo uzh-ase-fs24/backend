@@ -1,10 +1,9 @@
 from abc import ABC, abstractmethod
 
-from src.entities.Comment import Comment
-from src.entities.Rating import Rating
-from src.entities.Guess import Guess
-from src.entities.LocationRiddle import LocationRiddle
-
+from ..entities.Comment import Comment
+from ..entities.Guess import Guess
+from ..entities.LocationRiddle import LocationRiddle
+from ..entities.Rating import Rating
 
 
 class AbstractLocationRiddlesRepository(ABC):

@@ -1,6 +1,7 @@
 import unittest
-from src.UserService import UserService
-from src.test.MockUserRepository import MockUserRepository
+
+from ..src.UserService import UserService
+from ..src.test.MockUserRepository import MockUserRepository
 
 
 class TestUserService(unittest.TestCase):

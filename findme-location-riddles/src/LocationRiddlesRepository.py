@@ -1,5 +1,3 @@
-from decimal import Decimal
-
 import boto3
 from aws_lambda_powertools.event_handler.exceptions import (
     BadRequestError,
@@ -8,11 +6,12 @@ from aws_lambda_powertools.event_handler.exceptions import (
 from boto3.dynamodb.conditions import Key
 from botocore.exceptions import ClientError
 from pydantic import ValidationError
-from src.entities.LocationRiddle import LocationRiddle
-from src.entities.Rating import Rating
-from src.entities.Comment import Comment
-from src.entities.Guess import Guess
-from src.base.AbstractLocationRiddlesRepository import AbstractLocationRiddlesRepository
+
+from .base.AbstractLocationRiddlesRepository import AbstractLocationRiddlesRepository
+from .entities.Comment import Comment
+from .entities.Guess import Guess
+from .entities.LocationRiddle import LocationRiddle
+from .entities.Rating import Rating
 
 
 class LocationRiddlesRepository(AbstractLocationRiddlesRepository):

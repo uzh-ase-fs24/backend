@@ -1,5 +1,4 @@
-from src.base.AbstractUserRepository import AbstractUserRepository
-from src.entities.User import User
+from ..base.AbstractUserRepository import AbstractUserRepository
 
 
 class MockUserRepository(AbstractUserRepository):

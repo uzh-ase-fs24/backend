@@ -5,8 +5,8 @@ from aws_lambda_powertools.event_handler.exceptions import (
 from pydantic import ValidationError
 from typing import List
 
-from src.entities.User import User, UserDTO, UserPutDTO
-from src.entities.Score import Score
+from .entities.Score import Score
+from .entities.User import User, UserDTO, UserPutDTO
 
 
 class UserService:

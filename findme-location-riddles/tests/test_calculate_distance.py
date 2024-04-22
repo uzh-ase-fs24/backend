@@ -1,6 +1,6 @@
 import unittest
 
-from src.helpers.CalculateDistance import haversine_distance
+from ..src.helpers.CalculateDistance import haversine_distance
 
 
 class TestCalculateDistance(unittest.TestCase):
