@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 
+
 class AbstractFollowerRepository(ABC):
 
     @abstractmethod
@@ -19,13 +20,9 @@ class AbstractFollowerRepository(ABC):
         pass
 
     @abstractmethod
-    def does_follow_request_exist(self, requester_id, requestee_id):
+    def does_follow_request_exist(self, requester_id: str, requestee_id: str):
         pass
 
     @abstractmethod
-    def get_following(self, user_id: str):
-        pass
-
-    @abstractmethod
-    def get_followers(self, user_id: str):
+    def get_user_connections(self, user_id: str):
         pass

@@ -20,27 +20,14 @@ class LocationRiddlesRepository(AbstractLocationRiddlesRepository):
         self.dynamodb = boto3.resource("dynamodb", region_name="eu-central-2")
         self.table = self.dynamodb.Table("locationRiddleTable")
 
-    def write_location_riddle_to_db(self, user_id, location_riddle_id, location):
-        location_riddle_data = {
-            "location_riddle_id": location_riddle_id,
-            "user_id": user_id,
-            "location": [Decimal(str(coord)) for coord in location]
-        }
-
-        try:
-            location_riddle = LocationRiddle(**location_riddle_data)
-        except ValidationError as e:
-            raise BadRequestError(
-                f"unable to update location_riddle with provided parameters. {e}"
-            )
-
+    def write_location_riddle_to_db(self, location_riddle: LocationRiddle):
         try:
             self.table.put_item(Item=location_riddle.dict())
         except Exception as e:
             print(f"Error writing location_riddle to DynamoDB: {e}")
             raise BadRequestError(f"Error writing location_riddle to DynamoDB: {e}")
 
-    def get_all_location_riddles_by_user_id(self, user_id):
+    def get_all_location_riddles_by_user_id(self, user_id: str):
         response = self.table.query(
             IndexName="UserIndex", KeyConditionExpression=Key("user_id").eq(user_id)
         )
@@ -57,11 +44,12 @@ class LocationRiddlesRepository(AbstractLocationRiddlesRepository):
         try:
             location_riddles = [LocationRiddle(**item) for item in items]
         except ValidationError as e:
+            print(f"Unable to read Data from DB {e}")
             raise BadRequestError(f"Unable to read Data from DB {e}")
 
         return location_riddles
 
-    def get_location_riddle_by_location_riddle_id_from_db(self, location_riddle_id):
+    def get_location_riddle_by_location_riddle_id_from_db(self, location_riddle_id: str):
         response = self.table.get_item(Key={"location_riddle_id": location_riddle_id})
 
         if "Item" not in response:
@@ -71,35 +59,21 @@ class LocationRiddlesRepository(AbstractLocationRiddlesRepository):
         try:
             location_riddle = LocationRiddle(**response["Item"])
         except ValidationError as e:
+            print(f"Unable to read Data from DB {e}")
             raise BadRequestError(f"Unable to read Data from DB {e}")
 
         return location_riddle
 
-    def update_location_riddle_rating_in_db(self, location_riddle_id, user_id, rating):
-        try:
-            rating = Rating(user_id=user_id, rating=rating)
-        except ValidationError as e:
-            raise BadRequestError(f"unable to update location_riddle with provided parameters. {e}")
-
+    def update_location_riddle_rating_in_db(self, location_riddle_id: str, rating: Rating):
         return self.__append_attribute(location_riddle_id, "ratings", rating)
 
-    def update_location_riddle_comments_in_db(self, location_riddle_id, user_id, comment):
-        try:
-            comment = Comment(user_id=user_id, comment=comment)
-        except ValidationError as e:
-            raise BadRequestError(f"unable to update location_riddle with provided parameters. {e}")
-
+    def update_location_riddle_comments_in_db(self, location_riddle_id: str, comment: Comment):
         return self.__append_attribute(location_riddle_id, "comments", comment)
 
-    def update_location_riddle_guesses_in_db(self, location_riddle_id, user_id, guess):
-        try:
-            guess = Guess(user_id=user_id, guess=[Decimal(str(coord)) for coord in guess])
-        except ValidationError as e:
-            raise BadRequestError(f"unable to update location_riddle with provided parameters. {e}")
-
+    def update_location_riddle_guesses_in_db(self, location_riddle_id: str, guess: Guess):
         return self.__append_attribute(location_riddle_id, "guesses", guess)
 
-    def delete_location_riddle_from_db(self, location_riddle_id):
+    def delete_location_riddle_from_db(self, location_riddle_id: str):
         try:
             self.table.delete_item(Key={"location_riddle_id": location_riddle_id})
         except ClientError as e:

@@ -23,7 +23,8 @@ tracer = Tracer()
 logger = Logger()
 
 cors_config = CORSConfig(allow_origin=os.environ.get("FRONTEND_ORIGIN"))
-app = APIGatewayRestResolver(cors=cors_config)
+app = APIGatewayRestResolver(cors=cors_config, enable_validation=True)
+app.enable_swagger(path="/location-riddles/swagger")
 
 authorizer = Authorizer(
     auth0_domain=os.environ.get("AUTH0_DOMAIN"),
@@ -56,7 +57,7 @@ def post_location_riddles():
 @app.post("/location-riddles/<location_riddle_id>/guess")
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
-def post_guess_to_location_riddle(location_riddle_id: Annotated[int, Path(lt=999)]):
+def post_guess_to_location_riddle(location_riddle_id: Annotated[str, Path()]):
     """
         Endpoint: POST /location-riddles/<location_riddle_id>/guess
         Body: {
@@ -79,7 +80,7 @@ def post_guess_to_location_riddle(location_riddle_id: Annotated[int, Path(lt=999
 @app.post("/location-riddles/<location_riddle_id>/comment")
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
-def post_comment_to_location_riddle(location_riddle_id: Annotated[int, Path(lt=999)]):
+def post_comment_to_location_riddle(location_riddle_id: Annotated[str, Path()]):
     """
         Endpoint: POST /location-riddles/<location_riddle_id>/comment
         Body: {
@@ -108,14 +109,14 @@ def get_location_riddles():
 @app.get("/location-riddles/user/<user_id>")
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
-def get_location_riddles_by_user(user_id: Annotated[int, Path(lt=999)]):
+def get_location_riddles_by_user(user_id: Annotated[str, Path()]):
     """
         Endpoint: GET /location-riddles/user/<user_id>
         Body: None
         Description: Retrieves all location riddles for a specific user.
         Returns: A list of location riddles.
     """
-    return location_riddles_service.get_location_riddles_for_user(user_id)
+    return location_riddles_service.get_location_riddles_for_user(user_id, __get_id(app))
 
 
 @app.get("/location-riddles/user")
@@ -128,26 +129,26 @@ def get_location_riddles_by_user():
         Description: Retrieves all location riddles for the current user.
         Returns: A list of location riddles.
     """
-    return location_riddles_service.get_location_riddles_for_user(__get_id(app))
+    return location_riddles_service.get_location_riddles_for_user(__get_id(app), __get_id(app))
 
 
 @app.get("/location-riddles/<location_riddle_id>")
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
-def get_location_riddles_by_location_riddle_id(location_riddle_id: Annotated[int, Path(lt=999)]):
+def get_location_riddles_by_location_riddle_id(location_riddle_id: Annotated[str, Path()]):
     """
         Endpoint: GET /location-riddles/<location_riddle_id>
         Body: None
         Description: Retrieves a specific location riddle by its ID.
         Returns: The requested location riddle.
     """
-    return location_riddles_service.get_location_riddle(location_riddle_id)
+    return location_riddles_service.get_location_riddle(location_riddle_id, __get_id(app))
 
 
 @app.post("/location-riddles/<location_riddle_id>/rate")
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
-def rate_location_riddle(location_riddle_id: Annotated[int, Path(lt=999)]):
+def rate_location_riddle(location_riddle_id: Annotated[str, Path()]):
     """
         Endpoint: POST /location-riddles/<location_riddle_id>/rate
         Body: {
@@ -163,7 +164,7 @@ def rate_location_riddle(location_riddle_id: Annotated[int, Path(lt=999)]):
 @app.delete("/location-riddles/<location_riddle_id>")
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
-def delete_location_riddles_by_location_riddle_id(location_riddle_id: Annotated[int, Path(lt=999)]):
+def delete_location_riddles_by_location_riddle_id(location_riddle_id: Annotated[str, Path()]):
     """
         Endpoint: DELETE /location-riddles/<location_riddle_id>
         Body: None

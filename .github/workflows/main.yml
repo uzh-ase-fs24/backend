@@ -1,0 +1,55 @@
+name: Run Python test suite
+
+on:
+  push:
+    branches:
+      - '**'  # This will trigger the workflow on push to any branch
+  pull_request:
+    branches:
+      - '**'  # This will trigger the workflow on pull requests to any branch
+  workflow_dispatch:  # This allows manual triggering
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+      name: Check out repository code
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+
+  test-location-riddles:
+    needs: setup
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+
+    - name: Run tests in findme-location-riddles
+      run: |
+        cd findme-location-riddles
+        python -m pip install -r requirements.txt
+        python3 -m unittest discover -s tests
+
+  test-users:
+    needs: setup
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+
+    - name: Run tests in findme-users
+      run: |
+        cd findme-users
+        python -m pip install -r requirements.txt
+        python3 -m unittest discover -s tests
