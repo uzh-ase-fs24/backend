@@ -1,55 +1,47 @@
 from aws_lambda_powertools.event_handler.exceptions import (
+    NotFoundError,
     BadRequestError,
 )
-from pydantic import ValidationError
-from src.UserRepository import UserRepository
-from src.entities.User import User
 
 
 class UserService:
-    def __init__(self):
-        self.user_repository = UserRepository()
+    def __init__(self, user_repository):
+        self.user_repository = user_repository
 
     def post_user(self, data, user_id):
-        try:
-            user_data = {**data, "user_id": user_id}
-            user = User(**user_data)
-        except ValidationError as e:
-            raise BadRequestError(f"unable to create user with provided parameters. {e}")
-        self.user_repository.post_user_to_db(user)
-
-        return user
+        return (self.user_repository.post_user_to_db({**data, "user_id": user_id})
+                .dict(exclude={"scores"}))
 
     def get_user(self, user_id):
-        return self.user_repository.get_user_by_user_id_from_db(user_id)
+        return (self.user_repository.get_user_by_user_id_from_db(user_id)
+                .dict(exclude={"scores"}))
 
     def update_user(self, data, user_id):
+        return (self.user_repository.update_user_in_db({**data,
+                                                       "user_id": user_id,
+                                                       "username": self.user_repository
+                                                      .get_user_by_user_id_from_db(user_id).username})
+                .dict(exclude={"scores"}))
+
+    def write_guessing_score_to_user(self, user_id, location_riddle_id, score):
         try:
-            user_data = {**data, "user_id": user_id}
-            user = User(**user_data)
-        except ValidationError as e:
-            raise BadRequestError(f"unable to update user with provided parameters. {e}")
+            response = self.user_repository.update_user_score_in_db(
+                user_id, location_riddle_id, score
+            )
+        except Exception as e:
+            raise BadRequestError(e)
 
-        self.user_repository.update_user_in_db(user)
-
-        return user
+        return response.dict(exclude={"scores"})
 
     def get_similar_users(self, username_prefix, user_id):
-        user_items = self.user_repository.get_users_by_username_prefix(username_prefix)
-        users = []
-
-        for item in user_items:
-            # Skip own user
-            if item['user_id'] == user_id:
-                continue
-            try:
-                user = User(**item)
-                users.append(user)
-            except ValidationError as e:
-                print(e)
-                raise BadRequestError(f"Unable to read Data from DB {e}")
-
-        return users
+        users = list(filter(lambda user: user.user_id != user_id,
+                            self.user_repository
+                            .get_users_by_username_prefix(username_prefix)))
+        if not users:
+            raise NotFoundError(
+                f"No users found with username prefix {username_prefix}!"
+            )
+        return [user.dict(exclude={"scores"}) for user in users]
 
     def does_user_with_user_id_exist(self, user_id):
         return self.user_repository.does_user_with_user_id_exist(user_id)

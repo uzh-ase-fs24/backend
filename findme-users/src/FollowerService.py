@@ -2,9 +2,7 @@ from datetime import datetime
 from typing import List
 
 from pydantic import parse_obj_as
-from src.FollowerRepository import FollowerRepository
 from src.entities.FollowRequest import FollowRequest
-from src.entities.UserConnections import UserConnections
 
 from aws_lambda_powertools.event_handler.exceptions import (
     BadRequestError,
@@ -12,18 +10,19 @@ from aws_lambda_powertools.event_handler.exceptions import (
 
 
 class FollowerService:
-    def __init__(self):
-        self.follower_repository = FollowerRepository()
+    def __init__(self, follower_repository):
+        self.follower_repository = follower_repository
 
-    def create_follower_request(self, requester_id, requestee_id):
+    def create_follower_request(self, requester_username, requester_id, requestee_id):
         if requester_id == requestee_id:
             raise BadRequestError(
                 f"It is not possible to create the follow request since requester ({requester_id}) and requestee ({requestee_id}) are the same person!")
 
         follow_request = FollowRequest(
+            requester_username=requester_username,
             requester_id=requester_id,
             requestee_id=requestee_id,
-            status='pending',
+            request_status='pending',
             timestamp=datetime.now()
         )
 
@@ -34,20 +33,21 @@ class FollowerService:
     def accept_follow_request(self, requester_id, requestee_id):
         if self.follower_repository.does_follow_request_exist(requester_id, requestee_id):
             self.follower_repository.accept_follow_request(requester_id, requestee_id)
-            return f"Follow request by {requester_id} accepted!"
+            return {"result": f"Follow request by {requester_id} accepted!"}
         else:
             raise BadRequestError(f"The given follow request does not exist!")
 
-    def deny_follow_request(self, requester_id, requestee_id):
+    def decline_follow_request(self, requester_id, requestee_id):
         if self.follower_repository.does_follow_request_exist(requester_id, requestee_id):
-            self.follower_repository.deny_follow_request(requester_id, requestee_id)
-            return f"Follow request by {requester_id} declined!"
+            self.follower_repository.decline_follow_request(requester_id, requestee_id)
+            return {"result": f"Follow request by {requester_id} declined!"}
         else:
             raise BadRequestError(f"The given follow request does not exist!")
 
     def get_received_follow_requests(self, user_id):
         response = self.follower_repository.fetch_received_follow_requests(user_id)
         follow_requests = parse_obj_as(List[FollowRequest], response['Items'])
+
         return follow_requests
 
     def get_user_connections(self, user_id):
@@ -59,4 +59,3 @@ class FollowerService:
         followers = [item['sort_key'].split("#")[1] for item in followers_response['Items']]
 
         return {'following': following, 'followers': followers}
-

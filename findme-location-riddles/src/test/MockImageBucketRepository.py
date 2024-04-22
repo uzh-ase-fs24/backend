@@ -1,7 +1,7 @@
-from src.base.AbstractBucketRepository import AbstractBucketRepository
+from src.base.AbstractImageBucketRepository import AbstractImageBucketRepository
 
 
-class MockImageBucketRepository(AbstractBucketRepository):
+class MockImageBucketRepository(AbstractImageBucketRepository):
     def __init__(self):
         self.mock_data = {
             "image_base64": "mock_image_base64",

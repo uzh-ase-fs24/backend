@@ -39,6 +39,14 @@ custom:
 
 package:
   individually: true
+  patterns:
+    - '!**/.venv/**'
+    - '!**/node_modules/**'
+    - '!**/tests/**'
+    - '!**/.serverless/**'
+    - '!**/*.md'
+    - '!**/requirements.txt'
+    - '!**/package*.json'
 
 provider:
   name: aws
@@ -53,6 +61,7 @@ provider:
 functions:
   findme-users:
     handler: handler.lambda_handler
+    name: findme-users-${opt:stage}
     timeout: 30
     module: findme-users
     environment:
@@ -76,6 +85,11 @@ functions:
             origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
       - http:
           path: /users
+          method: post
+          cors:
+            origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
+      - http:
+          path: /users/score
           method: post
           cors:
             origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
@@ -133,11 +147,13 @@ functions:
   findme-location-riddles:
     handler: handler.lambda_handler
     module: findme-location-riddles
+    name: findme-location-riddles-${opt:stage}
     timeout: 30
     environment:
       FRONTEND_ORIGIN: ${self:custom.stage.${opt:stage}.frontendOrigin}
       AUTH0_DOMAIN: ${self:custom.stage.${opt:stage}.auth0Domain}
       AUTH0_AUDIENCE: ${self:custom.stage.${opt:stage}.auth0Audience}
+      USER_FUNCTION_NAME: findme-users-${opt:stage}
     events:
       - http:
           path: /location-riddles
@@ -145,6 +161,24 @@ functions:
           cors:
             origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
       - http:
+          path: /location-riddles/{location_riddle_id}/guess
+          method: post
+          cors:
+            origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
+          request:
+            parameters:
+              paths:
+                id: true
+      - http:
+          path: /location-riddles/{location_riddle_id}/comment
+          method: post
+          cors:
+            origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
+          request:
+            parameters:
+              paths:
+                id: true
+      - http:
           path: /location-riddles
           method: get
           cors:
@@ -154,14 +188,27 @@ functions:
           method: get
           cors:
             origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
+          request:
+            parameters:
+              paths:
+                id: true
       - http:
           path: /location-riddles/user/{user_id}
           method: get
           cors:
             origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
+          request:
+            parameters:
+              paths:
+                id: true
       - http:
           path: /location-riddles/user
           method: get
+          cors:
+            origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
+      - http:
+          path: /location-riddles/{location_riddle_id}/rate
+          method: post
           cors:
             origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
       - http:
@@ -169,6 +216,10 @@ functions:
           method: delete
           cors:
             origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
+          request:
+            parameters:
+              paths:
+                id: true
 
 resources:
   extensions: ${file(./sls-config-${opt:stage}.yml), null}
@@ -229,7 +280,7 @@ resources:
             KeySchema:
               - AttributeName: requester_id
                 KeyType: HASH
-              - AttributeName: sort_key
+              - AttributeName: partition_key
                 KeyType: RANGE
             Projection:
               ProjectionType: ALL
@@ -237,7 +288,7 @@ resources:
             KeySchema:
               - AttributeName: requestee_id
                 KeyType: HASH
-              - AttributeName: sort_key
+              - AttributeName: partition_key
                 KeyType: RANGE
             Projection:
               ProjectionType: ALL
