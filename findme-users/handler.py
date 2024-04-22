@@ -79,7 +79,7 @@ def update_user(user: UserPutDTO) -> UserDTO:
 @app.get("/users/<user_id>")
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
-def get_user(user_id: Annotated[str, Path(lt=999)]) -> UserDTO:
+def get_user(user_id: Annotated[str, Path()]) -> UserDTO:
     """
         Endpoint: GET /users/<user_id>
         Body: None
