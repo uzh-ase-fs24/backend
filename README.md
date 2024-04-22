@@ -77,8 +77,7 @@ in e.g findme-users/ you will see the change after saving without redeploying.
 >
 >`.venv/bin/pip install -r <path_to>/requirements.txt`
 
-To run the tests for the microservices, navigate to the respective directory and
-run ` python -m unittest discover -s tests` to run the tests.
+To run the tests for the microservices, run ` python -m unittest discover` from the backend root.
 (If the virtual environment hasn't been activated yet, you can do so by running the
 command ` source .venv/bin/activate`.)
 
