@@ -4,7 +4,6 @@ from ..entities.User import User, UserPutDTO
 
 
 class AbstractUserRepository(ABC):
-
     @abstractmethod
     def post_user_to_db(self, user_data: User):
         pass
@@ -22,7 +21,9 @@ class AbstractUserRepository(ABC):
         pass
 
     @abstractmethod
-    def update_user_score_in_db(self, user_id: str, location_riddle_id: str, score: int):
+    def update_user_score_in_db(
+        self, user_id: str, location_riddle_id: str, score: int
+    ):
         pass
 
     @abstractmethod

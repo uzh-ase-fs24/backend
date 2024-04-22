@@ -7,7 +7,6 @@ from ..entities.Rating import Rating
 
 
 class AbstractLocationRiddlesRepository(ABC):
-
     @abstractmethod
     def write_location_riddle_to_db(self, location_riddle: LocationRiddle):
         pass
@@ -17,19 +16,27 @@ class AbstractLocationRiddlesRepository(ABC):
         pass
 
     @abstractmethod
-    def get_location_riddle_by_location_riddle_id_from_db(self, location_riddle_id: str):
+    def get_location_riddle_by_location_riddle_id_from_db(
+        self, location_riddle_id: str
+    ):
         pass
 
     @abstractmethod
-    def update_location_riddle_rating_in_db(self, location_riddle_id: str, rating: Rating):
+    def update_location_riddle_rating_in_db(
+        self, location_riddle_id: str, rating: Rating
+    ):
         pass
 
     @abstractmethod
-    def update_location_riddle_comments_in_db(self, location_riddle_id: str, comment: Comment):
+    def update_location_riddle_comments_in_db(
+        self, location_riddle_id: str, comment: Comment
+    ):
         pass
 
     @abstractmethod
-    def update_location_riddle_guesses_in_db(self, location_riddle_id: str, guess: Guess):
+    def update_location_riddle_guesses_in_db(
+        self, location_riddle_id: str, guess: Guess
+    ):
         pass
 
     @abstractmethod

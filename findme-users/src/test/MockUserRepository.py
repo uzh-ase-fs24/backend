@@ -28,7 +28,9 @@ class MockUserRepository(AbstractUserRepository):
         raise ValueError(f"No User with user_id: {user_id} found")
 
     def get_users_by_username_prefix(self, username_prefix):
-        return [user for user in self.users if user.username.startswith(username_prefix)]
+        return [
+            user for user in self.users if user.username.startswith(username_prefix)
+        ]
 
     def update_user_score_in_db(self, user_id, location_riddle_id, score):
         return self.get_user_by_user_id_from_db(user_id)
