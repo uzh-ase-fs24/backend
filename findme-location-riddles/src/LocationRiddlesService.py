@@ -44,14 +44,17 @@ class LocationRiddlesService:
                 f"unable to update location_riddle with provided parameters. {e}"
             )
 
+        image_path = f"location-riddles/{location_riddle.location_riddle_id}.png"
+        response = self.image_bucket_repository.post_image_to_s3(
+            image_base64, image_path
+        )
+
         try:
             self.location_riddle_repository.write_location_riddle_to_db(location_riddle)
         except Exception as e:
             print(e)
             raise InternalServerError(e)
-
-        image_path = f"location-riddles/{location_riddle.location_riddle_id}.png"
-        return self.image_bucket_repository.post_image_to_s3(image_base64, image_path)
+        return response
 
     def get_location_riddle(
         self, location_riddle_id: str, user_id: str
