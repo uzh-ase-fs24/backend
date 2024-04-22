@@ -47,7 +47,6 @@ class LocationRiddlesService:
         return self.image_bucket_repository.post_image_to_s3(image_base64, image_path)
 
     def get_location_riddle(self, location_riddle_id: str, user_id: str) -> Union[LocationRiddleDTO, SolvedLocationRiddleDTO]:
-        # TODO: check if requesting user is following the user_id
         location_riddle = self.location_riddle_repository.get_location_riddle_by_location_riddle_id_from_db(
             location_riddle_id
         )
@@ -61,7 +60,6 @@ class LocationRiddlesService:
         return location_riddle_dto
 
     def get_location_riddles_for_user(self, user_id: str, requester_id: str) -> list[Union[LocationRiddleDTO, SolvedLocationRiddleDTO]]:
-        # TODO: check if requesting user is following the user_id
         location_riddles = (
             self.location_riddle_repository.get_all_location_riddles_by_user_id(user_id)
         )
@@ -97,7 +95,6 @@ class LocationRiddlesService:
         for rating_entry in location_riddle.ratings:
             if rating_entry.user_id == user_id:
                 raise BadRequestError("User has already rated this location riddle")
-        # TODO: check if requesting user is following the user_id
 
         try:
             rating = Rating(user_id=user_id, rating=rating)
@@ -125,7 +122,6 @@ class LocationRiddlesService:
         for guess_entry in location_riddle.guesses:
             if guess_entry.user_id == user_id:
                 raise BadRequestError("User has already guessed this location riddle")
-        # TODO: check if requesting user is following the user_id
 
         try:
             guess = Guess(user_id=user_id, guess=[Decimal(str(coord)) for coord in guess])
