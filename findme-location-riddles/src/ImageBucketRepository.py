@@ -27,7 +27,7 @@ class ImageBucketRepository(AbstractImageBucketRepository):
         except ClientError as e:
             raise BadRequestError(f"Error saving image to bucket: {e}")
 
-    def get_image_from_s3(self, key: str) -> dict:
+    def get_image_from_s3(self, key: str) -> str:
         image_data = self.__get_image_data_from_s3(key)
 
         if image_data:
