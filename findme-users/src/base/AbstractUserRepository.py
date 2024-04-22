@@ -1,14 +1,15 @@
 from abc import ABC, abstractmethod
+from src.entities.User import User, UserPutDTO
 
 
 class AbstractUserRepository(ABC):
 
     @abstractmethod
-    def post_user_to_db(self, user_data: dict):
+    def post_user_to_db(self, user_data: User):
         pass
 
     @abstractmethod
-    def update_user_in_db(self, user_data: dict):
+    def update_user_in_db(self, user_id: str, user_data: UserPutDTO):
         pass
 
     @abstractmethod

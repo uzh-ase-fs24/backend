@@ -6,7 +6,7 @@ from aws_lambda_powertools.event_handler.exceptions import (
 )
 from botocore.exceptions import ClientError
 from pydantic import ValidationError
-from src.entities.User import User
+from src.entities.User import User, UserPutDTO
 from src.base.AbstractUserRepository import AbstractUserRepository
 from src.entities.Score import Score
 
@@ -24,7 +24,7 @@ class UserRepository(AbstractUserRepository):
 
         return self.__put_user_to_db(user)
 
-    def update_user_in_db(self, user_id: str, user_data: dict) -> User:
+    def update_user_in_db(self, user_id: str, user_data: UserPutDTO) -> User:
         if not self.does_user_with_user_id_exist(user_id):
             raise NotFoundError(f"No User with user_id: {user_id} found")
 

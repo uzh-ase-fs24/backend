@@ -9,6 +9,7 @@ from pydantic import ValidationError
 from aws_lambda_powertools.event_handler.exceptions import (
     BadRequestError,
     NotFoundError,
+    InternalServerError
 )
 from src.helpers.CalculateScore import calculate_score_and_distance
 from src.entities.LocationRiddle import LocationRiddle, LocationRiddleDTO, SolvedLocationRiddleDTO
@@ -41,7 +42,7 @@ class LocationRiddlesService:
             self.location_riddle_repository.write_location_riddle_to_db(location_riddle)
         except Exception as e:
             print(e)
-            raise BadRequestError(e)
+            raise InternalServerError(e)
 
         image_path = f"location-riddles/{location_riddle.location_riddle_id}.png"
         return self.image_bucket_repository.post_image_to_s3(image_base64, image_path)
