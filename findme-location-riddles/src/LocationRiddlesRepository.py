@@ -1,5 +1,3 @@
-from decimal import Decimal
-
 import boto3
 from aws_lambda_powertools.event_handler.exceptions import (
     BadRequestError,
@@ -8,11 +6,12 @@ from aws_lambda_powertools.event_handler.exceptions import (
 from boto3.dynamodb.conditions import Key
 from botocore.exceptions import ClientError
 from pydantic import ValidationError
-from src.entities.LocationRiddle import LocationRiddle
-from src.entities.Rating import Rating
-from src.entities.Comment import Comment
-from src.entities.Guess import Guess
-from src.base.AbstractLocationRiddlesRepository import AbstractLocationRiddlesRepository
+
+from .base.AbstractLocationRiddlesRepository import AbstractLocationRiddlesRepository
+from .entities.Comment import Comment
+from .entities.Guess import Guess
+from .entities.LocationRiddle import LocationRiddle
+from .entities.Rating import Rating
 
 
 class LocationRiddlesRepository(AbstractLocationRiddlesRepository):
@@ -49,7 +48,9 @@ class LocationRiddlesRepository(AbstractLocationRiddlesRepository):
 
         return location_riddles
 
-    def get_location_riddle_by_location_riddle_id_from_db(self, location_riddle_id: str):
+    def get_location_riddle_by_location_riddle_id_from_db(
+        self, location_riddle_id: str
+    ):
         response = self.table.get_item(Key={"location_riddle_id": location_riddle_id})
 
         if "Item" not in response:
@@ -64,13 +65,19 @@ class LocationRiddlesRepository(AbstractLocationRiddlesRepository):
 
         return location_riddle
 
-    def update_location_riddle_rating_in_db(self, location_riddle_id: str, rating: Rating):
+    def update_location_riddle_rating_in_db(
+        self, location_riddle_id: str, rating: Rating
+    ):
         return self.__append_attribute(location_riddle_id, "ratings", rating)
 
-    def update_location_riddle_comments_in_db(self, location_riddle_id: str, comment: Comment):
+    def update_location_riddle_comments_in_db(
+        self, location_riddle_id: str, comment: Comment
+    ):
         return self.__append_attribute(location_riddle_id, "comments", comment)
 
-    def update_location_riddle_guesses_in_db(self, location_riddle_id: str, guess: Guess):
+    def update_location_riddle_guesses_in_db(
+        self, location_riddle_id: str, guess: Guess
+    ):
         return self.__append_attribute(location_riddle_id, "guesses", guess)
 
     def delete_location_riddle_from_db(self, location_riddle_id: str):
@@ -89,6 +96,10 @@ class LocationRiddlesRepository(AbstractLocationRiddlesRepository):
             )
         except ClientError as e:
             print(f"Error updating location_riddle {attribute} in DynamoDB: {e}")
-            raise BadRequestError(f"Error updating location_riddle {attribute} in DynamoDB: {e}")
+            raise BadRequestError(
+                f"Error updating location_riddle {attribute} in DynamoDB: {e}"
+            )
 
-        return self.get_location_riddle_by_location_riddle_id_from_db(location_riddle_id)
+        return self.get_location_riddle_by_location_riddle_id_from_db(
+            location_riddle_id
+        )

@@ -1,8 +1,7 @@
+from pydantic import BaseModel
 from typing import List, Optional
 
-from pydantic import BaseModel
-
-from src.entities.User import UserDTO
+from .User import UserDTO
 
 
 class UserConnections(BaseModel):

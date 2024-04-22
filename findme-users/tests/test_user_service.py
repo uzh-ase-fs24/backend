@@ -1,6 +1,7 @@
 import unittest
-from src.UserService import UserService
-from src.test.MockUserRepository import MockUserRepository
+
+from ..src.UserService import UserService
+from ..src.test.MockUserRepository import MockUserRepository
 
 
 class TestUserService(unittest.TestCase):
@@ -19,7 +20,11 @@ class TestUserService(unittest.TestCase):
         self.assertEqual(result.user_id, "1")
 
         # Test incorrect input
-        user_data = {"username": "testuser_2", "first_name": "Test", "last_name": "User"}
+        user_data = {
+            "username": "testuser_2",
+            "first_name": "Test",
+            "last_name": "User",
+        }
         user_id = "1"
         with self.assertRaises(ValueError):
             self.user_service.post_user(user_data, user_id)
@@ -76,7 +81,9 @@ class TestUserService(unittest.TestCase):
         # Test correct input
         username_prefix = "j"
         user_id = "1"
-        self.assertEqual(len(self.user_service.get_similar_users(username_prefix, user_id)), 2)
+        self.assertEqual(
+            len(self.user_service.get_similar_users(username_prefix, user_id)), 2
+        )
         username_prefix = "jane"
         result = self.user_service.get_similar_users(username_prefix, user_id)
         self.assertEqual(len(result), 1)
@@ -101,5 +108,6 @@ class TestUserService(unittest.TestCase):
         result = self.user_service.does_user_with_user_id_exist(user_id)
         self.assertFalse(result)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()
