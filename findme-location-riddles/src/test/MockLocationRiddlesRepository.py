@@ -10,7 +10,7 @@ class MockLocationRiddlesRepository(AbstractLocationRiddlesRepository):
         self.mock_data = LocationRiddle(
             **{
                 "location_riddle_id": "mock_location_riddle_id",
-                "user_id": "mock_user_id",
+                "username": "mock_username",
                 "location": [0.0, 0.0],
             }
         )
@@ -18,7 +18,7 @@ class MockLocationRiddlesRepository(AbstractLocationRiddlesRepository):
     def write_location_riddle_to_db(self, location_riddle: LocationRiddle):
         self.mock_data = location_riddle
 
-    def get_all_location_riddles_by_user_id(self, user_id: str):
+    def get_all_location_riddles_by_username(self, username: str):
         return [self.mock_data]
 
     def get_location_riddle_by_location_riddle_id_from_db(
