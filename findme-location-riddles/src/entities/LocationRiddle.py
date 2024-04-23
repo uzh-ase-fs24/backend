@@ -1,8 +1,9 @@
 from datetime import datetime
 from decimal import Decimal
-from pydantic import BaseModel, field_validator, ValidationError
+from pydantic import BaseModel
 from typing import List, Optional
 
+from .Coordinate import Coordinate
 from .Comment import Comment
 from .Guess import Guess
 from .Rating import Rating
@@ -11,7 +12,7 @@ from .Rating import Rating
 class LocationRiddle(BaseModel):
     location_riddle_id: str
     username: str
-    location: List[Decimal]
+    location: Coordinate
     ratings: List[Rating] = []
     comments: List[Comment] = []
     guesses: List[Guess] = []
@@ -24,19 +25,6 @@ class LocationRiddle(BaseModel):
             self.average_rating = sum(rating.rating for rating in self.ratings) / len(
                 self.ratings
             )
-
-    @field_validator("location")
-    def validate_coordinates(cls, v):
-        if len(v) != 2:
-            raise ValidationError(
-                "Coordinate should contain 2 values: latitude and longitude"
-            )
-        # ToDo: implement validation for latitude and longitude for coordinates used in frontend
-        # if not (-90 <= v[0] <= 90):
-        #     raise ValidationError('Latitude should be between -90 and 90')
-        # if not (-180 <= v[1] <= 180):
-        #     raise ValidationError('Longitude should be between -180 and 180')
-        return v
 
     def to_dto(self, username: str):
         if (
@@ -51,7 +39,7 @@ class SolvedLocationRiddleDTO(BaseModel):
     solved: bool = True
     location_riddle_id: str
     username: str
-    location: List[Decimal]
+    location: Coordinate
     comments: List[Comment] = []
     guesses: List[Guess] = []
     created_at: int = int(datetime.now().timestamp())

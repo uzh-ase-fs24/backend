@@ -11,6 +11,7 @@ from decimal import Decimal
 from pydantic import ValidationError
 from typing import Union
 
+from .entities.Coordinate import Coordinate
 from .entities.Comment import Comment
 from .entities.Guess import Guess
 from .entities.LocationRiddle import (
@@ -30,10 +31,11 @@ class LocationRiddlesService:
     def post_location_riddle(
         self, image_base64: str, location: list, username: str
     ) -> dict:
+        print(location)
         location_riddle_data = {
             "location_riddle_id": str(uuid.uuid4()),
             "username": username,
-            "location": [Decimal(str(coord)) for coord in location],
+            "location": Coordinate(coordinate=[Decimal(str(coord)) for coord in location]),
         }
 
         try:
@@ -157,7 +159,7 @@ class LocationRiddlesService:
 
         try:
             guess = Guess(
-                username=username, guess=[Decimal(str(coord)) for coord in guess]
+                username=username, guess=Coordinate(coordinate=[Decimal(str(coord)) for coord in guess])
             )
         except ValidationError as e:
             print(f"unable to update location_riddle with provided parameters. {e}")
@@ -176,8 +178,8 @@ class LocationRiddlesService:
             raise BadRequestError(e)
 
         score, distance = calculate_score_and_distance(
-            map(float, tuple(updated_location_riddle.location)),
-            map(float, tuple(guess.guess)),
+            map(float, tuple(updated_location_riddle.location.coordinate)),
+            map(float, tuple(guess.guess.coordinate)),
         )
 
         try:
