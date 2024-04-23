@@ -1,3 +1,4 @@
+import math
 import boto3
 import json
 import os
@@ -261,3 +262,14 @@ class LocationRiddlesService:
             FunctionName=os.environ["USER_FUNCTION_NAME"],
             Payload=json.dumps(event_dict),
         )
+
+    @staticmethod
+    def calculate_score_and_distance(
+            actual_coord, guessed_coord, max_score=10000, distance_penalty=100
+    ):
+        distance = (math.sqrt((actual_coord[0] - guessed_coord[1]) ** 2 + (actual_coord[1] - guessed_coord[1]) ** 2)
+                    / 1000)
+
+        # Calculate score with simple linear penalty
+        score = max(0, max_score - distance * distance_penalty)
+        return score, distance
