@@ -1,58 +1,37 @@
-from src.base.AbstractUserRepository import AbstractUserRepository
-
-
-class User:
-    def __init__(self, user_id, username, first_name, last_name):
-        self.user_id = user_id
-        self.username = username
-        self.first_name = first_name
-        self.last_name = last_name
-
-    def dict(self, exclude=set()):
-        return {
-            attr:
-                [item.dict() if hasattr(item, 'dict') and callable(item.dict) else item for item in value]
-                if isinstance(value, list)
-                else value.dict()
-                if hasattr(value, 'dict') and callable(value.dict)
-                else value
-            for attr, value in self.__dict__.items()
-            if attr not in exclude
-        }
+from ..base.AbstractUserRepository import AbstractUserRepository
 
 
 class MockUserRepository(AbstractUserRepository):
     def __init__(self):
         self.users = []
 
-    def post_user_to_db(self, user_data):
-        user = User(**user_data)
-        if self.does_user_with_user_id_exist(user.user_id):
-            raise ValueError(f"User with id {user.user_id} already has an account!")
-        if self.__does_user_with_username_exist(user.username):
+    def post_user_to_db(self, user):
+        if self.does_user_with_username_exist(user.username):
             raise ValueError(f"Username '{user.username}' is already taken!")
         self.users.append(user)
         return user
 
-    def update_user_in_db(self, user_data):
-        user = User(**user_data)
+    def update_user_in_db(self, username, user_put_dto):
         for i, u in enumerate(self.users):
-            if u.user_id == user.user_id:
-                self.users[i] = user
-                return user
-        raise ValueError(f"No User with user_id: {user.user_id} found")
+            if u.username == username:
+                self.users[i].first_name = user_put_dto.first_name
+                self.users[i].last_name = user_put_dto.last_name
+                return self.users[i]
+        raise ValueError(f"No User with username: {username} found")
 
-    def get_user_by_user_id_from_db(self, user_id):
+    def get_user_by_username_from_db(self, username):
         for user in self.users:
-            if user.user_id == user_id:
+            if user.username == username:
                 return user
-        raise ValueError(f"No User with user_id: {user_id} found")
+        raise ValueError(f"No User with username: {username} found")
 
     def get_users_by_username_prefix(self, username_prefix):
-        return [user for user in self.users if user.username.startswith(username_prefix)]
+        return [
+            user for user in self.users if user.username.startswith(username_prefix)
+        ]
 
-    def does_user_with_user_id_exist(self, user_id):
-        return any(user.user_id == user_id for user in self.users)
+    def update_user_score_in_db(self, username, score):
+        return self.get_user_by_username_from_db(username)
 
-    def __does_user_with_username_exist(self, username):
+    def does_user_with_username_exist(self, username):
         return any(user.username == username for user in self.users)

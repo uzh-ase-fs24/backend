@@ -67,17 +67,22 @@ functions:
     environment:
       FRONTEND_ORIGIN: ${self:custom.stage.${opt:stage}.frontendOrigin}
       AUTH0_DOMAIN: ${self:custom.stage.${opt:stage}.auth0Domain}
-      AUTH0_AUDIENCE: ${self:custom.stage.${opt:stage}.auth0Audience}
+      AUTH0_AUDIENCE: ${self:custom.stage.${opt:stage, 'dev'}.auth0Audience}
     events:
       - http:
-          path: /users/{user_id}
+          path: /users/swagger
+          method: get
+          cors:
+            origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
+      - http:
+          path: /users/{username}
           method: get
           cors:
             origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
           request:
             parameters:
               paths:
-                id: true
+                username: true
       - http:
           path: /users
           method: get
@@ -109,35 +114,35 @@ functions:
                 username: true
                 type: false
       - http:
-          path: /users/{user_id}/follow
+          path: /users/{username}/follow
           method: put
           cors:
             origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
           request:
             parameters:
               paths:
-                id: true
+                username: true
       - http:
-          path: /users/{user_id}/follow
+          path: /users/{username}/follow
           method: patch
           cors:
             origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
           request:
             parameters:
               paths:
-                id: true
+                username: true
               querystrings:
                 action: true
                 type: false
       - http:
-          path: /users/{user_id}/follow
+          path: /users/{username}/follow
           method: get
           cors:
             origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
           request:
             parameters:
               paths:
-                id: true
+                username: true
       - http:
           path: /users/follow
           method: get
@@ -152,9 +157,14 @@ functions:
     environment:
       FRONTEND_ORIGIN: ${self:custom.stage.${opt:stage}.frontendOrigin}
       AUTH0_DOMAIN: ${self:custom.stage.${opt:stage}.auth0Domain}
-      AUTH0_AUDIENCE: ${self:custom.stage.${opt:stage}.auth0Audience}
+      AUTH0_AUDIENCE: ${self:custom.stage.${opt:stage, 'local'}.auth0Audience}
       USER_FUNCTION_NAME: findme-users-${opt:stage}
     events:
+      - http:
+          path: /location-riddles/swagger
+          method: get
+          cors:
+            origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
       - http:
           path: /location-riddles
           method: post
@@ -193,7 +203,7 @@ functions:
               paths:
                 id: true
       - http:
-          path: /location-riddles/user/{user_id}
+          path: /location-riddles/user/{username}
           method: get
           cors:
             origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
@@ -240,21 +250,12 @@ resources:
             AttributeType: S
           - AttributeName: username
             AttributeType: S
-          - AttributeName: user_id
-            AttributeType: S
         BillingMode: PAY_PER_REQUEST
         KeySchema:
           - AttributeName: partition_key
             KeyType: HASH
           - AttributeName: username
             KeyType: RANGE
-        GlobalSecondaryIndexes:
-          - IndexName: UserIdIndex
-            KeySchema:
-              - AttributeName: user_id
-                KeyType: HASH
-            Projection:
-              ProjectionType: ALL
 
     FollowerTable:
       Type: AWS::DynamoDB::Table
@@ -263,11 +264,11 @@ resources:
         AttributeDefinitions:
           - AttributeName: partition_key # REQUEST / FOLLOWERS / FOLLOWING
             AttributeType: S
-          - AttributeName: sort_key # ID
+          - AttributeName: sort_key # USERNAME
             AttributeType: S
-          - AttributeName: requestee_id
+          - AttributeName: requestee
             AttributeType: S
-          - AttributeName: requester_id
+          - AttributeName: requester
             AttributeType: S
         KeySchema:
           - AttributeName: partition_key
@@ -276,17 +277,17 @@ resources:
             KeyType: RANGE
         BillingMode: PAY_PER_REQUEST
         GlobalSecondaryIndexes:
-          - IndexName: RequesterIDIndex
+          - IndexName: RequesterIndex
             KeySchema:
-              - AttributeName: requester_id
+              - AttributeName: requester
                 KeyType: HASH
               - AttributeName: partition_key
                 KeyType: RANGE
             Projection:
               ProjectionType: ALL
-          - IndexName: RequesteeIDIndex
+          - IndexName: RequesteeIndex
             KeySchema:
-              - AttributeName: requestee_id
+              - AttributeName: requestee
                 KeyType: HASH
               - AttributeName: partition_key
                 KeyType: RANGE
@@ -300,7 +301,7 @@ resources:
         AttributeDefinitions:
           - AttributeName: location_riddle_id
             AttributeType: S
-          - AttributeName: user_id
+          - AttributeName: username
             AttributeType: S
         KeySchema:
           - AttributeName: location_riddle_id
@@ -309,7 +310,7 @@ resources:
         GlobalSecondaryIndexes:
           - IndexName: UserIndex
             KeySchema:
-              - AttributeName: user_id
+              - AttributeName: username
                 KeyType: HASH
             Projection:
               ProjectionType: ALL

@@ -1,6 +1,7 @@
 import unittest
-from src.UserService import UserService
-from src.test.MockUserRepository import MockUserRepository
+
+from ..src.UserService import UserService
+from ..src.test.MockUserRepository import MockUserRepository
 
 
 class TestUserService(unittest.TestCase):
@@ -10,96 +11,97 @@ class TestUserService(unittest.TestCase):
 
     def test_post_user(self):
         # Test correct input
-        user_data = {"username": "testuser", "first_name": "Test", "last_name": "User"}
-        user_id = "1"
-        result = self.user_service.post_user(user_data, user_id)
-        self.assertEqual(result["username"], "testuser")
-        self.assertEqual(result["first_name"], "Test")
-        self.assertEqual(result["last_name"], "User")
-        self.assertEqual(result["user_id"], "1")
+        user_data = {"first_name": "Test", "last_name": "User"}
+        username = "testuser"
+        result = self.user_service.post_user(user_data, username)
+        self.assertEqual(result.username, "testuser")
+        self.assertEqual(result.first_name, "Test")
+        self.assertEqual(result.last_name, "User")
 
-        # Test incorrect input
-        user_data = {"username": "testuser_2", "first_name": "Test", "last_name": "User"}
-        user_id = "1"
+        # Test incorrect input (same username)
+        user_data = {
+            "first_name": "Test",
+            "last_name": "User",
+        }
+        username = "testuser"
         with self.assertRaises(ValueError):
-            self.user_service.post_user(user_data, user_id)
-        user_data = {"username": "testuser", "first_name": "Test", "last_name": "User"}
-        user_id = "2"
-        with self.assertRaises(ValueError):
-            self.user_service.post_user(user_data, user_id)
+            self.user_service.post_user(user_data, username)
 
     def test_get_user(self):
         # Create a user
-        user_data = {"username": "testuser", "first_name": "Test", "last_name": "User"}
-        user_id = "1"
-        _ = self.user_service.post_user(user_data, user_id)
+        user_data = {"first_name": "Test", "last_name": "User"}
+        username = "testuser"
+        _ = self.user_service.post_user(user_data, username)
 
         # Test correct input
-        user_id = "1"
-        result = self.user_service.get_user(user_id)
-        self.assertEqual(result["user_id"], "1")
+        username = "testuser"
+        result = self.user_service.get_user(username)
+        self.assertEqual(result.last_name, "User")
 
         # Test incorrect input
-        user_id = "2"
+        username = "not_existing"
         with self.assertRaises(ValueError):
-            self.user_service.get_user(user_id)
+            self.user_service.get_user(username)
 
     def test_update_user(self):
         # Create a user
-        user_data = {"username": "testuser", "first_name": "Test", "last_name": "User"}
-        user_id = "1"
-        _ = self.user_service.post_user(user_data, user_id)
+        user_data = {"first_name": "Test", "last_name": "User"}
+        username = "testuser"
+        _ = self.user_service.post_user(user_data, username)
 
         # Test correct input
-        user_data = {"username": "testuser", "first_name": "Updated", "last_name": "User"}
-        user_id = "1"
-        result = self.user_service.update_user(user_data, user_id)
-        self.assertEqual(result["first_name"], "Updated")
+        user_data = {"first_name": "Updated", "last_name": "User"}
+        username = "testuser"
+        result = self.user_service.update_user(user_data, username)
+        self.assertEqual(result.first_name, "Updated")
 
         # Test incorrect input
-        user_id = "2"
+        username = "non_existing"
         with self.assertRaises(ValueError):
-            self.user_service.update_user(user_data, user_id)
+            self.user_service.update_user(user_data, username)
 
     def test_get_similar_users(self):
         # Create users
-        user_data = {"username": "johndoe", "first_name": "John", "last_name": "Doe"}
-        user_id = "1"
-        _ = self.user_service.post_user(user_data, user_id)
+        user_data = {"first_name": "John", "last_name": "Doe"}
+        username = "johndoe"
+        _ = self.user_service.post_user(user_data, username)
         user_data = {"username": "janedoe", "first_name": "Jane", "last_name": "Doe"}
-        user_id = "2"
-        _ = self.user_service.post_user(user_data, user_id)
-        user_data = {"username": "jackdoe", "first_name": "jack", "last_name": "Doe"}
-        user_id = "3"
-        _ = self.user_service.post_user(user_data, user_id)
+        username = "janedoe"
+        _ = self.user_service.post_user(user_data, username)
+        user_data = {"first_name": "jack", "last_name": "Doe"}
+        username = "jackdoe"
+        _ = self.user_service.post_user(user_data, username)
 
         # Test correct input
         username_prefix = "j"
-        user_id = "1"
-        self.assertEqual(len(self.user_service.get_similar_users(username_prefix, user_id)), 2)
+        username = "johndoe"
+        self.assertEqual(
+            len(self.user_service.get_similar_users(username_prefix, username)), 2
+        )
         username_prefix = "jane"
-        result = self.user_service.get_similar_users(username_prefix, user_id)
+        result = self.user_service.get_similar_users(username_prefix, username)
         self.assertEqual(len(result), 1)
-        self.assertEqual(result[0]["username"], "janedoe")
+        self.assertEqual(result[0].last_name, "Doe")
 
         # Test incorrect input
-        username_prefix = "nonexistent"
+        username_prefix = "non_exisiting"
         with self.assertRaises(Exception):
-            self.user_service.get_similar_users(username_prefix, user_id)
+            self.user_service.get_similar_users(username_prefix, username)
 
-    def test_does_user_with_user_id_exist(self):
-        user_data = {"username": "testuser", "first_name": "Test", "last_name": "User"}
-        user_id = "1"
-        _ = self.user_service.post_user(user_data, user_id)
+    def test_does_user_with_username_exist(self):
+        user_data = {"first_name": "Test", "last_name": "User"}
+        username = "testuser"
+        _ = self.user_service.post_user(user_data, username)
         # Test correct input
-        user_id = "1"
-        result = self.user_service.does_user_with_user_id_exist(user_id)
+        username = "testuser"
+        result = self.user_service.does_user_with_username_exist(username)
         self.assertTrue(result)
 
         # Test incorrect input
-        user_id = "2"
-        result = self.user_service.does_user_with_user_id_exist(user_id)
+        username = "non_existing"
+        result = self.user_service.does_user_with_username_exist(username)
         self.assertFalse(result)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

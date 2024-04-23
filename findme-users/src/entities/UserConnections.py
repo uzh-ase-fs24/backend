@@ -1,10 +1,14 @@
-from typing import List
-
 from pydantic import BaseModel
+from typing import List, Optional
 
-from src.entities.User import User
+from .User import UserDTO
 
 
 class UserConnections(BaseModel):
-    following: List[User] = []
-    followers: List[User] = []
+    following: Optional[List[UserDTO]] = []
+    followers: Optional[List[UserDTO]] = []
+
+
+class UserConnectionsUsernames(BaseModel):
+    following: List[str] = []
+    followers: List[str] = []

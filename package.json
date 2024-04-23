@@ -4,6 +4,7 @@
   },
   "devDependencies": {
     "serverless-localstack": "^1.2.0",
+    "serverless-openapi-documentation": "^0.4.0",
     "serverless-python-requirements": "^6.0.1"
   }
 }

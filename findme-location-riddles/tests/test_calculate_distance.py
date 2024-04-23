@@ -1,6 +1,6 @@
 import unittest
 
-from src.helpers.CalculateDistance import haversine_distance
+from ..src.helpers.CalculateDistance import haversine_distance
 
 
 class TestCalculateDistance(unittest.TestCase):
@@ -17,8 +17,10 @@ class TestCalculateDistance(unittest.TestCase):
         # Test the distance calculation from Zurich to St. Gallen
         distance = haversine_distance(self.location_zurich, self.location_st_gallen)
         # Distance between choosen point at Zurich Hauptbahnhof and St.Gallen Hauptbahnhof is approx. 62'583 km (according to google maps)
-        self.assertAlmostEqual(distance, 62.583, delta=5)  # Allowing margin for calculation errors
+        self.assertAlmostEqual(
+            distance, 62.583, delta=5
+        )  # Allowing margin for calculation errors
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
