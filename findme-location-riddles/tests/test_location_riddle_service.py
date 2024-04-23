@@ -1,4 +1,5 @@
 import unittest
+from decimal import Decimal
 
 from ..src.LocationRiddlesService import LocationRiddlesService
 from ..src.test.MockImageBucketRepository import MockImageBucketRepository
@@ -63,9 +64,9 @@ class TestLocationRiddleService(unittest.TestCase):
         self.assertEqual(guess_result["location_riddle"]["username"], "mock_username")
         self.assertEqual(guess_result["location_riddle"]["comments"], [])
         self.assertEqual(
-            guess_result["location_riddle"]["guesses"],
-            [{"guess": [0.0, 0.0], "username": "mock_user2_id"}],
+            guess_result["location_riddle"]["guesses"][0]["username"], "mock_user2_id"
         )
+        self.assertEqual(guess_result["location_riddle"]["guesses"][0]["guess"]["coordinate"], [Decimal('0.0'), Decimal('0.0')])
         self.assertEqual(guess_result["location_riddle"]["average_rating"], None)
         self.assertEqual(guess_result["guess_result"]["distance"], 0.0)
         self.assertEqual(guess_result["guess_result"]["received_score"], 10000.0)
