@@ -31,7 +31,6 @@ class LocationRiddlesService:
     def post_location_riddle(
         self, image_base64: str, location: list, username: str
     ) -> dict:
-        print(location)
         location_riddle_data = {
             "location_riddle_id": str(uuid.uuid4()),
             "username": username,
@@ -177,9 +176,9 @@ class LocationRiddlesService:
             print(e)
             raise BadRequestError(e)
 
-        score, distance = calculate_score_and_distance(
-            map(float, tuple(updated_location_riddle.location.coordinate)),
-            map(float, tuple(guess.guess.coordinate)),
+        score, distance = LocationRiddlesService.calculate_score_and_distance(
+            [float(coord) for coord in updated_location_riddle.location.coordinate],
+            [float(coord) for coord in guess.guess.coordinate],
         )
 
         try:
@@ -250,7 +249,7 @@ class LocationRiddlesService:
         return user_connections["following"]
 
     def __write_score_to_user_in_user_db(
-        self, event, location_riddle_id: str, score: str
+        self, event, location_riddle_id: str, score: int
     ):
         event_dict = dict(event)
         event_dict["path"] = "/users/score"

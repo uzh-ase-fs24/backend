@@ -1,3 +1,4 @@
+from ..entities.Coordinate import Coordinate
 from ..base.AbstractLocationRiddlesRepository import AbstractLocationRiddlesRepository
 from ..entities.Comment import Comment
 from ..entities.Guess import Guess
@@ -11,7 +12,7 @@ class MockLocationRiddlesRepository(AbstractLocationRiddlesRepository):
             **{
                 "location_riddle_id": "mock_location_riddle_id",
                 "username": "mock_username",
-                "location": [0.0, 0.0],
+                "location": Coordinate(coordinate=[0.0, 0.0]),
             }
         )
 
