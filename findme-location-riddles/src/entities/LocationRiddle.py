@@ -78,6 +78,7 @@ class LocationRiddleDTO(BaseModel):
     username: str
     comments: List[Comment] = []
     created_at: int = int(datetime.now().timestamp())
+    average_rating: Optional[float] = None
     image_base64: Optional[str] = None
 
     def __init__(self, **data):
@@ -88,4 +89,5 @@ class LocationRiddleDTO(BaseModel):
             username=location_riddle.username,
             comments=location_riddle.comments,
             created_at=location_riddle.created_at,
+            average_rating=location_riddle.average_rating,
         )
