@@ -23,3 +23,7 @@ class AbstractUserRepository(ABC):
     @abstractmethod
     def update_user_score_in_db(self, username: str, score: int):
         pass
+
+    @abstractmethod
+    def does_user_with_username_exist(self, username: str) -> bool:
+        pass
