@@ -10,7 +10,7 @@ from .Rating import Rating
 
 class LocationRiddle(BaseModel):
     location_riddle_id: str
-    user_id: str
+    username: str
     location: List[Decimal]
     ratings: List[Rating] = []
     comments: List[Comment] = []
@@ -38,10 +38,10 @@ class LocationRiddle(BaseModel):
         #     raise ValidationError('Longitude should be between -180 and 180')
         return v
 
-    def to_dto(self, user_id: str):
+    def to_dto(self, username: str):
         if (
-            any(guess.user_id == user_id for guess in self.guesses)
-            or self.user_id == user_id
+            any(guess.username == username for guess in self.guesses)
+            or self.username == username
         ):
             return SolvedLocationRiddleDTO(**self.dict())
         return LocationRiddleDTO(**self.dict())
@@ -50,7 +50,7 @@ class LocationRiddle(BaseModel):
 class SolvedLocationRiddleDTO(BaseModel):
     solved: bool = True
     location_riddle_id: str
-    user_id: str
+    username: str
     location: List[Decimal]
     comments: List[Comment] = []
     guesses: List[Guess] = []
@@ -63,7 +63,7 @@ class SolvedLocationRiddleDTO(BaseModel):
         super().__init__(
             solved=True,
             location_riddle_id=location_riddle.location_riddle_id,
-            user_id=location_riddle.user_id,
+            username=location_riddle.username,
             location=location_riddle.location,
             comments=location_riddle.comments,
             guesses=location_riddle.guesses,
@@ -75,7 +75,7 @@ class SolvedLocationRiddleDTO(BaseModel):
 class LocationRiddleDTO(BaseModel):
     solved: bool = False
     location_riddle_id: str
-    user_id: str
+    username: str
     comments: List[Comment] = []
     created_at: int = int(datetime.now().timestamp())
     image_base64: Optional[str] = None
@@ -85,7 +85,7 @@ class LocationRiddleDTO(BaseModel):
         super().__init__(
             solved=False,
             location_riddle_id=location_riddle.location_riddle_id,
-            user_id=location_riddle.user_id,
+            username=location_riddle.username,
             comments=location_riddle.comments,
             created_at=location_riddle.created_at,
         )

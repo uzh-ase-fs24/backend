@@ -4,7 +4,7 @@ from decimal import Decimal
 
 
 class Guess(BaseModel):
-    user_id: str
+    username: str
     guess: List[Decimal]
 
     @field_validator('guess')

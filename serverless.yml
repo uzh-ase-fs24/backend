@@ -203,7 +203,7 @@ functions:
               paths:
                 id: true
       - http:
-          path: /location-riddles/user/{user_id}
+          path: /location-riddles/user/{username}
           method: get
           cors:
             origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
@@ -301,7 +301,7 @@ resources:
         AttributeDefinitions:
           - AttributeName: location_riddle_id
             AttributeType: S
-          - AttributeName: user_id
+          - AttributeName: username
             AttributeType: S
         KeySchema:
           - AttributeName: location_riddle_id
@@ -310,7 +310,7 @@ resources:
         GlobalSecondaryIndexes:
           - IndexName: UserIndex
             KeySchema:
-              - AttributeName: user_id
+              - AttributeName: username
                 KeyType: HASH
             Projection:
               ProjectionType: ALL

@@ -12,7 +12,7 @@ class AbstractLocationRiddlesRepository(ABC):
         pass
 
     @abstractmethod
-    def get_all_location_riddles_by_user_id(self, user_id: str):
+    def get_all_location_riddles_by_username(self, username: str):
         pass
 
     @abstractmethod
