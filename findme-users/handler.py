@@ -197,7 +197,9 @@ def get_user_connections(username: Annotated[str, Path()]) -> UserConnections:
     Endpoint: GET /users/username/follow
     Body: None
     Description: Retrieves all connections (followers, following) of a specific user
-    Returns: Dictionary containing one list for followers and one for following. Each list contains of 0-many user objects.
+    Returns:
+        Dictionary containing one list for followers and one for following.
+        Each list contains of 0-many user objects.
     """
     connections = follower_service.get_user_connections(username)
     followers = (

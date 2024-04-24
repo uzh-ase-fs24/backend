@@ -50,7 +50,7 @@ class TestLocationRiddleService(unittest.TestCase):
         # Test that the user can not rate its own location riddle
         with self.assertRaises(Exception):
             self.location_riddles_service.guess_location_riddle(
-                "mock_location_riddle_id", "mock_username", [0.0, 0.0]
+                "event", "mock_location_riddle_id", "mock_username", [0.0, 0.0]
             )
 
         # Test that a different user can guess the location riddle
@@ -66,7 +66,8 @@ class TestLocationRiddleService(unittest.TestCase):
         self.assertEqual(
             guess_result["location_riddle"]["guesses"][0]["username"], "mock_username2"
         )
-        self.assertEqual(guess_result["location_riddle"]["guesses"][0]["guess"]["coordinate"], [Decimal('0.0'), Decimal('0.0')])
+        self.assertEqual(guess_result["location_riddle"]["guesses"][0]["guess"]["coordinate"],
+                         [Decimal('0.0'), Decimal('0.0')])
         self.assertEqual(guess_result["location_riddle"]["average_rating"], None)
         self.assertEqual(guess_result["guess_result"]["distance"], 0.0)
         self.assertEqual(guess_result["guess_result"]["received_score"], 10000.0)
@@ -74,7 +75,7 @@ class TestLocationRiddleService(unittest.TestCase):
         # Test that the user can not guess a location riddle twice
         with self.assertRaises(Exception):
             self.location_riddles_service.guess_location_riddle(
-                "mock_location_riddle_id", "mock_username2", [0.0, 0.0]
+                "event", "mock_location_riddle_id", "mock_username2", [0.0, 0.0]
             )
 
     def test_rate_location_riddle(self):

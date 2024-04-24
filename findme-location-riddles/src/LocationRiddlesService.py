@@ -54,7 +54,7 @@ class LocationRiddlesService:
             self.location_riddle_repository.write_location_riddle_to_db(location_riddle)
         except Exception as e:
             print(e)
-            raise InternalServerError(e)
+            raise InternalServerError(f"{e}")
         return response
 
     def get_location_riddle(
@@ -139,7 +139,7 @@ class LocationRiddlesService:
             )
         except Exception as e:
             print(e)
-            raise BadRequestError(e)
+            raise BadRequestError(f"{e}")
 
         return updated_location_riddle.to_dto(username)
 
@@ -174,7 +174,7 @@ class LocationRiddlesService:
             )
         except Exception as e:
             print(e)
-            raise BadRequestError(e)
+            raise BadRequestError(f"{e}")
 
         score, distance = LocationRiddlesService.calculate_score_and_distance(
             [float(coord) for coord in updated_location_riddle.location.coordinate],
@@ -210,7 +210,7 @@ class LocationRiddlesService:
             )
         except Exception as e:
             print(e)
-            raise BadRequestError(e)
+            raise BadRequestError(f"{e}")
 
         return updated_location_riddle.to_dto(username)
 

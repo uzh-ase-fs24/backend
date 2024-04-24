@@ -9,13 +9,12 @@ class TestCalculateDistance(unittest.TestCase):
 
     def test_distance_zero(self):
         # Test the distance calculation when both points are the same (Zurich HB to Zurich HB)
-        _ ,distance = LocationRiddlesService.calculate_score_and_distance(self.location_zurich, self.location_zurich)
+        _, distance = LocationRiddlesService.calculate_score_and_distance(self.location_zurich, self.location_zurich)
         self.assertEqual(distance, 0)
 
     def test_distance_zurich_to_st_gallen(self):
         # Test the distance calculation from Zurich to St. Gallen
         _, distance = LocationRiddlesService.calculate_score_and_distance(self.location_zurich, self.location_st_gallen)
-        # Distance between choosen point at Zurich Hauptbahnhof and St.Gallen Hauptbahnhof is approx. 62'583 km (according to google maps)
         self.assertAlmostEqual(
             distance,  92.612, delta=5
         )  # Allowing margin for calculation errors
