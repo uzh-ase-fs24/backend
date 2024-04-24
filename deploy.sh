@@ -3,6 +3,7 @@
 # Default stage
 STAGE="dev"
 HOST="localstack-main"
+LOAD_DEFAULT_STATE="false"
 
 # Parse command line options
 while [[ $# -gt 0 ]]; do
@@ -13,6 +14,10 @@ while [[ $# -gt 0 ]]; do
         STAGE="$2"
         shift # past argument
         shift # past value
+        ;;
+        --load-default-state)
+        LOAD_DEFAULT_STATE="true"
+        shift # past argument
         ;;
         *)    # unknown option
         echo "Unknown option: $1"
@@ -60,5 +65,7 @@ fi
 
 echo "Deployment of all services completed successfully."
 
-echo "Adding default setup data..."
-sh infrastructure/default_setup/default_setup.sh
+if [ "$LOAD_DEFAULT_STATE" == "true" ]; then
+  echo "Adding default setup data..."
+  bash infrastructure/default_state_setup/setup.sh --all
+fi

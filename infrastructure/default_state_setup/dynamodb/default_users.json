@@ -1,0 +1,87 @@
+{
+  "Items": [
+    {
+      "last_name": {
+        "S": "Bauer"
+      },
+      "partition_key": {
+        "S": "USER"
+      },
+      "user_id": {
+        "S": "662642a6ea5057cd0b559ab5"
+      },
+      "first_name": {
+        "S": "Christian"
+      },
+      "scores": {
+        "L": []
+      },
+      "username": {
+        "S": "chrispyb"
+      }
+    },
+    {
+      "last_name": {
+        "S": "Meier"
+      },
+      "partition_key": {
+        "S": "USER"
+      },
+      "user_id": {
+        "S": "662642bfea5057cd0b559ad4"
+      },
+      "first_name": {
+        "S": "Lukas"
+      },
+      "scores": {
+        "L": []
+      },
+      "username": {
+        "S": "flyingbeat"
+      }
+    },
+    {
+      "last_name": {
+        "S": "Müller"
+      },
+      "partition_key": {
+        "S": "USER"
+      },
+      "user_id": {
+        "S": "66264246ea5057cd0b559a5d"
+      },
+      "first_name": {
+        "S": "Simon"
+      },
+      "scores": {
+        "L": []
+      },
+      "username": {
+        "S": "goldachboi"
+      }
+    },
+    {
+      "last_name": {
+        "S": "Schmidt"
+      },
+      "partition_key": {
+        "S": "USER"
+      },
+      "user_id": {
+        "S": "662642846589c98ee4832f2b"
+      },
+      "first_name": {
+        "S": "Ingmar"
+      },
+      "scores": {
+        "L": []
+      },
+      "username": {
+        "S": "lachs"
+      }
+    }
+  ],
+  "Count": 4,
+  "ScannedCount": 4,
+  "ConsumedCapacity": null
+}

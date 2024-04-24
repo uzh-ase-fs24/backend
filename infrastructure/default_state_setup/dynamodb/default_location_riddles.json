@@ -1,0 +1,155 @@
+{
+  "Items": [
+    {
+      "location_riddle_id": {
+        "S": "c4ad1dab-ec20-4b65-9087-5d7d56805489"
+      },
+      "comments": {
+        "L": []
+      },
+      "ratings": {
+        "L": []
+      },
+      "created_at": {
+        "N": "1713944461"
+      },
+      "location": {
+        "M": {
+          "coordinate": {
+            "L": [
+              {
+                "N": "904933.5279015605"
+              },
+              {
+                "N": "5930493.186690126"
+              }
+            ]
+          }
+        }
+      },
+      "average_rating": {
+        "NULL": true
+      },
+      "guesses": {
+        "L": []
+      },
+      "username": {
+        "S": "flyingbeat"
+      }
+    },
+    {
+      "location_riddle_id": {
+        "S": "329e0705-dc0b-47d3-b6a9-b140bbe13aa3"
+      },
+      "comments": {
+        "L": []
+      },
+      "ratings": {
+        "L": []
+      },
+      "created_at": {
+        "N": "1713944461"
+      },
+      "location": {
+        "M": {
+          "coordinate": {
+            "L": [
+              {
+                "N": "904933.5279015605"
+              },
+              {
+                "N": "5930493.186690126"
+              }
+            ]
+          }
+        }
+      },
+      "average_rating": {
+        "NULL": true
+      },
+      "guesses": {
+        "L": []
+      },
+      "username": {
+        "S": "lachs"
+      }
+    },
+    {
+      "location_riddle_id": {
+        "S": "8a8e4d1b-eb46-447d-ae99-691716feab92"
+      },
+      "comments": {
+        "L": []
+      },
+      "ratings": {
+        "L": []
+      },
+      "created_at": {
+        "N": "1713944461"
+      },
+      "location": {
+        "M": {
+          "coordinate": {
+            "L": [
+              {
+                "N": "904933.5279015605"
+              },
+              {
+                "N": "5930493.186690126"
+              }
+            ]
+          }
+        }
+      },
+      "average_rating": {
+        "NULL": true
+      },
+      "guesses": {
+        "L": []
+      },
+      "username": {
+        "S": "goldachboi"
+      }
+    },
+    {
+      "location_riddle_id": {
+        "S": "b5c648f1-40ac-4b98-a259-6c4e2aa3fa3"
+      },
+      "comments": {
+        "L": []
+      },
+      "ratings": {
+        "L": []
+      },
+      "created_at": {
+        "N": "1713944461"
+      },
+      "location": {
+        "M": {
+          "coordinate": {
+            "L": [
+              {
+                "N": "904933.5279015605"
+              },
+              {
+                "N": "5930493.186690126"
+              }
+            ]
+          }
+        }
+      },
+      "average_rating": {
+        "NULL": true
+      },
+      "guesses": {
+        "L": []
+      },
+      "username": {
+        "S": "chrispyb"
+      }
+    }
+  ],
+  "Count": 4,
+  "ScannedCount": 4,
+  "ConsumedCapacity": null
+}

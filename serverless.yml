@@ -47,6 +47,7 @@ package:
     - '!**/*.md'
     - '!**/requirements.txt'
     - '!**/package*.json'
+    - '!**/infrastructure/**'
 
 provider:
   name: aws
