@@ -266,7 +266,7 @@ class LocationRiddlesService:
     def calculate_score_and_distance(
             actual_coord, guessed_coord, max_score=10000, distance_penalty=100
     ):
-        distance = (math.sqrt((actual_coord[0] - guessed_coord[1]) ** 2 + (actual_coord[1] - guessed_coord[1]) ** 2)
+        distance = (math.sqrt((actual_coord[0] - guessed_coord[0]) ** 2 + (actual_coord[1] - guessed_coord[1]) ** 2)
                     / 1000)
 
         # Calculate score with simple linear penalty
