@@ -33,12 +33,13 @@ class UserRepository(AbstractUserRepository):
             self.table.update_item(
                 Key={
                     "partition_key": "USER",
-                    "username": self.get_user_by_username_from_db(username).username,
+                    "username": username,
                 },
-                UpdateExpression="SET first_name = :fn, last_name = :ln",
+                UpdateExpression="SET first_name = :fn, last_name = :ln, bio = :b",
                 ExpressionAttributeValues={
                     ":fn": user_data.first_name,
                     ":ln": user_data.last_name,
+                    ":b": user_data.bio,
                 },
             )
         except ClientError as e:
@@ -49,7 +50,7 @@ class UserRepository(AbstractUserRepository):
 
     def get_user_by_username_from_db(self, username: str) -> User:
         response = self.table.query(
-            ProjectionExpression="username, first_name, last_name, scores",
+            ProjectionExpression="username, first_name, last_name, bio, scores",
             KeyConditionExpression=Key("partition_key").eq("USER")
             & Key("username").eq(username),
         )
@@ -66,7 +67,7 @@ class UserRepository(AbstractUserRepository):
 
     def get_users_by_username_prefix(self, username_prefix: str) -> [User]:
         response = self.table.query(
-            ProjectionExpression="username, first_name, last_name, scores",
+            ProjectionExpression="username, first_name, last_name, bio, scores",
             KeyConditionExpression=Key("partition_key").eq("USER")
             & Key("username").begins_with(username_prefix),
         )
