@@ -21,7 +21,6 @@ from .entities.LocationRiddle import (
     SolvedLocationRiddleDTO,
 )
 from .entities.Rating import Rating
-from .helpers.CalculateScore import calculate_score_and_distance
 
 
 class LocationRiddlesService:
@@ -74,7 +73,7 @@ class LocationRiddlesService:
         return location_riddle_dto
 
     def get_location_riddles_for_user(
-        self, username: str, requester_id: str
+        self, username: str, requester_username: str
     ) -> list[Union[LocationRiddleDTO, SolvedLocationRiddleDTO]]:
         location_riddles = (
             self.location_riddle_repository.get_all_location_riddles_by_username(username)
@@ -85,7 +84,7 @@ class LocationRiddlesService:
             )
 
         location_riddles = [
-            location_riddle.to_dto(requester_id) for location_riddle in location_riddles
+            location_riddle.to_dto(requester_username) for location_riddle in location_riddles
         ]
         for location_riddle in location_riddles:
             key = f"location-riddles/{location_riddle.location_riddle_id}.png"
@@ -104,7 +103,7 @@ class LocationRiddlesService:
             try:
                 response.extend(
                     self.get_location_riddles_for_user(
-                        username=following_user["username"], requester_id=username
+                        username=following_user["username"], requester_username=username
                     )
                 )
             except NotFoundError:
