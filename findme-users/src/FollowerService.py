@@ -3,6 +3,8 @@ from aws_lambda_powertools.event_handler.exceptions import (
 )
 from datetime import datetime
 
+from pydantic import ValidationError
+
 from .entities.FollowRequest import FollowRequest
 from .entities.UserConnections import UserConnectionsUsernames
 
@@ -17,14 +19,19 @@ class FollowerService:
                 "It is not possible to create the follow request since requester and requestee are the same person!"
             )
 
-        return self.follower_repository.create_follow_request(
-            {
-                "requester": requester,
-                "requestee": requestee,
-                "request_status": "pending",
-                "timestamp": datetime.now(),
-            }
-        )
+        try:
+            follow_request = FollowRequest(requester=requester,
+                                           requestee=requestee,
+                                           request_status="pending",
+                                           timestamp=datetime.now()
+                                           )
+        except ValidationError as e:
+            print(f"unable to create follow request with provided parameters. {e}")
+            raise BadRequestError(
+                f"unable to create follow request with provided parameters. {e}"
+            )
+
+        return self.follower_repository.create_follow_request(follow_request)
 
     def accept_follow_request(self, requester: str, requestee: str) -> FollowRequest:
         return self.follower_repository.accept_follow_request(requester, requestee)

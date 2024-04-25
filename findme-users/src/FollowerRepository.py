@@ -17,15 +17,7 @@ class FollowerRepository(AbstractFollowerRepository):
         self.dynamodb = boto3.resource("dynamodb", region_name="eu-central-2")
         self.table = self.dynamodb.Table("FollowerTable")
 
-    def create_follow_request(self, follow_request_data: dict) -> FollowRequest:
-        try:
-            follow_request = FollowRequest(**follow_request_data)
-        except ValidationError as e:
-            print(f"unable to create follow request with provided parameters. {e}")
-            raise BadRequestError(
-                f"unable to create follow request with provided parameters. {e}"
-            )
-
+    def create_follow_request(self, follow_request: FollowRequest) -> FollowRequest:
         # Check if follow request already exists
         existing_request = self.table.scan(
             FilterExpression=Attr("partition_key").eq("REQUEST")
@@ -33,7 +25,6 @@ class FollowerRepository(AbstractFollowerRepository):
                 f"{follow_request.requester}#{follow_request.requestee}"
             )
         )["Items"]
-
         if existing_request:
             raise BadRequestError("Follow request already exists")
 

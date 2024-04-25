@@ -75,7 +75,7 @@ class UserRepository(AbstractUserRepository):
 
         while "LastEvaluatedKey" in response:
             response = self.table.query(
-                ProjectionExpression="username, first_name, last_name",
+                ProjectionExpression="username, first_name, last_name, bio, scores",
                 ExclusiveStartKey=response["LastEvaluatedKey"],
                 KeyConditionExpression=Key("partition_key").eq("USER")
                 & Key("username").begins_with(username_prefix),

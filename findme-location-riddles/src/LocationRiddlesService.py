@@ -265,7 +265,6 @@ class LocationRiddlesService:
         key = f"location-riddles/{location_riddle.location_riddle_id}.png"
         location_riddle.image_base64 = self.image_bucket_repository.get_image_from_s3(key)
 
-
     @staticmethod
     def calculate_score_and_distance(
             actual_coord, guessed_coord, max_score=10000, distance_penalty=100
