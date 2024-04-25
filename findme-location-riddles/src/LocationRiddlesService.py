@@ -1,4 +1,6 @@
 import math
+from urllib.parse import urljoin
+
 import boto3
 import json
 import os
@@ -230,7 +232,8 @@ class LocationRiddlesService:
 
     def __get_following_users_list(self, event, username: str):
         event_dict = dict(event)
-        event_dict["path"] = f"/users/{username}/follow"
+        base_url = "/users/"
+        event_dict["path"] = urljoin(base_url, f"{username}/follow")
         client = boto3.client("lambda", region_name="eu-central-2")
         response = client.invoke(
             FunctionName=os.environ["USER_FUNCTION_NAME"],
