@@ -31,14 +31,12 @@ class LocationRiddlesService:
     def post_location_riddle(
         self, image_base64: str, location: list, username: str
     ) -> dict:
-        location_riddle_data = {
-            "location_riddle_id": str(uuid.uuid4()),
-            "username": username,
-            "location": Coordinate(coordinate=[Decimal(str(coord)) for coord in location]),
-        }
-
         try:
-            location_riddle = LocationRiddle(**location_riddle_data)
+            location_riddle = LocationRiddle(location_riddle_id=str(uuid.uuid4()),
+                                             username=username,
+                                             location=Coordinate(
+                                                 coordinate=[Decimal(str(coord)) for coord in location])
+                                             )
         except ValidationError as e:
             print(f"unable to update location_riddle with provided parameters. {e}")
             raise BadRequestError(

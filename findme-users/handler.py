@@ -13,6 +13,7 @@ from aws_lambda_powertools.event_handler.exceptions import (
     BadRequestError,
 )
 from typing import List
+from enum import Enum
 from findme.authorization import Authorizer
 
 from src.UserRepository import UserRepository
@@ -42,6 +43,14 @@ follower_repository = FollowerRepository()
 follower_service = FollowerService(follower_repository)
 
 
+class Attribute(Enum):
+    USERNAME = "username"
+    FINDME_USERNAME = "https://findme.ch/username"
+    LOCATION_RIDDLE_ID = "location_riddle_id"
+    SCORE = "score"
+    ACTION = "action"
+
+
 # TODO Beautify: constructor required for swagger but unused
 @app.post("/users")
 @tracer.capture_method
@@ -56,7 +65,6 @@ def post_user(user: UserPostDTO) -> UserDTO:
     Description: Creates a new user in the database.
     Returns: The created user.
     """
-
     return user_service.post_user(app.current_event.json_body, __get_username())
 
 
@@ -117,8 +125,8 @@ def post_score_to_user(score: Score) -> UserDTO:
     """
     return user_service.write_guessing_score_to_user(
         __get_username(),
-        __get_attribute("location_riddle_id"),
-        __get_attribute("score"),
+        __get_attribute(Attribute.LOCATION_RIDDLE_ID.value),
+        __get_attribute(Attribute.SCORE.value),
     )
 
 
@@ -133,7 +141,7 @@ def get_similar_users() -> List[UserDTO]:
     Returns: A list of users with similar usernames.
     """
     return user_service.get_similar_users(
-        app.current_event.query_string_parameters.get("username"), __get_username()
+        app.current_event.query_string_parameters.get(Attribute.USERNAME.value), __get_username()
     )
 
 
@@ -164,7 +172,7 @@ def update_follow_user(requester: Annotated[str, Path()]) -> FollowRequest:
     Returns: A json confirming the accepting or declining of the follow request
     """
     requestee = __get_username()
-    action = app.current_event.query_string_parameters.get("action")
+    action = app.current_event.query_string_parameters.get(Attribute.ACTION.value)
 
     if action == "accept":
         return follower_service.accept_follow_request(requester, requestee)
@@ -216,7 +224,7 @@ def get_user_connections(username: Annotated[str, Path()]) -> UserConnections:
 
 
 def __get_username():
-    return app.context.get("claims").get("https://findme.ch/username")
+    return app.context.get("claims").get(Attribute.FINDME_USERNAME.value)
 
 
 def __get_attribute(attribute: str):
