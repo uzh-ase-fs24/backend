@@ -6,7 +6,7 @@ from boto3.dynamodb.conditions import Attr
 from botocore.exceptions import ClientError
 from datetime import datetime
 
-from .PartitionKey import PartitionKey
+from .entities.PartitionKey import PartitionKey
 from .base.AbstractFollowerRepository import AbstractFollowerRepository
 from .entities.FollowRequest import FollowRequest
 from .entities.UserConnections import UserConnectionsUsernames

@@ -7,7 +7,7 @@ from boto3.dynamodb.conditions import Key
 from botocore.exceptions import ClientError
 from pydantic import ValidationError
 
-from .PartitionKey import PartitionKey
+from .entities.PartitionKey import PartitionKey
 from .base.AbstractUserRepository import AbstractUserRepository
 from .entities.Score import Score
 from .entities.User import User, UserPutDTO
