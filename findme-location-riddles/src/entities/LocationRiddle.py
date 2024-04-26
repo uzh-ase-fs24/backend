@@ -27,6 +27,7 @@ class LocationRiddle(BaseModel):
             )
 
     def to_dto(self, username: str):
+        # creates a solved or regular LocationRiddleDTO object based on the user that is requesting the data
         if (
             any(guess.username == username for guess in self.guesses)
             or self.username == username

@@ -14,6 +14,7 @@ from aws_lambda_powertools.event_handler.exceptions import (
 )
 
 from findme.authorization import Authorizer
+from enum import Enum
 
 from src.LocationRiddlesService import LocationRiddlesService
 from src.ImageBucketRepository import ImageBucketRepository
@@ -36,6 +37,15 @@ location_riddle_repository = LocationRiddlesRepository()
 location_riddles_service = LocationRiddlesService(location_riddle_repository, image_bucket_repository)
 
 
+class RequestBodyAttribute(Enum):
+    FINDME_USERNAME = "https://findme.ch/username"
+    LOCATION = "location"
+    IMAGE = "image"
+    GUESS = "guess"
+    COMMENT = "comment"
+    RATING = "rating"
+
+
 @app.post("/location-riddles")
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
@@ -49,8 +59,8 @@ def post_location_riddles():
         Description: Creates a new location riddle with the provided image and location.
         Returns: A message indicating the successful upload of the location riddle.
     """
-    return location_riddles_service.post_location_riddle(__get_attribute("image", app),
-                                                         __get_attribute("location", app),
+    return location_riddles_service.post_location_riddle(__get_attribute_from_request_body(RequestBodyAttribute.IMAGE.value, app),
+                                                         __get_attribute_from_request_body(RequestBodyAttribute.LOCATION.value, app),
                                                          __get_username())
 
 
@@ -74,7 +84,7 @@ def post_guess_to_location_riddle(location_riddle_id: Annotated[str, Path()]):
     return location_riddles_service.guess_location_riddle(app.current_event,
                                                           location_riddle_id,
                                                           __get_username(),
-                                                          __get_attribute("guess", app))
+                                                          __get_attribute_from_request_body(RequestBodyAttribute.GUESS.value, app))
 
 
 @app.post("/location-riddles/<location_riddle_id>/comment")
@@ -90,7 +100,7 @@ def post_comment_to_location_riddle(location_riddle_id: Annotated[str, Path()]):
         Returns: The updated location riddle with the new comment.
     """
     return location_riddles_service.comment_location_riddle(location_riddle_id, __get_username(),
-                                                            __get_attribute("comment", app))
+                                                            __get_attribute_from_request_body(RequestBodyAttribute.COMMENT.value, app))
 
 
 @app.get("/location-riddles")
@@ -158,7 +168,7 @@ def rate_location_riddle(location_riddle_id: Annotated[str, Path()]):
         Returns: The updated location riddle with the new rating.
     """
     return location_riddles_service.rate_location_riddle(location_riddle_id, __get_username(),
-                                                         __get_attribute("rating", app))
+                                                         __get_attribute_from_request_body(RequestBodyAttribute.RATING.value, app))
 
 
 @app.delete("/location-riddles/<location_riddle_id>")
@@ -175,10 +185,10 @@ def delete_location_riddles_by_location_riddle_id(location_riddle_id: Annotated[
 
 
 def __get_username():
-    return app.context.get("claims").get("https://findme.ch/username")
+    return app.context.get("claims").get(RequestBodyAttribute.FINDME_USERNAME.value)
 
 
-def __get_attribute(attribute, app):
+def __get_attribute_from_request_body(attribute, app):
     try:
         return app.current_event.json_body[attribute]
     except KeyError:

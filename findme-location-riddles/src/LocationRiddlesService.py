@@ -1,4 +1,6 @@
 import math
+from urllib.parse import urljoin
+
 import boto3
 import json
 import os
@@ -21,7 +23,6 @@ from .entities.LocationRiddle import (
     SolvedLocationRiddleDTO,
 )
 from .entities.Rating import Rating
-from .helpers.CalculateScore import calculate_score_and_distance
 
 
 class LocationRiddlesService:
@@ -32,14 +33,12 @@ class LocationRiddlesService:
     def post_location_riddle(
         self, image_base64: str, location: list, username: str
     ) -> dict:
-        location_riddle_data = {
-            "location_riddle_id": str(uuid.uuid4()),
-            "username": username,
-            "location": Coordinate(coordinate=[Decimal(str(coord)) for coord in location]),
-        }
-
         try:
-            location_riddle = LocationRiddle(**location_riddle_data)
+            location_riddle = LocationRiddle(location_riddle_id=str(uuid.uuid4()),
+                                             username=username,
+                                             location=Coordinate(
+                                                 coordinate=[Decimal(str(coord)) for coord in location])
+                                             )
         except ValidationError as e:
             print(f"unable to update location_riddle with provided parameters. {e}")
             raise BadRequestError(
@@ -55,7 +54,7 @@ class LocationRiddlesService:
             self.location_riddle_repository.write_location_riddle_to_db(location_riddle)
         except Exception as e:
             print(e)
-            raise InternalServerError(e)
+            raise InternalServerError(f"{e}")
         return response
 
     def get_location_riddle(
@@ -65,16 +64,12 @@ class LocationRiddlesService:
             location_riddle_id
         )
 
-        key = f"location-riddles/{location_riddle.location_riddle_id}.png"
-        location_riddle_image = self.image_bucket_repository.get_image_from_s3(key)
-
         location_riddle_dto = location_riddle.to_dto(username=username)
-        location_riddle_dto.image_base64 = location_riddle_image
-
+        self.__append_image_to_location_riddle(location_riddle_dto)
         return location_riddle_dto
 
     def get_location_riddles_for_user(
-        self, username: str, requester_id: str
+        self, username: str, requester_username: str
     ) -> list[Union[LocationRiddleDTO, SolvedLocationRiddleDTO]]:
         location_riddles = (
             self.location_riddle_repository.get_all_location_riddles_by_username(username)
@@ -84,15 +79,12 @@ class LocationRiddlesService:
                 f"No location riddles for user with username: {username} found"
             )
 
-        location_riddles = [
-            location_riddle.to_dto(requester_id) for location_riddle in location_riddles
+        location_riddle_dtos = [
+            location_riddle.to_dto(requester_username) for location_riddle in location_riddles
         ]
-        for location_riddle in location_riddles:
-            key = f"location-riddles/{location_riddle.location_riddle_id}.png"
-            location_riddle.image_base64 = (
-                self.image_bucket_repository.get_image_from_s3(key)
-            )
-        return location_riddles
+        for location_riddle_dto in location_riddle_dtos:
+            self.__append_image_to_location_riddle(location_riddle_dto)
+        return location_riddle_dtos
 
     def get_location_riddles_feed(
         self, event, username: str
@@ -104,7 +96,7 @@ class LocationRiddlesService:
             try:
                 response.extend(
                     self.get_location_riddles_for_user(
-                        username=following_user["username"], requester_id=username
+                        username=following_user["username"], requester_username=username
                     )
                 )
             except NotFoundError:
@@ -140,9 +132,11 @@ class LocationRiddlesService:
             )
         except Exception as e:
             print(e)
-            raise BadRequestError(e)
+            raise BadRequestError(f"{e}")
 
-        return updated_location_riddle.to_dto(username)
+        location_riddle_dto = updated_location_riddle.to_dto(username)
+        self.__append_image_to_location_riddle(location_riddle_dto)
+        return location_riddle_dto
 
     def guess_location_riddle(
         self, event, location_riddle_id: str, username: str, guess: list
@@ -175,7 +169,7 @@ class LocationRiddlesService:
             )
         except Exception as e:
             print(e)
-            raise BadRequestError(e)
+            raise BadRequestError(f"{e}")
 
         score, distance = LocationRiddlesService.calculate_score_and_distance(
             [float(coord) for coord in updated_location_riddle.location.coordinate],
@@ -187,8 +181,10 @@ class LocationRiddlesService:
         except Exception as e:
             print(f"There was an error writing the score to the user db: {e}")
 
+        location_riddle_dto = updated_location_riddle.to_dto(username)
+        self.__append_image_to_location_riddle(location_riddle_dto)
         return {
-            "location_riddle": updated_location_riddle.to_dto(username).dict(),
+            "location_riddle": location_riddle_dto.dict(),
             "guess_result": {"distance": distance, "received_score": score},
         }
 
@@ -211,9 +207,11 @@ class LocationRiddlesService:
             )
         except Exception as e:
             print(e)
-            raise BadRequestError(e)
+            raise BadRequestError(f"{e}")
 
-        return updated_location_riddle.to_dto(username)
+        location_riddle_dto = updated_location_riddle.to_dto(username)
+        self.__append_image_to_location_riddle(location_riddle_dto)
+        return location_riddle_dto
 
     def delete_location_riddle(self, location_riddle_id: str, username: str) -> dict:
         location_riddle = self.location_riddle_repository.get_location_riddle_by_location_riddle_id_from_db(
@@ -234,7 +232,8 @@ class LocationRiddlesService:
 
     def __get_following_users_list(self, event, username: str):
         event_dict = dict(event)
-        event_dict["path"] = f"/users/{username}/follow"
+        base_url = "/users/"
+        event_dict["path"] = urljoin(base_url, f"{username}/follow")
         client = boto3.client("lambda", region_name="eu-central-2")
         response = client.invoke(
             FunctionName=os.environ["USER_FUNCTION_NAME"],
@@ -263,11 +262,15 @@ class LocationRiddlesService:
             Payload=json.dumps(event_dict),
         )
 
+    def __append_image_to_location_riddle(self, location_riddle: LocationRiddle):
+        key = f"location-riddles/{location_riddle.location_riddle_id}.png"
+        location_riddle.image_base64 = self.image_bucket_repository.get_image_from_s3(key)
+
     @staticmethod
     def calculate_score_and_distance(
             actual_coord, guessed_coord, max_score=10000, distance_penalty=100
     ):
-        distance = (math.sqrt((actual_coord[0] - guessed_coord[1]) ** 2 + (actual_coord[1] - guessed_coord[1]) ** 2)
+        distance = (math.sqrt((actual_coord[0] - guessed_coord[0]) ** 2 + (actual_coord[1] - guessed_coord[1]) ** 2)
                     / 1000)
 
         # Calculate score with simple linear penalty

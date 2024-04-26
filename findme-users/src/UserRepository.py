@@ -7,6 +7,7 @@ from boto3.dynamodb.conditions import Key
 from botocore.exceptions import ClientError
 from pydantic import ValidationError
 
+from .entities.PartitionKey import PartitionKey
 from .base.AbstractUserRepository import AbstractUserRepository
 from .entities.Score import Score
 from .entities.User import User, UserPutDTO
@@ -32,13 +33,14 @@ class UserRepository(AbstractUserRepository):
         try:
             self.table.update_item(
                 Key={
-                    "partition_key": "USER",
-                    "username": self.get_user_by_username_from_db(username).username,
+                    "partition_key": PartitionKey.USER.value,
+                    "username": username,
                 },
-                UpdateExpression="SET first_name = :fn, last_name = :ln",
+                UpdateExpression="SET first_name = :fn, last_name = :ln, bio = :b",
                 ExpressionAttributeValues={
                     ":fn": user_data.first_name,
                     ":ln": user_data.last_name,
+                    ":b": user_data.bio,
                 },
             )
         except ClientError as e:
@@ -49,8 +51,8 @@ class UserRepository(AbstractUserRepository):
 
     def get_user_by_username_from_db(self, username: str) -> User:
         response = self.table.query(
-            ProjectionExpression="username, first_name, last_name, scores",
-            KeyConditionExpression=Key("partition_key").eq("USER")
+            ProjectionExpression="username, first_name, last_name, bio, scores",
+            KeyConditionExpression=Key("partition_key").eq(PartitionKey.USER.value)
             & Key("username").eq(username),
         )
         if not response.get("Items") or not response.get("Items")[0]:
@@ -66,17 +68,17 @@ class UserRepository(AbstractUserRepository):
 
     def get_users_by_username_prefix(self, username_prefix: str) -> [User]:
         response = self.table.query(
-            ProjectionExpression="username, first_name, last_name, scores",
-            KeyConditionExpression=Key("partition_key").eq("USER")
+            ProjectionExpression="username, first_name, last_name, bio, scores",
+            KeyConditionExpression=Key("partition_key").eq(PartitionKey.USER.value)
             & Key("username").begins_with(username_prefix),
         )
         items = response["Items"]
 
         while "LastEvaluatedKey" in response:
             response = self.table.query(
-                ProjectionExpression="username, first_name, last_name",
+                ProjectionExpression="username, first_name, last_name, bio, scores",
                 ExclusiveStartKey=response["LastEvaluatedKey"],
-                KeyConditionExpression=Key("partition_key").eq("USER")
+                KeyConditionExpression=Key("partition_key").eq(PartitionKey.USER.value)
                 & Key("username").begins_with(username_prefix),
             )
             items.extend(response["Items"])
@@ -95,7 +97,7 @@ class UserRepository(AbstractUserRepository):
         try:
             self.table.update_item(
                 Key={
-                    "partition_key": "USER",
+                    "partition_key": PartitionKey.USER.value,
                     "username": username,
                 },
                 UpdateExpression="SET scores = list_append(scores, :i)",
@@ -109,7 +111,7 @@ class UserRepository(AbstractUserRepository):
 
     def does_user_with_username_exist(self, username: str) -> bool:
         response = self.table.query(
-            KeyConditionExpression=Key("partition_key").eq("USER")
+            KeyConditionExpression=Key("partition_key").eq(PartitionKey.USER.value)
             & Key("username").eq(username),
             ProjectionExpression="username, first_name, last_name",
         )
@@ -118,7 +120,7 @@ class UserRepository(AbstractUserRepository):
     def __put_user_to_db(self, user: User) -> User:
         try:
             user = user.dict()
-            user["partition_key"] = "USER"
+            user["partition_key"] = PartitionKey.USER.value
             self.table.put_item(Item=user)
         except ClientError as e:
             print(f"Error saving user to DynamoDB: {e}")
