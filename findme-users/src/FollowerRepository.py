@@ -5,8 +5,8 @@ from aws_lambda_powertools.event_handler.exceptions import (
 from boto3.dynamodb.conditions import Attr
 from botocore.exceptions import ClientError
 from datetime import datetime
-from pydantic import ValidationError
 
+from .entities.PartitionKey import PartitionKey
 from .base.AbstractFollowerRepository import AbstractFollowerRepository
 from .entities.FollowRequest import FollowRequest
 from .entities.UserConnections import UserConnectionsUsernames
@@ -17,30 +17,21 @@ class FollowerRepository(AbstractFollowerRepository):
         self.dynamodb = boto3.resource("dynamodb", region_name="eu-central-2")
         self.table = self.dynamodb.Table("FollowerTable")
 
-    def create_follow_request(self, follow_request_data: dict) -> FollowRequest:
-        try:
-            follow_request = FollowRequest(**follow_request_data)
-        except ValidationError as e:
-            print(f"unable to create follow request with provided parameters. {e}")
-            raise BadRequestError(
-                f"unable to create follow request with provided parameters. {e}"
-            )
-
+    def create_follow_request(self, follow_request: FollowRequest) -> FollowRequest:
         # Check if follow request already exists
         existing_request = self.table.scan(
-            FilterExpression=Attr("partition_key").eq("REQUEST")
+            FilterExpression=Attr("partition_key").eq(PartitionKey.REQUEST.value)
             & Attr("sort_key").eq(
                 f"{follow_request.requester}#{follow_request.requestee}"
             )
         )["Items"]
-
         if existing_request:
             raise BadRequestError("Follow request already exists")
 
         try:
             self.table.put_item(
                 Item={
-                    "partition_key": "REQUEST",
+                    "partition_key": PartitionKey.REQUEST.value,
                     "sort_key": f"{follow_request.requester}#{follow_request.requestee}",
                     "requester": follow_request.requester,
                     "requestee": follow_request.requestee,
@@ -63,7 +54,7 @@ class FollowerRepository(AbstractFollowerRepository):
         try:
             response = self.table.update_item(
                 Key={
-                    "partition_key": "REQUEST",
+                    "partition_key": PartitionKey.REQUEST.value,
                     "sort_key": f"{requester}#{requestee}",
                 },
                 UpdateExpression="SET request_status = :s",
@@ -75,7 +66,7 @@ class FollowerRepository(AbstractFollowerRepository):
             # sort_key: "requestee" has the follower "requester"
             self.table.put_item(
                 Item={
-                    "partition_key": "FOLLOWERS",
+                    "partition_key": PartitionKey.FOLLOWERS.value,
                     "sort_key": f"{requestee}#{requester}",
                     "timestamp": datetime.now().isoformat(),
                 }
@@ -85,7 +76,7 @@ class FollowerRepository(AbstractFollowerRepository):
             # sort_key: "requester" is following "requestee"
             self.table.put_item(
                 Item={
-                    "partition_key": "FOLLOWING",
+                    "partition_key": PartitionKey.FOLLOWING.value,
                     "sort_key": f"{requester}#{requestee}",
                     "timestamp": datetime.now().isoformat(),
                 }
@@ -106,7 +97,7 @@ class FollowerRepository(AbstractFollowerRepository):
             # Update the follow request status to 'declined'
             response = self.table.update_item(
                 Key={
-                    "partition_key": "REQUEST",
+                    "partition_key": PartitionKey.REQUEST.value,
                     "sort_key": f"{requester}#{requestee}",
                 },
                 UpdateExpression="set request_status = :s",
@@ -128,7 +119,7 @@ class FollowerRepository(AbstractFollowerRepository):
                 ExpressionAttributeValues={
                     ":requestee": username,
                     ":status_val": "pending",
-                    ":partition_key": "REQUEST",
+                    ":partition_key": PartitionKey.REQUEST.value,
                 },
             )
         except ClientError as e:
@@ -156,7 +147,7 @@ class FollowerRepository(AbstractFollowerRepository):
             follow_request = self.table.query(
                 KeyConditionExpression="partition_key = :partition_key AND sort_key = :follow_request_id",
                 ExpressionAttributeValues={
-                    ":partition_key": "REQUEST",
+                    ":partition_key": PartitionKey.REQUEST.value,
                     ":follow_request_id": follow_request_id,
                 },
             )
@@ -175,7 +166,7 @@ class FollowerRepository(AbstractFollowerRepository):
             following_response = self.table.query(
                 KeyConditionExpression="partition_key = :partition_key AND begins_with(sort_key, :username)",
                 ExpressionAttributeValues={
-                    ":partition_key": "FOLLOWING",
+                    ":partition_key": PartitionKey.FOLLOWING.value,
                     ":username": username,
                 },
             )
@@ -189,7 +180,7 @@ class FollowerRepository(AbstractFollowerRepository):
             follower_response = self.table.query(
                 KeyConditionExpression="partition_key = :partition_key AND begins_with(sort_key, :username)",
                 ExpressionAttributeValues={
-                    ":partition_key": "FOLLOWERS",
+                    ":partition_key": PartitionKey.FOLLOWERS.value,
                     ":username": username,
                 },
             )

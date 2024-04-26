@@ -52,7 +52,7 @@ class UserService:
             updated_user = self.user_repository.update_user_score_in_db(username, score)
         except Exception as e:
             print(e)
-            raise BadRequestError(e)
+            raise BadRequestError(f"{e}")
 
         return updated_user.to_dto()
 

@@ -7,10 +7,9 @@ In this game, users post photos containing a geolocation. Other users then have 
 the photo was taken. The closer the guess, the higher the score. This creates a fun and engaging way for users to test
 their geographical knowledge and observational skills.
 
-The backend is composed of three microservices:
+The backend is composed of two microservices:
 
 - `findme-location-riddles`: Handles the creation and management of location riddles.
-- `findme-scores`: Manages the scoring system based on how accurately users guess the locations.
 - `findme-users`: Manages user profiles, including follow relationships.
 
 Each microservice is developed using Python, and they are all deployed using Docker and Serverless. The backend API can

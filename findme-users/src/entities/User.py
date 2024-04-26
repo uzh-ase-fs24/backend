@@ -8,6 +8,7 @@ class User(BaseModel):
     username: str
     first_name: str
     last_name: str
+    bio: Optional[str] = None
     scores: List[Score] = []
     average_score: Optional[float] = None
 
@@ -26,6 +27,7 @@ class UserDTO(BaseModel):
     username: str
     first_name: str
     last_name: str
+    bio: Optional[str] = None
     average_score: Optional[float] = None
 
     def __init__(self, **data):
@@ -34,6 +36,7 @@ class UserDTO(BaseModel):
             username=user.username,
             first_name=user.first_name,
             last_name=user.last_name,
+            bio=user.bio,
             average_score=user.average_score,
         )
 
@@ -41,8 +44,10 @@ class UserDTO(BaseModel):
 class UserPostDTO(BaseModel):
     first_name: str
     last_name: str
+    bio: Optional[str] = None
 
 
 class UserPutDTO(BaseModel):
     first_name: str
     last_name: str
+    bio: Optional[str] = None

@@ -11,12 +11,13 @@ class TestUserService(unittest.TestCase):
 
     def test_post_user(self):
         # Test correct input
-        user_data = {"first_name": "Test", "last_name": "User"}
+        user_data = {"first_name": "Test", "last_name": "User", "bio": "Test bio"}
         username = "testuser"
         result = self.user_service.post_user(user_data, username)
         self.assertEqual(result.username, "testuser")
         self.assertEqual(result.first_name, "Test")
         self.assertEqual(result.last_name, "User")
+        self.assertEqual(result.bio, "Test bio")
 
         # Test incorrect input (same username)
         user_data = {
