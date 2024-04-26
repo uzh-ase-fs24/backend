@@ -26,9 +26,9 @@ class LocationRiddlesRepository(AbstractLocationRiddlesRepository):
             print(f"Error writing location_riddle to DynamoDB: {e}")
             raise BadRequestError(f"Error writing location_riddle to DynamoDB: {e}")
 
-    def get_all_location_riddles_by_user_id(self, user_id: str):
+    def get_all_location_riddles_by_username(self, username: str):
         response = self.table.query(
-            IndexName="UserIndex", KeyConditionExpression=Key("user_id").eq(user_id)
+            IndexName="UserIndex", KeyConditionExpression=Key("username").eq(username)
         )
         items = response["Items"]
 
@@ -36,7 +36,7 @@ class LocationRiddlesRepository(AbstractLocationRiddlesRepository):
             response = self.table.query(
                 IndexName="UserIndex",
                 ExclusiveStartKey=response["LastEvaluatedKey"],
-                KeyConditionExpression=Key("user_id").eq(user_id),
+                KeyConditionExpression=Key("username").eq(username),
             )
             items.extend(response["Items"])
 

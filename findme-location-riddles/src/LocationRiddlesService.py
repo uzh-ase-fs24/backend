@@ -1,3 +1,4 @@
+import math
 import boto3
 import json
 import os
@@ -11,6 +12,7 @@ from decimal import Decimal
 from pydantic import ValidationError
 from typing import Union
 
+from .entities.Coordinate import Coordinate
 from .entities.Comment import Comment
 from .entities.Guess import Guess
 from .entities.LocationRiddle import (
@@ -19,7 +21,6 @@ from .entities.LocationRiddle import (
     SolvedLocationRiddleDTO,
 )
 from .entities.Rating import Rating
-from .helpers.CalculateScore import calculate_score_and_distance
 
 
 class LocationRiddlesService:
@@ -28,12 +29,12 @@ class LocationRiddlesService:
         self.location_riddle_repository = location_riddle_repository
 
     def post_location_riddle(
-        self, image_base64: str, location: list, user_id: str
+        self, image_base64: str, location: list, username: str
     ) -> dict:
         location_riddle_data = {
             "location_riddle_id": str(uuid.uuid4()),
-            "user_id": user_id,
-            "location": [Decimal(str(coord)) for coord in location],
+            "username": username,
+            "location": Coordinate(coordinate=[Decimal(str(coord)) for coord in location]),
         }
 
         try:
@@ -57,7 +58,7 @@ class LocationRiddlesService:
         return response
 
     def get_location_riddle(
-        self, location_riddle_id: str, user_id: str
+        self, location_riddle_id: str, username: str
     ) -> Union[LocationRiddleDTO, SolvedLocationRiddleDTO]:
         location_riddle = self.location_riddle_repository.get_location_riddle_by_location_riddle_id_from_db(
             location_riddle_id
@@ -66,24 +67,24 @@ class LocationRiddlesService:
         key = f"location-riddles/{location_riddle.location_riddle_id}.png"
         location_riddle_image = self.image_bucket_repository.get_image_from_s3(key)
 
-        location_riddle_dto = location_riddle.to_dto(user_id=user_id)
+        location_riddle_dto = location_riddle.to_dto(username=username)
         location_riddle_dto.image_base64 = location_riddle_image
 
         return location_riddle_dto
 
     def get_location_riddles_for_user(
-        self, user_id: str, requester_id: str
+        self, username: str, requester_username: str
     ) -> list[Union[LocationRiddleDTO, SolvedLocationRiddleDTO]]:
         location_riddles = (
-            self.location_riddle_repository.get_all_location_riddles_by_user_id(user_id)
+            self.location_riddle_repository.get_all_location_riddles_by_username(username)
         )
         if len(location_riddles) == 0:
             raise NotFoundError(
-                f"No location riddles for user with user_id: {user_id} found"
+                f"No location riddles for user with username: {username} found"
             )
 
         location_riddles = [
-            location_riddle.to_dto(requester_id) for location_riddle in location_riddles
+            location_riddle.to_dto(requester_username) for location_riddle in location_riddles
         ]
         for location_riddle in location_riddles:
             key = f"location-riddles/{location_riddle.location_riddle_id}.png"
@@ -93,16 +94,16 @@ class LocationRiddlesService:
         return location_riddles
 
     def get_location_riddles_feed(
-        self, event, user_id: str
+        self, event, username: str
     ) -> list[Union[LocationRiddleDTO, SolvedLocationRiddleDTO]]:
-        following_users = self.__get_following_users_list(event, user_id)
+        following_users = self.__get_following_users_list(event, username)
 
         response = []
         for following_user in following_users:
             try:
                 response.extend(
                     self.get_location_riddles_for_user(
-                        user_id=following_user["user_id"], requester_id=user_id
+                        username=following_user["username"], requester_username=username
                     )
                 )
             except NotFoundError:
@@ -110,20 +111,20 @@ class LocationRiddlesService:
         return sorted(response, key=lambda riddle: riddle.created_at, reverse=True)
 
     def rate_location_riddle(
-        self, location_riddle_id: str, user_id: str, rating: int
+        self, location_riddle_id: str, username: str, rating: int
     ) -> Union[LocationRiddleDTO, SolvedLocationRiddleDTO]:
         location_riddle = self.location_riddle_repository.get_location_riddle_by_location_riddle_id_from_db(
             location_riddle_id
         )
 
-        if location_riddle.user_id == user_id:
+        if location_riddle.username == username:
             raise BadRequestError("User cannot rate their own location riddle")
         for rating_entry in location_riddle.ratings:
-            if rating_entry.user_id == user_id:
+            if rating_entry.username == username:
                 raise BadRequestError("User has already rated this location riddle")
 
         try:
-            rating = Rating(user_id=user_id, rating=rating)
+            rating = Rating(username=username, rating=rating)
         except ValidationError as e:
             print(f"unable to update location_riddle with provided parameters. {e}")
             raise BadRequestError(
@@ -140,24 +141,24 @@ class LocationRiddlesService:
             print(e)
             raise BadRequestError(e)
 
-        return updated_location_riddle.to_dto(user_id)
+        return updated_location_riddle.to_dto(username)
 
     def guess_location_riddle(
-        self, event, location_riddle_id: str, user_id: str, guess: list
+        self, event, location_riddle_id: str, username: str, guess: list
     ) -> dict:
         location_riddle = self.location_riddle_repository.get_location_riddle_by_location_riddle_id_from_db(
             location_riddle_id
         )
 
-        if location_riddle.user_id == user_id:
+        if location_riddle.username == username:
             raise BadRequestError("User cannot guess their own location riddle")
         for guess_entry in location_riddle.guesses:
-            if guess_entry.user_id == user_id:
+            if guess_entry.username == username:
                 raise BadRequestError("User has already guessed this location riddle")
 
         try:
             guess = Guess(
-                user_id=user_id, guess=[Decimal(str(coord)) for coord in guess]
+                username=username, guess=Coordinate(coordinate=[Decimal(str(coord)) for coord in guess])
             )
         except ValidationError as e:
             print(f"unable to update location_riddle with provided parameters. {e}")
@@ -175,9 +176,9 @@ class LocationRiddlesService:
             print(e)
             raise BadRequestError(e)
 
-        score, distance = calculate_score_and_distance(
-            map(float, tuple(updated_location_riddle.location)),
-            map(float, tuple(guess.guess)),
+        score, distance = LocationRiddlesService.calculate_score_and_distance(
+            [float(coord) for coord in updated_location_riddle.location.coordinate],
+            [float(coord) for coord in guess.guess.coordinate],
         )
 
         try:
@@ -186,15 +187,15 @@ class LocationRiddlesService:
             print(f"There was an error writing the score to the user db: {e}")
 
         return {
-            "location_riddle": updated_location_riddle.to_dto(user_id).dict(),
+            "location_riddle": updated_location_riddle.to_dto(username).dict(),
             "guess_result": {"distance": distance, "received_score": score},
         }
 
     def comment_location_riddle(
-        self, location_riddle_id: str, user_id: str, comment: str
+        self, location_riddle_id: str, username: str, comment: str
     ) -> Union[LocationRiddleDTO, SolvedLocationRiddleDTO]:
         try:
-            comment = Comment(user_id=user_id, comment=comment)
+            comment = Comment(username=username, comment=comment)
         except ValidationError as e:
             print(f"unable to update location_riddle with provided parameters. {e}")
             raise BadRequestError(
@@ -211,14 +212,14 @@ class LocationRiddlesService:
             print(e)
             raise BadRequestError(e)
 
-        return updated_location_riddle.to_dto(user_id)
+        return updated_location_riddle.to_dto(username)
 
-    def delete_location_riddle(self, location_riddle_id: str, user_id: str) -> dict:
+    def delete_location_riddle(self, location_riddle_id: str, username: str) -> dict:
         location_riddle = self.location_riddle_repository.get_location_riddle_by_location_riddle_id_from_db(
             location_riddle_id
         )
 
-        if location_riddle.user_id != user_id:
+        if location_riddle.username != username:
             raise BadRequestError(
                 "User does not have permission to delete this location riddle"
             )
@@ -230,9 +231,9 @@ class LocationRiddlesService:
         )
         return {"message": "Location riddle deleted successfully"}
 
-    def __get_following_users_list(self, event, user_id: str):
+    def __get_following_users_list(self, event, username: str):
         event_dict = dict(event)
-        event_dict["path"] = f"/users/{user_id}/follow"
+        event_dict["path"] = f"/users/{username}/follow"
         client = boto3.client("lambda", region_name="eu-central-2")
         response = client.invoke(
             FunctionName=os.environ["USER_FUNCTION_NAME"],
@@ -248,7 +249,7 @@ class LocationRiddlesService:
         return user_connections["following"]
 
     def __write_score_to_user_in_user_db(
-        self, event, location_riddle_id: str, score: str
+        self, event, location_riddle_id: str, score: int
     ):
         event_dict = dict(event)
         event_dict["path"] = "/users/score"
@@ -260,3 +261,14 @@ class LocationRiddlesService:
             FunctionName=os.environ["USER_FUNCTION_NAME"],
             Payload=json.dumps(event_dict),
         )
+
+    @staticmethod
+    def calculate_score_and_distance(
+            actual_coord, guessed_coord, max_score=10000, distance_penalty=100
+    ):
+        distance = (math.sqrt((actual_coord[0] - guessed_coord[0]) ** 2 + (actual_coord[1] - guessed_coord[1]) ** 2)
+                    / 1000)
+
+        # Calculate score with simple linear penalty
+        score = max(0, max_score - distance * distance_penalty)
+        return score, distance

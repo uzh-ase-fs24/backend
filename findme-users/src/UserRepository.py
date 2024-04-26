@@ -18,24 +18,22 @@ class UserRepository(AbstractUserRepository):
         self.table = self.dynamodb.Table("usersTable")
 
     def post_user_to_db(self, user: User) -> User:
-        if self.does_user_with_user_id_exist(user.user_id):
+        if self.does_user_with_username_exist(user.username):
             raise BadRequestError(
-                f"User with id {user.user_id} already has an account!"
+                f"User with username '{user.username}' already has an account!"
             )
-        if self.__does_user_with_username_exist(user.username):
-            raise BadRequestError(f"Username '{user.username}' is already taken!")
 
         return self.__put_user_to_db(user)
 
-    def update_user_in_db(self, user_id: str, user_data: UserPutDTO) -> User:
-        if not self.does_user_with_user_id_exist(user_id):
-            raise NotFoundError(f"No User with user_id: {user_id} found")
+    def update_user_in_db(self, username: str, user_data: UserPutDTO) -> User:
+        if not self.does_user_with_username_exist(username):
+            raise NotFoundError(f"No User with username: {username} found")
 
         try:
             self.table.update_item(
                 Key={
                     "partition_key": "USER",
-                    "username": self.get_user_by_user_id_from_db(user_id).username,
+                    "username": self.get_user_by_username_from_db(username).username,
                 },
                 UpdateExpression="SET first_name = :fn, last_name = :ln",
                 ExpressionAttributeValues={
@@ -47,16 +45,16 @@ class UserRepository(AbstractUserRepository):
             print(f"Error updating user in DynamoDB: {e}")
             raise BadRequestError(f"Error updating user in DynamoDB: {e}")
 
-        return self.get_user_by_user_id_from_db(user_id)
+        return self.get_user_by_username_from_db(username)
 
-    def get_user_by_user_id_from_db(self, user_id: str) -> User:
+    def get_user_by_username_from_db(self, username: str) -> User:
         response = self.table.query(
-            IndexName="UserIdIndex",
-            ProjectionExpression="user_id, username, first_name, last_name, scores",
-            KeyConditionExpression=Key("user_id").eq(user_id),
+            ProjectionExpression="username, first_name, last_name, scores",
+            KeyConditionExpression=Key("partition_key").eq("USER")
+            & Key("username").eq(username),
         )
         if not response.get("Items") or not response.get("Items")[0]:
-            raise NotFoundError(f"No User with user_id: {user_id} found")
+            raise NotFoundError(f"No User with username: {username} found")
 
         try:
             return User(**response["Items"][0])
@@ -68,7 +66,7 @@ class UserRepository(AbstractUserRepository):
 
     def get_users_by_username_prefix(self, username_prefix: str) -> [User]:
         response = self.table.query(
-            ProjectionExpression="user_id, username, first_name, last_name, scores",
+            ProjectionExpression="username, first_name, last_name, scores",
             KeyConditionExpression=Key("partition_key").eq("USER")
             & Key("username").begins_with(username_prefix),
         )
@@ -76,7 +74,7 @@ class UserRepository(AbstractUserRepository):
 
         while "LastEvaluatedKey" in response:
             response = self.table.query(
-                ProjectionExpression="user_id, username, first_name, last_name",
+                ProjectionExpression="username, first_name, last_name",
                 ExclusiveStartKey=response["LastEvaluatedKey"],
                 KeyConditionExpression=Key("partition_key").eq("USER")
                 & Key("username").begins_with(username_prefix),
@@ -93,12 +91,12 @@ class UserRepository(AbstractUserRepository):
 
         return users
 
-    def update_user_score_in_db(self, user_id: str, score: Score) -> User:
+    def update_user_score_in_db(self, username: str, score: Score) -> User:
         try:
             self.table.update_item(
                 Key={
                     "partition_key": "USER",
-                    "username": self.get_user_by_user_id_from_db(user_id).username,
+                    "username": username,
                 },
                 UpdateExpression="SET scores = list_append(scores, :i)",
                 ExpressionAttributeValues={":i": [score.dict()]},
@@ -107,21 +105,13 @@ class UserRepository(AbstractUserRepository):
             print(f"Error updating user scores in DynamoDB: {e}")
             raise BadRequestError(f"Error updating user scores in DynamoDB: {e}")
 
-        return self.get_user_by_user_id_from_db(user_id)
+        return self.get_user_by_username_from_db(username)
 
-    def does_user_with_user_id_exist(self, user_id: str) -> bool:
-        response = self.table.query(
-            IndexName="UserIdIndex",
-            KeyConditionExpression=Key("user_id").eq(user_id),
-            ProjectionExpression="user_id, username, first_name, last_name",
-        )
-        return "Items" in response and len(response["Items"]) > 0
-
-    def __does_user_with_username_exist(self, username: str) -> bool:
+    def does_user_with_username_exist(self, username: str) -> bool:
         response = self.table.query(
             KeyConditionExpression=Key("partition_key").eq("USER")
             & Key("username").eq(username),
-            ProjectionExpression="user_id, username, first_name, last_name",
+            ProjectionExpression="username, first_name, last_name",
         )
         return "Items" in response and len(response["Items"]) > 0
 
