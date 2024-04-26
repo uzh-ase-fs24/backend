@@ -43,7 +43,7 @@ follower_repository = FollowerRepository()
 follower_service = FollowerService(follower_repository)
 
 
-class Attribute(Enum):
+class RequestBodyAttribute(Enum):
     USERNAME = "username"
     FINDME_USERNAME = "https://findme.ch/username"
     LOCATION_RIDDLE_ID = "location_riddle_id"
@@ -125,8 +125,8 @@ def post_score_to_user(score: Score) -> UserDTO:
     """
     return user_service.write_guessing_score_to_user(
         __get_username(),
-        __get_attribute(Attribute.LOCATION_RIDDLE_ID.value),
-        __get_attribute(Attribute.SCORE.value),
+        __get_attribute_from_request_body(RequestBodyAttribute.LOCATION_RIDDLE_ID.value),
+        __get_attribute_from_request_body(RequestBodyAttribute.SCORE.value),
     )
 
 
@@ -141,7 +141,7 @@ def get_similar_users() -> List[UserDTO]:
     Returns: A list of users with similar usernames.
     """
     return user_service.get_similar_users(
-        app.current_event.query_string_parameters.get(Attribute.USERNAME.value), __get_username()
+        app.current_event.query_string_parameters.get(RequestBodyAttribute.USERNAME.value), __get_username()
     )
 
 
@@ -172,7 +172,7 @@ def update_follow_user(requester: Annotated[str, Path()]) -> FollowRequest:
     Returns: A json confirming the accepting or declining of the follow request
     """
     requestee = __get_username()
-    action = app.current_event.query_string_parameters.get(Attribute.ACTION.value)
+    action = app.current_event.query_string_parameters.get(RequestBodyAttribute.ACTION.value)
 
     if action == "accept":
         return follower_service.accept_follow_request(requester, requestee)
@@ -224,10 +224,10 @@ def get_user_connections(username: Annotated[str, Path()]) -> UserConnections:
 
 
 def __get_username():
-    return app.context.get("claims").get(Attribute.FINDME_USERNAME.value)
+    return app.context.get("claims").get(RequestBodyAttribute.FINDME_USERNAME.value)
 
 
-def __get_attribute(attribute: str):
+def __get_attribute_from_request_body(attribute: str):
     try:
         return app.current_event.json_body[attribute]
     except KeyError:
