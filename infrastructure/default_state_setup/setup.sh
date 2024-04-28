@@ -42,29 +42,29 @@ while [[ $# -gt 0 ]]; do
 done
 
 if [ "$LOAD_USERS" == "true" ]; then
-  for row in $(jq -c '.Items[]' infrastructure/default_state_setup/dynamodb/default_users.json); do
-    username=$(echo $row | jq -r '.username.S')
+  while IFS= read -r row; do
+    username=$(echo "$row" | jq -r '.username.S')
     echo "adding $username"
-    awslocal dynamodb put-item --table-name $USERS_TABLE_NAME --item $row --region $REGION
-  done
+    awslocal dynamodb put-item --table-name $USERS_TABLE_NAME --item="$row" --region $REGION
+  done < <(jq -c '.Items[]' infrastructure/default_state_setup/dynamodb/default_users.json)
 fi
 
 if [ "$LOAD_CONNECTIONS" == "true" ]; then
-  for row in $(jq -c '.Items[]' infrastructure/default_state_setup/dynamodb/default_connections.json); do
-    connection=$(echo $row | jq -r '.sort_key.S')
-    type=$(echo $row | jq -r '.partition_key.S')
+  while IFS= read -r row; do
+    connection=$(echo "$row" | jq -r '.sort_key.S')
+    type=$(echo "$row" | jq -r '.partition_key.S')
     echo "adding connection $connection $type"
-    awslocal dynamodb put-item --table-name $FOLLOWERS_TABLE_NAME --item $row --region $REGION
-  done
+    awslocal dynamodb put-item --table-name $FOLLOWERS_TABLE_NAME --item="$row" --region $REGION
+  done < <(jq -c '.Items[]' infrastructure/default_state_setup/dynamodb/default_connections.json)
 fi
 
 if [ "$LOAD_LOCATION_RIDDLES" == "true" ]; then
-  for row in $(jq -c '.Items[]' infrastructure/default_state_setup/dynamodb/default_location_riddles.json); do
-    location_riddle=$(echo $row | jq -r '.location_riddle_id.S')
-    username=$(echo $row | jq -r '.username.S')
+  while IFS= read -r row; do
+    location_riddle=$(echo "$row" | jq -r '.location_riddle_id.S')
+    username=$(echo "$row" | jq -r '.username.S')
     echo "adding location_riddle $location_riddle by $username"
-    awslocal dynamodb put-item --table-name $LOCATION_RIDDLES_TABLE_NAME --item $row --region $REGION
+    awslocal dynamodb put-item --table-name $LOCATION_RIDDLES_TABLE_NAME --item="$row" --region $REGION
     echo "uploading image"
     awslocal s3api put-object --bucket $LOCATION_RIDDLES_BUCKET --key location-riddles/${location_riddle}.png --body infrastructure/default_state_setup/s3/location_riddle_images/${location_riddle}.png
-  done
+  done < <(jq -c '.Items[]' infrastructure/default_state_setup/dynamodb/default_location_riddles.json)
 fi

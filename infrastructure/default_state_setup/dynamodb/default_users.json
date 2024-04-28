@@ -7,14 +7,14 @@
       "partition_key": {
         "S": "USER"
       },
-      "user_id": {
-        "S": "662642a6ea5057cd0b559ab5"
-      },
       "first_name": {
         "S": "Christian"
       },
       "scores": {
         "L": []
+      },
+      "bio": {
+        "S": "I'm a software engineer from Switzerland"
       },
       "username": {
         "S": "chrispyb"
@@ -27,14 +27,14 @@
       "partition_key": {
         "S": "USER"
       },
-      "user_id": {
-        "S": "662642bfea5057cd0b559ad4"
-      },
       "first_name": {
         "S": "Lukas"
       },
       "scores": {
         "L": []
+      },
+      "bio": {
+        "S": "BEST riddler in town!"
       },
       "username": {
         "S": "flyingbeat"
@@ -47,11 +47,11 @@
       "partition_key": {
         "S": "USER"
       },
-      "user_id": {
-        "S": "66264246ea5057cd0b559a5d"
-      },
       "first_name": {
         "S": "Simon"
+      },
+      "bio": {
+        "S": "Challenge me with your riddles"
       },
       "scores": {
         "L": []
@@ -67,11 +67,11 @@
       "partition_key": {
         "S": "USER"
       },
-      "user_id": {
-        "S": "662642846589c98ee4832f2b"
-      },
       "first_name": {
         "S": "Ingmar"
+      },
+      "bio": {
+        "S": "I am a software engineer from Germany"
       },
       "scores": {
         "L": []
