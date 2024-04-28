@@ -1,21 +1,22 @@
+import json
 import math
+import os
+import uuid
+from decimal import Decimal
+from typing import Union
 from urllib.parse import urljoin
 
 import boto3
-import json
-import os
-import uuid
 from aws_lambda_powertools.event_handler.exceptions import (
     BadRequestError,
     NotFoundError,
     InternalServerError,
 )
-from decimal import Decimal
+from aws_lambda_powertools.logging import Logger
 from pydantic import ValidationError
-from typing import Union
 
-from .entities.Coordinate import Coordinate
 from .entities.Comment import Comment
+from .entities.Coordinate import Coordinate
 from .entities.Guess import Guess
 from .entities.LocationRiddle import (
     LocationRiddle,
@@ -23,6 +24,8 @@ from .entities.LocationRiddle import (
     SolvedLocationRiddleDTO,
 )
 from .entities.Rating import Rating
+
+logger = Logger()
 
 
 class LocationRiddlesService:
@@ -34,13 +37,17 @@ class LocationRiddlesService:
         self, image_base64: str, location: list, username: str
     ) -> dict:
         try:
-            location_riddle = LocationRiddle(location_riddle_id=str(uuid.uuid4()),
-                                             username=username,
-                                             location=Coordinate(
-                                                 coordinate=[Decimal(str(coord)) for coord in location])
-                                             )
+            location_riddle = LocationRiddle(
+                location_riddle_id=str(uuid.uuid4()),
+                username=username,
+                location=Coordinate(
+                    coordinate=[Decimal(str(coord)) for coord in location]
+                ),
+            )
         except ValidationError as e:
-            print(f"unable to update location_riddle with provided parameters. {e}")
+            logger.info(
+                f"unable to update location_riddle with provided parameters. {e}"
+            )
             raise BadRequestError(
                 f"unable to update location_riddle with provided parameters. {e}"
             )
@@ -53,7 +60,7 @@ class LocationRiddlesService:
         try:
             self.location_riddle_repository.write_location_riddle_to_db(location_riddle)
         except Exception as e:
-            print(e)
+            logger.error(e)
             raise InternalServerError(f"{e}")
         return response
 
@@ -72,7 +79,9 @@ class LocationRiddlesService:
         self, username: str, requester_username: str
     ) -> list[Union[LocationRiddleDTO, SolvedLocationRiddleDTO]]:
         location_riddles = (
-            self.location_riddle_repository.get_all_location_riddles_by_username(username)
+            self.location_riddle_repository.get_all_location_riddles_by_username(
+                username
+            )
         )
         if len(location_riddles) == 0:
             raise NotFoundError(
@@ -80,7 +89,8 @@ class LocationRiddlesService:
             )
 
         location_riddle_dtos = [
-            location_riddle.to_dto(requester_username) for location_riddle in location_riddles
+            location_riddle.to_dto(requester_username)
+            for location_riddle in location_riddles
         ]
         for location_riddle_dto in location_riddle_dtos:
             self.__append_image_to_location_riddle(location_riddle_dto)
@@ -119,7 +129,9 @@ class LocationRiddlesService:
         try:
             rating = Rating(username=username, rating=rating)
         except ValidationError as e:
-            print(f"unable to update location_riddle with provided parameters. {e}")
+            logger.info(
+                f"unable to update location_riddle with provided parameters. {e}"
+            )
             raise BadRequestError(
                 f"unable to update location_riddle with provided parameters. {e}"
             )
@@ -131,7 +143,7 @@ class LocationRiddlesService:
                 )
             )
         except Exception as e:
-            print(e)
+            logger.error(e)
             raise BadRequestError(f"{e}")
 
         location_riddle_dto = updated_location_riddle.to_dto(username)
@@ -153,10 +165,13 @@ class LocationRiddlesService:
 
         try:
             guess = Guess(
-                username=username, guess=Coordinate(coordinate=[Decimal(str(coord)) for coord in guess])
+                username=username,
+                guess=Coordinate(coordinate=[Decimal(str(coord)) for coord in guess]),
             )
         except ValidationError as e:
-            print(f"unable to update location_riddle with provided parameters. {e}")
+            logger.info(
+                f"unable to update location_riddle with provided parameters. {e}"
+            )
             raise BadRequestError(
                 f"unable to update location_riddle with provided parameters. {e}"
             )
@@ -168,7 +183,7 @@ class LocationRiddlesService:
                 )
             )
         except Exception as e:
-            print(e)
+            logger.error(e)
             raise BadRequestError(f"{e}")
 
         score, distance = LocationRiddlesService.calculate_score_and_distance(
@@ -179,7 +194,7 @@ class LocationRiddlesService:
         try:
             self.__write_score_to_user_in_user_db(event, location_riddle_id, int(score))
         except Exception as e:
-            print(f"There was an error writing the score to the user db: {e}")
+            logger.error(f"There was an error writing the score to the user db: {e}")
 
         location_riddle_dto = updated_location_riddle.to_dto(username)
         self.__append_image_to_location_riddle(location_riddle_dto)
@@ -194,7 +209,9 @@ class LocationRiddlesService:
         try:
             comment = Comment(username=username, comment=comment)
         except ValidationError as e:
-            print(f"unable to update location_riddle with provided parameters. {e}")
+            logger.info(
+                f"unable to update location_riddle with provided parameters. {e}"
+            )
             raise BadRequestError(
                 f"unable to update location_riddle with provided parameters. {e}"
             )
@@ -206,7 +223,7 @@ class LocationRiddlesService:
                 )
             )
         except Exception as e:
-            print(e)
+            logger.error(e)
             raise BadRequestError(f"{e}")
 
         location_riddle_dto = updated_location_riddle.to_dto(username)
@@ -264,14 +281,21 @@ class LocationRiddlesService:
 
     def __append_image_to_location_riddle(self, location_riddle: LocationRiddle):
         key = f"location-riddles/{location_riddle.location_riddle_id}.png"
-        location_riddle.image_base64 = self.image_bucket_repository.get_image_from_s3(key)
+        location_riddle.image_base64 = self.image_bucket_repository.get_image_from_s3(
+            key
+        )
 
     @staticmethod
     def calculate_score_and_distance(
-            actual_coord, guessed_coord, max_score=10000, distance_penalty=100
+        actual_coord, guessed_coord, max_score=10000, distance_penalty=100
     ):
-        distance = (math.sqrt((actual_coord[0] - guessed_coord[0]) ** 2 + (actual_coord[1] - guessed_coord[1]) ** 2)
-                    / 1000)
+        distance = (
+            math.sqrt(
+                (actual_coord[0] - guessed_coord[0]) ** 2
+                + (actual_coord[1] - guessed_coord[1]) ** 2
+            )
+            / 1000
+        )
 
         # Calculate score with simple linear penalty
         score = max(0, max_score - distance * distance_penalty)

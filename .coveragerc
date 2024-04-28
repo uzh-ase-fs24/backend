@@ -1,0 +1,7 @@
+# .coveragerc
+[run]
+omit =
+    */test*.py
+    */*test*/*.py
+    */tests/*.py
+    */*tests*/*.py

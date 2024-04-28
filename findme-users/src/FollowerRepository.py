@@ -1,15 +1,19 @@
+from datetime import datetime
+
 import boto3
 from aws_lambda_powertools.event_handler.exceptions import (
     BadRequestError,
 )
+from aws_lambda_powertools.logging import Logger
 from boto3.dynamodb.conditions import Attr
 from botocore.exceptions import ClientError
-from datetime import datetime
 
 from .entities.PartitionKey import PartitionKey
 from .base.AbstractFollowerRepository import AbstractFollowerRepository
 from .entities.FollowRequest import FollowRequest
 from .entities.UserConnections import UserConnectionsUsernames
+
+logger = Logger()
 
 
 class FollowerRepository(AbstractFollowerRepository):
@@ -40,7 +44,7 @@ class FollowerRepository(AbstractFollowerRepository):
                 },
             )
         except ClientError as e:
-            print(f"Error saving user to DynamoDB: {e}")
+            logger.error(f"Error saving user to DynamoDB: {e}")
             raise BadRequestError(f"Error saving user to DynamoDB: {e}")
 
         return follow_request
@@ -82,7 +86,7 @@ class FollowerRepository(AbstractFollowerRepository):
                 }
             )
         except ClientError as e:
-            print(f"Error saving user to DynamoDB: {e}")
+            logger.error(f"Error saving user to DynamoDB: {e}")
             raise BadRequestError(f"Error saving user to DynamoDB: {e}")
 
         return FollowRequest(**response["Attributes"])
@@ -105,7 +109,7 @@ class FollowerRepository(AbstractFollowerRepository):
                 ReturnValues="UPDATED_NEW",
             )
         except Exception as e:
-            print(f"Unable to deny follow request. {e}")
+            logger.error(f"Unable to deny follow request. {e}")
             raise BadRequestError(f"Unable to deny follow request. {e}")
 
         return FollowRequest(**response["Attributes"])
@@ -123,7 +127,7 @@ class FollowerRepository(AbstractFollowerRepository):
                 },
             )
         except ClientError as e:
-            print(f"Unable to fetch received follow requests. {e}")
+            logger.error(f"Unable to fetch received follow requests. {e}")
             raise BadRequestError(f"Unable to fetch received follow requests. {e}")
 
         return [FollowRequest(**item) for item in response["Items"]]
@@ -136,7 +140,7 @@ class FollowerRepository(AbstractFollowerRepository):
                 ExpressionAttributeValues={":requester": username},
             )
         except ClientError as e:
-            print(f"Unable to fetch received follow requests. {e}")
+            logger.error(f"Unable to fetch received follow requests. {e}")
             raise BadRequestError(f"Unable to fetch received follow requests. {e}")
 
         return [FollowRequest(**item) for item in response["Items"]]
@@ -152,7 +156,7 @@ class FollowerRepository(AbstractFollowerRepository):
                 },
             )
         except ClientError as e:
-            print(f"Couldn't fetch follow request. {e}")
+            logger.error(f"Couldn't fetch follow request. {e}")
             raise BadRequestError(f"Couldn't fetch follow request. {e}")
 
         return (
@@ -171,7 +175,7 @@ class FollowerRepository(AbstractFollowerRepository):
                 },
             )
         except ClientError as e:
-            print(f"Unable to retrieve user connections. {e}")
+            logger.error(f"Unable to retrieve user connections. {e}")
             raise BadRequestError(f"Unable to retrieve user connections. {e}")
         return [item["sort_key"].split("#")[1] for item in following_response["Items"]]
 
@@ -185,7 +189,7 @@ class FollowerRepository(AbstractFollowerRepository):
                 },
             )
         except ClientError as e:
-            print(f"Unable to retrieve user connections. {e}")
+            logger.error(f"Unable to retrieve user connections. {e}")
             raise BadRequestError(f"Unable to retrieve user connections. {e}")
         return [item["sort_key"].split("#")[1] for item in follower_response["Items"]]
 

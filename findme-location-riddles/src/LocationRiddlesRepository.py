@@ -3,6 +3,7 @@ from aws_lambda_powertools.event_handler.exceptions import (
     BadRequestError,
     NotFoundError,
 )
+from aws_lambda_powertools.logging import Logger
 from boto3.dynamodb.conditions import Key
 from botocore.exceptions import ClientError
 from pydantic import ValidationError
@@ -12,6 +13,8 @@ from .entities.Comment import Comment
 from .entities.Guess import Guess
 from .entities.LocationRiddle import LocationRiddle
 from .entities.Rating import Rating
+
+logger = Logger()
 
 
 class LocationRiddlesRepository(AbstractLocationRiddlesRepository):
@@ -23,7 +26,7 @@ class LocationRiddlesRepository(AbstractLocationRiddlesRepository):
         try:
             self.table.put_item(Item=location_riddle.dict())
         except Exception as e:
-            print(f"Error writing location_riddle to DynamoDB: {e}")
+            logger.error(f"Error writing location_riddle to DynamoDB: {e}")
             raise BadRequestError(f"Error writing location_riddle to DynamoDB: {e}")
 
     def get_all_location_riddles_by_username(self, username: str):
@@ -43,7 +46,7 @@ class LocationRiddlesRepository(AbstractLocationRiddlesRepository):
         try:
             location_riddles = [LocationRiddle(**item) for item in items]
         except ValidationError as e:
-            print(f"Unable to read Data from DB {e}")
+            logger.info(f"Unable to read Data from DB {e}")
             raise BadRequestError(f"Unable to read Data from DB {e}")
 
         return location_riddles
@@ -60,7 +63,7 @@ class LocationRiddlesRepository(AbstractLocationRiddlesRepository):
         try:
             location_riddle = LocationRiddle(**response["Item"])
         except ValidationError as e:
-            print(f"Unable to read Data from DB {e}")
+            logger.info(f"Unable to read Data from DB {e}")
             raise BadRequestError(f"Unable to read Data from DB {e}")
 
         return location_riddle
@@ -84,7 +87,7 @@ class LocationRiddlesRepository(AbstractLocationRiddlesRepository):
         try:
             self.table.delete_item(Key={"location_riddle_id": location_riddle_id})
         except ClientError as e:
-            print(f"Error deleting location_riddle from DynamoDB: {e}")
+            logger.error(f"Error deleting location_riddle from DynamoDB: {e}")
             raise BadRequestError(f"Error deleting location_riddle from DynamoDB: {e}")
 
     def __append_attribute(self, location_riddle_id, attribute, value):
@@ -95,7 +98,7 @@ class LocationRiddlesRepository(AbstractLocationRiddlesRepository):
                 ExpressionAttributeValues={":i": [value.dict()]},
             )
         except ClientError as e:
-            print(f"Error updating location_riddle {attribute} in DynamoDB: {e}")
+            logger.error(f"Error updating location_riddle {attribute} in DynamoDB: {e}")
             raise BadRequestError(
                 f"Error updating location_riddle {attribute} in DynamoDB: {e}"
             )

@@ -3,6 +3,7 @@ from aws_lambda_powertools.event_handler.exceptions import (
     BadRequestError,
     NotFoundError,
 )
+from aws_lambda_powertools.logging import Logger
 from boto3.dynamodb.conditions import Key
 from botocore.exceptions import ClientError
 from pydantic import ValidationError
@@ -11,6 +12,8 @@ from .entities.PartitionKey import PartitionKey
 from .base.AbstractUserRepository import AbstractUserRepository
 from .entities.Score import Score
 from .entities.User import User, UserPutDTO
+
+logger = Logger()
 
 
 class UserRepository(AbstractUserRepository):
@@ -44,7 +47,7 @@ class UserRepository(AbstractUserRepository):
                 },
             )
         except ClientError as e:
-            print(f"Error updating user in DynamoDB: {e}")
+            logger.error(f"Error updating user in DynamoDB: {e}")
             raise BadRequestError(f"Error updating user in DynamoDB: {e}")
 
         return self.get_user_by_username_from_db(username)
@@ -61,7 +64,7 @@ class UserRepository(AbstractUserRepository):
         try:
             return User(**response["Items"][0])
         except ValidationError as e:
-            print(f"unable to create user with provided parameters. {e}")
+            logger.info(f"unable to create user with provided parameters. {e}")
             raise BadRequestError(
                 f"unable to create user with provided parameters. {e}"
             )
@@ -86,7 +89,7 @@ class UserRepository(AbstractUserRepository):
         try:
             users = [User(**item) for item in items]
         except ValidationError as e:
-            print(f"unable to create user with provided parameters. {e}")
+            logger.info(f"unable to create user with provided parameters. {e}")
             raise BadRequestError(
                 f"unable to create user with provided parameters. {e}"
             )
@@ -104,7 +107,7 @@ class UserRepository(AbstractUserRepository):
                 ExpressionAttributeValues={":i": [score.dict()]},
             )
         except ClientError as e:
-            print(f"Error updating user scores in DynamoDB: {e}")
+            logger.error(f"Error updating user scores in DynamoDB: {e}")
             raise BadRequestError(f"Error updating user scores in DynamoDB: {e}")
 
         return self.get_user_by_username_from_db(username)
@@ -123,7 +126,7 @@ class UserRepository(AbstractUserRepository):
             user["partition_key"] = PartitionKey.USER.value
             self.table.put_item(Item=user)
         except ClientError as e:
-            print(f"Error saving user to DynamoDB: {e}")
+            logger.error(f"Error saving user to DynamoDB: {e}")
             raise BadRequestError(f"Error saving user to DynamoDB: {e}")
 
         return User(**user)
