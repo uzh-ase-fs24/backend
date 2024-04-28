@@ -1,80 +1,184 @@
 {
   "Items": [
     {
+      "bio": {
+        "S": "I'm a software engineer from Switzerland"
+      },
       "last_name": {
         "S": "Bauer"
       },
       "partition_key": {
         "S": "USER"
       },
+      "scores": {
+        "L": [
+          {
+            "M": {
+              "score": {
+                "N": "0"
+              },
+              "location_riddle_id": {
+                "S": "c4ad1dab-ec20-4b65-9087-5d7d56805489"
+              }
+            }
+          },
+          {
+            "M": {
+              "score": {
+                "N": "6881"
+              },
+              "location_riddle_id": {
+                "S": "329e0705-dc0b-47d3-b6a9-b140bbe13aa3"
+              }
+            }
+          }
+        ]
+      },
       "first_name": {
         "S": "Christian"
-      },
-      "scores": {
-        "L": []
-      },
-      "bio": {
-        "S": "I'm a software engineer from Switzerland"
       },
       "username": {
         "S": "chrispyb"
       }
     },
     {
+      "bio": {
+        "S": "BEST riddler in town!"
+      },
       "last_name": {
         "S": "Meier"
       },
       "partition_key": {
         "S": "USER"
       },
+      "scores": {
+        "L": [
+          {
+            "M": {
+              "score": {
+                "N": "9999"
+              },
+              "location_riddle_id": {
+                "S": "b5c648f1-40ac-4b98-a259-6c4e2aa3fa3"
+              }
+            }
+          },
+          {
+            "M": {
+              "score": {
+                "N": "9945"
+              },
+              "location_riddle_id": {
+                "S": "8a8e4d1b-eb46-447d-ae99-691716feab92"
+              }
+            }
+          }
+        ]
+      },
       "first_name": {
         "S": "Lukas"
-      },
-      "scores": {
-        "L": []
-      },
-      "bio": {
-        "S": "BEST riddler in town!"
       },
       "username": {
         "S": "flyingbeat"
       }
     },
     {
+      "bio": {
+        "S": "Challenge me with your riddles"
+      },
       "last_name": {
         "S": "Müller"
       },
       "partition_key": {
         "S": "USER"
       },
+      "scores": {
+        "L": [
+          {
+            "M": {
+              "score": {
+                "N": "7836"
+              },
+              "location_riddle_id": {
+                "S": "b5c648f1-40ac-4b98-a259-6c4e2aa3fa3"
+              }
+            }
+          },
+          {
+            "M": {
+              "score": {
+                "N": "6970"
+              },
+              "location_riddle_id": {
+                "S": "c4ad1dab-ec20-4b65-9087-5d7d56805489"
+              }
+            }
+          },
+          {
+            "M": {
+              "score": {
+                "N": "9980"
+              },
+              "location_riddle_id": {
+                "S": "329e0705-dc0b-47d3-b6a9-b140bbe13aa3"
+              }
+            }
+          }
+        ]
+      },
       "first_name": {
         "S": "Simon"
-      },
-      "bio": {
-        "S": "Challenge me with your riddles"
-      },
-      "scores": {
-        "L": []
       },
       "username": {
         "S": "goldachboi"
       }
     },
     {
+      "bio": {
+        "S": "I am a software engineer from Germany"
+      },
       "last_name": {
         "S": "Schmidt"
       },
       "partition_key": {
         "S": "USER"
       },
+      "scores": {
+        "L": [
+          {
+            "M": {
+              "score": {
+                "N": "8631"
+              },
+              "location_riddle_id": {
+                "S": "b5c648f1-40ac-4b98-a259-6c4e2aa3fa3"
+              }
+            }
+          },
+          {
+            "M": {
+              "score": {
+                "N": "9992"
+              },
+              "location_riddle_id": {
+                "S": "c4ad1dab-ec20-4b65-9087-5d7d56805489"
+              }
+            }
+          },
+          {
+            "M": {
+              "score": {
+                "N": "9548"
+              },
+              "location_riddle_id": {
+                "S": "8a8e4d1b-eb46-447d-ae99-691716feab92"
+              }
+            }
+          }
+        ]
+      },
       "first_name": {
         "S": "Ingmar"
-      },
-      "bio": {
-        "S": "I am a software engineer from Germany"
-      },
-      "scores": {
-        "L": []
       },
       "username": {
         "S": "lachs"

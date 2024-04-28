@@ -2,53 +2,41 @@
   "Items": [
     {
       "location_riddle_id": {
-        "S": "c4ad1dab-ec20-4b65-9087-5d7d56805489"
-      },
-      "comments": {
-        "L": []
-      },
-      "ratings": {
-        "L": []
-      },
-      "created_at": {
-        "N": "1713944461"
-      },
-      "location": {
-        "M": {
-          "coordinate": {
-            "L": [
-              {
-                "N": "947747.690381979"
-              },
-              {
-                "N": "6004240.675657255"
-              }
-            ]
-          }
-        }
-      },
-      "average_rating": {
-        "NULL": true
-      },
-      "guesses": {
-        "L": []
-      },
-      "username": {
-        "S": "flyingbeat"
-      }
-    },
-    {
-      "location_riddle_id": {
         "S": "329e0705-dc0b-47d3-b6a9-b140bbe13aa3"
       },
       "comments": {
-        "L": []
+        "L": [
+          {
+            "M": {
+              "comment": {
+                "S": "my favorite blossom!"
+              },
+              "username": {
+                "S": "chrispyb"
+              }
+            }
+          }
+        ]
       },
       "ratings": {
-        "L": []
+        "L": [
+          {
+            "M": {
+              "rating": {
+                "N": "4"
+              },
+              "username": {
+                "S": "chrispyb"
+              }
+            }
+          }
+        ]
       },
       "created_at": {
         "N": "1713944461"
+      },
+      "average_rating": {
+        "NULL": true
       },
       "location": {
         "M": {
@@ -64,11 +52,51 @@
           }
         }
       },
-      "average_rating": {
-        "NULL": true
-      },
       "guesses": {
-        "L": []
+        "L": [
+          {
+            "M": {
+              "guess": {
+                "M": {
+                  "coordinate": {
+                    "L": [
+                      {
+                        "N": "948146.3269730493"
+                      },
+                      {
+                        "N": "5969670.419676308"
+                      }
+                    ]
+                  }
+                }
+              },
+              "username": {
+                "S": "chrispyb"
+              }
+            }
+          },
+          {
+            "M": {
+              "guess": {
+                "M": {
+                  "coordinate": {
+                    "L": [
+                      {
+                        "N": "949570.7032868171"
+                      },
+                      {
+                        "N": "6000643.707705978"
+                      }
+                    ]
+                  }
+                }
+              },
+              "username": {
+                "S": "goldachboi"
+              }
+            }
+          }
+        ]
       },
       "username": {
         "S": "lachs"
@@ -76,53 +104,61 @@
     },
     {
       "location_riddle_id": {
-        "S": "8a8e4d1b-eb46-447d-ae99-691716feab92"
-      },
-      "comments": {
-        "L": []
-      },
-      "ratings": {
-        "L": []
-      },
-      "created_at": {
-        "N": "1713944461"
-      },
-      "location": {
-        "M": {
-          "coordinate": {
-            "L": [
-              {
-                "N": "948709.8306850172"
-              },
-              {
-                "N": "6007449.677960505"
-              }
-            ]
-          }
-        }
-      },
-      "average_rating": {
-        "NULL": true
-      },
-      "guesses": {
-        "L": []
-      },
-      "username": {
-        "S": "goldachboi"
-      }
-    },
-    {
-      "location_riddle_id": {
         "S": "b5c648f1-40ac-4b98-a259-6c4e2aa3fa3"
       },
       "comments": {
-        "L": []
+        "L": [
+          {
+            "M": {
+              "comment": {
+                "S": "I know exactly where this is!"
+              },
+              "username": {
+                "S": "flyingbeat"
+              }
+            }
+          },
+          {
+            "M": {
+              "comment": {
+                "S": "not bad! you were super close"
+              },
+              "username": {
+                "S": "lachs"
+              }
+            }
+          },
+          {
+            "M": {
+              "comment": {
+                "S": "almost... haha"
+              },
+              "username": {
+                "S": "goldachboi"
+              }
+            }
+          }
+        ]
       },
       "ratings": {
-        "L": []
+        "L": [
+          {
+            "M": {
+              "rating": {
+                "N": "4"
+              },
+              "username": {
+                "S": "flyingbeat"
+              }
+            }
+          }
+        ]
       },
       "created_at": {
         "N": "1713944461"
+      },
+      "average_rating": {
+        "NULL": true
       },
       "location": {
         "M": {
@@ -138,14 +174,320 @@
           }
         }
       },
-      "average_rating": {
-        "NULL": true
-      },
       "guesses": {
-        "L": []
+        "L": [
+          {
+            "M": {
+              "guess": {
+                "M": {
+                  "coordinate": {
+                    "L": [
+                      {
+                        "N": "1086457.4531827462"
+                      },
+                      {
+                        "N": "5930780.166542127"
+                      }
+                    ]
+                  }
+                }
+              },
+              "username": {
+                "S": "flyingbeat"
+              }
+            }
+          },
+          {
+            "M": {
+              "guess": {
+                "M": {
+                  "coordinate": {
+                    "L": [
+                      {
+                        "N": "1093326.8712175705"
+                      },
+                      {
+                        "N": "5918947.175375077"
+                      }
+                    ]
+                  }
+                }
+              },
+              "username": {
+                "S": "lachs"
+              }
+            }
+          },
+          {
+            "M": {
+              "guess": {
+                "M": {
+                  "coordinate": {
+                    "L": [
+                      {
+                        "N": "1094629.3898110797"
+                      },
+                      {
+                        "N": "5910747.191596264"
+                      }
+                    ]
+                  }
+                }
+              },
+              "username": {
+                "S": "goldachboi"
+              }
+            }
+          }
+        ]
       },
       "username": {
         "S": "chrispyb"
+      }
+    },
+    {
+      "location_riddle_id": {
+        "S": "8a8e4d1b-eb46-447d-ae99-691716feab92"
+      },
+      "comments": {
+        "L": [
+          {
+            "M": {
+              "comment": {
+                "S": "for sure in zurich, I can see the prime tower!"
+              },
+              "username": {
+                "S": "flyingbeat"
+              }
+            }
+          },
+          {
+            "M": {
+              "comment": {
+                "S": "did you go for a run?"
+              },
+              "username": {
+                "S": "lachs"
+              }
+            }
+          }
+        ]
+      },
+      "ratings": {
+        "L": [
+          {
+            "M": {
+              "rating": {
+                "N": "3"
+              },
+              "username": {
+                "S": "flyingbeat"
+              }
+            }
+          }
+        ]
+      },
+      "created_at": {
+        "N": "1713944461"
+      },
+      "average_rating": {
+        "NULL": true
+      },
+      "location": {
+        "M": {
+          "coordinate": {
+            "L": [
+              {
+                "N": "948709.8306850172"
+              },
+              {
+                "N": "6007449.677960505"
+              }
+            ]
+          }
+        }
+      },
+      "guesses": {
+        "L": [
+          {
+            "M": {
+              "guess": {
+                "M": {
+                  "coordinate": {
+                    "L": [
+                      {
+                        "N": "948177.7385722799"
+                      },
+                      {
+                        "N": "6007551.133888862"
+                      }
+                    ]
+                  }
+                }
+              },
+              "username": {
+                "S": "flyingbeat"
+              }
+            }
+          },
+          {
+            "M": {
+              "guess": {
+                "M": {
+                  "coordinate": {
+                    "L": [
+                      {
+                        "N": "950546.8967389967"
+                      },
+                      {
+                        "N": "6003320.95269378"
+                      }
+                    ]
+                  }
+                }
+              },
+              "username": {
+                "S": "lachs"
+              }
+            }
+          }
+        ]
+      },
+      "username": {
+        "S": "goldachboi"
+      }
+    },
+    {
+      "location_riddle_id": {
+        "S": "c4ad1dab-ec20-4b65-9087-5d7d56805489"
+      },
+      "comments": {
+        "L": [
+          {
+            "M": {
+              "comment": {
+                "S": "I was there haha"
+              },
+              "username": {
+                "S": "lachs"
+              }
+            }
+          },
+          {
+            "M": {
+              "comment": {
+                "S": "super crazy weather! Who would've thought that this is possible in april?!?"
+              },
+              "username": {
+                "S": "goldachboi"
+              }
+            }
+          }
+        ]
+      },
+      "ratings": {
+        "L": [
+          {
+            "M": {
+              "rating": {
+                "N": "5"
+              },
+              "username": {
+                "S": "lachs"
+              }
+            }
+          }
+        ]
+      },
+      "created_at": {
+        "N": "1713944461"
+      },
+      "average_rating": {
+        "NULL": true
+      },
+      "location": {
+        "M": {
+          "coordinate": {
+            "L": [
+              {
+                "N": "947747.690381979"
+              },
+              {
+                "N": "6004240.675657255"
+              }
+            ]
+          }
+        }
+      },
+      "guesses": {
+        "L": [
+          {
+            "M": {
+              "guess": {
+                "M": {
+                  "coordinate": {
+                    "L": [
+                      {
+                        "N": "947671.2795733719"
+                      },
+                      {
+                        "N": "6004237.137477517"
+                      }
+                    ]
+                  }
+                }
+              },
+              "username": {
+                "S": "lachs"
+              }
+            }
+          },
+          {
+            "M": {
+              "guess": {
+                "M": {
+                  "coordinate": {
+                    "L": [
+                      {
+                        "N": "829477.3477349128"
+                      },
+                      {
+                        "N": "5934339.593843568"
+                      }
+                    ]
+                  }
+                }
+              },
+              "username": {
+                "S": "chrispyb"
+              }
+            }
+          },
+          {
+            "M": {
+              "guess": {
+                "M": {
+                  "coordinate": {
+                    "L": [
+                      {
+                        "N": "971363.8072634754"
+                      },
+                      {
+                        "N": "6023211.302551743"
+                      }
+                    ]
+                  }
+                }
+              },
+              "username": {
+                "S": "goldachboi"
+              }
+            }
+          }
+        ]
+      },
+      "username": {
+        "S": "flyingbeat"
       }
     }
   ],
