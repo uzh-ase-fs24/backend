@@ -1,12 +1,15 @@
+from datetime import datetime
+
 from aws_lambda_powertools.event_handler.exceptions import (
     BadRequestError,
 )
-from datetime import datetime
-
+from aws_lambda_powertools.logging import Logger
 from pydantic import ValidationError
 
 from .entities.FollowRequest import FollowRequest
 from .entities.UserConnections import UserConnectionsUsernames
+
+logger = Logger()
 
 
 class FollowerService:
@@ -20,13 +23,16 @@ class FollowerService:
             )
 
         try:
-            follow_request = FollowRequest(requester=requester,
-                                           requestee=requestee,
-                                           request_status="pending",
-                                           timestamp=datetime.now()
-                                           )
+            follow_request = FollowRequest(
+                requester=requester,
+                requestee=requestee,
+                request_status="pending",
+                timestamp=datetime.now(),
+            )
         except ValidationError as e:
-            print(f"unable to create follow request with provided parameters. {e}")
+            logger.info(
+                f"unable to create follow request with provided parameters. {e}"
+            )
             raise BadRequestError(
                 f"unable to create follow request with provided parameters. {e}"
             )
