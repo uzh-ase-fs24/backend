@@ -42,6 +42,29 @@
       }
     },
     {
+      "average_score": {
+        "NULL": true
+      },
+      "partition_key": {
+        "S": "USER"
+      },
+      "scores": {
+        "L": []
+      },
+      "last_name": {
+        "S": "Mustermann"
+      },
+      "bio": {
+        "S": "I like to compete with my friends, especially when it comes to location riddles!"
+      },
+      "first_name": {
+        "S": "Max"
+      },
+      "username": {
+        "S": "demo"
+      }
+    },
+    {
       "bio": {
         "S": "BEST riddler in town!"
       },
@@ -185,7 +208,7 @@
       }
     }
   ],
-  "Count": 4,
-  "ScannedCount": 4,
+  "Count": 5,
+  "ScannedCount": 5,
   "ConsumedCapacity": null
 }
