@@ -49,6 +49,7 @@ class RequestBodyAttribute(Enum):
     GUESS = "guess"
     COMMENT = "comment"
     RATING = "rating"
+    ARENAS = "arenas"
 
 
 @app.post("/location-riddles")
@@ -60,6 +61,7 @@ def post_location_riddles():
         Body: {
             "image": <image_file>,
             "location": <coordinate_list> e.g. [12.345, 67.890]
+            "arenas": <arena_list> e.g. ["arena1", "arena2"]
         }
         Description: Creates a new location riddle with the provided image and location.
         Returns: A message indicating the successful upload of the location riddle.
@@ -67,6 +69,7 @@ def post_location_riddles():
     return location_riddles_service.post_location_riddle(
         __get_attribute_from_request_body(RequestBodyAttribute.IMAGE.value, app),
         __get_attribute_from_request_body(RequestBodyAttribute.LOCATION.value, app),
+        __get_attribute_from_request_body(RequestBodyAttribute.ARENAS.value, app),
         __get_username())
 
 

@@ -16,6 +16,7 @@ class LocationRiddle(BaseModel):
     ratings: List[Rating] = []
     comments: List[Comment] = []
     guesses: List[Guess] = []
+    arenas: List[str] = []
     created_at: int = int(datetime.now().timestamp())
     average_rating: Optional[float] = None
 

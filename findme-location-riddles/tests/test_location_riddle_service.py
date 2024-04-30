@@ -20,7 +20,7 @@ class TestLocationRiddleService(unittest.TestCase):
     def test_post_location_riddle(self):
         self.assertEqual(
             self.location_riddles_service.post_location_riddle(
-                "mock_image_base64", [45, 13], "mock_username"
+                "mock_image_base64", [45, 13], ["zurich", "parks"], "mock_username"
             ),
             {"message": "Mock image upload successful"},
         )

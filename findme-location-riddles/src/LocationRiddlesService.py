@@ -30,12 +30,13 @@ class LocationRiddlesService:
         self.user_microservice_client = user_microservice_client
 
     def post_location_riddle(
-        self, image_base64: str, location: list, username: str
+        self, image_base64: str, location: list, arenas: list, username: str
     ) -> dict:
         try:
             location_riddle = LocationRiddle(
                 location_riddle_id=str(uuid.uuid4()),
                 username=username,
+                arenas=arenas,
                 location=Coordinate(
                     coordinate=[Decimal(str(coord)) for coord in location]
                 ),
