@@ -58,6 +58,17 @@ class TestLocationRiddleService(unittest.TestCase):
         self.assertEqual(location_riddle.username, "mock_username")
         self.assertEqual(location_riddle.solved, True)
 
+    def test_get_location_riddles_feed(self):
+        location_riddles = self.location_riddles_service.get_location_riddles_feed(
+            "event", "mock_username"
+        )
+        location_riddle = location_riddles[0]
+
+        self.assertEqual(location_riddle.location_riddle_id, "mock_location_riddle_id")
+        self.assertEqual(location_riddle.username, "mock_username")
+        self.assertEqual(location_riddle.comments, [])
+        self.assertEqual(location_riddle.image_base64, "mock_image_base64")
+
     def test_guess_location_riddle(self):
         # Test that the user can not rate its own location riddle
         with self.assertRaises(Exception):
