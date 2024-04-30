@@ -2,9 +2,10 @@ import json
 import os
 import boto3
 from urllib.parse import urljoin
+from .base.AbstractUserMicroserviceClient import AbstractUserMicroserviceClient
 
 
-class UserMicroserviceClient:
+class UserMicroserviceClient(AbstractUserMicroserviceClient):
     def __init__(self):
         self.client = boto3.client("lambda", region_name="eu-central-2")
         self.base_url = "/users/"
