@@ -204,6 +204,15 @@ functions:
           cors:
             origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
       - http:
+          path: /location-riddles/arena/{arena_name}
+          method: get
+          cors:
+            origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
+          request:
+            parameters:
+              paths:
+                arena_name: true
+      - http:
           path: /location-riddles/{location_riddle_id}
           method: get
           cors:

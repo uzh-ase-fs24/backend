@@ -135,6 +135,23 @@ class LocationRiddlesService:
                 continue
         return sorted(response, key=lambda riddle: riddle.created_at, reverse=True)
 
+    def get_location_riddles_arena(
+            self, arena: str, username: str
+    ) -> list[Union[LocationRiddleDTO, SolvedLocationRiddleDTO]]:
+        location_riddles = self.location_riddle_repository.get_all_location_riddles_containing_arena(arena)
+        if len(location_riddles) == 0:
+            raise NotFoundError(
+                f"No location riddles for arena: {arena} found"
+            )
+
+        location_riddle_dtos = [
+            location_riddle.to_dto(username)
+            for location_riddle in location_riddles
+        ]
+        for location_riddle_dto in location_riddle_dtos:
+            self.__append_image_to_location_riddle(location_riddle_dto)
+        return location_riddle_dtos
+
     def rate_location_riddle(
         self, location_riddle_id: str, username: str, rating: int
     ) -> Union[LocationRiddleDTO, SolvedLocationRiddleDTO]:

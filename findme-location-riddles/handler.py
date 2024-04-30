@@ -129,6 +129,19 @@ def get_location_riddles():
     return location_riddles_service.get_location_riddles_feed(app.current_event, __get_username())
 
 
+@app.get("/location-riddles/arena/<arena_name>")
+@tracer.capture_method
+@authorizer.requires_auth(app=app)
+def get_location_riddles_arena(arena_name: Annotated[str, Path()]):
+    """
+        Endpoint: GET /location-riddles/arena/<arena>
+        Body: None
+        Description: Retrieves all location riddles that contain the requested arena.
+        Returns: A list of location riddles.
+    """
+    return location_riddles_service.get_location_riddles_arena(arena_name, __get_username())
+
+
 @app.get("/location-riddles/user/<username>")
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
