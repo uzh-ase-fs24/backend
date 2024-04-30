@@ -96,6 +96,29 @@ class LocationRiddlesService:
             self.__append_image_to_location_riddle(location_riddle_dto)
         return location_riddle_dtos
 
+    def get_solved_location_riddles_for_user(
+        self, event, username: str, requester_username: str
+    ) -> list[Union[LocationRiddleDTO, SolvedLocationRiddleDTO]]:
+        location_riddle_ids = [location_riddle["location_riddle_id"] for location_riddle in self.__get_user_scores(event, username)]
+
+        if len(location_riddle_ids) == 0:
+            raise NotFoundError(
+                f"No location riddles for user with username: {username} found"
+            )
+
+        location_riddles = [
+            self.location_riddle_repository.get_location_riddle_by_location_riddle_id_from_db(location_riddle_id)
+            for location_riddle_id in location_riddle_ids
+        ]
+
+        location_riddle_dtos = [
+            location_riddle.to_dto(requester_username)
+            for location_riddle in location_riddles
+        ]
+        for location_riddle_dto in location_riddle_dtos:
+            self.__append_image_to_location_riddle(location_riddle_dto)
+        return location_riddle_dtos
+
     def get_location_riddles_feed(
         self, event, username: str
     ) -> list[Union[LocationRiddleDTO, SolvedLocationRiddleDTO]]:
@@ -264,6 +287,24 @@ class LocationRiddlesService:
         user_connections = json.loads(payload_dict["body"])
 
         return user_connections["following"]
+
+    def __get_user_scores(self, event, username: str):
+        event_dict = dict(event)
+        base_url = "/users/"
+        event_dict["path"] = urljoin(base_url, f"{username}/scores")
+        client = boto3.client("lambda", region_name="eu-central-2")
+        response = client.invoke(
+            FunctionName=os.environ["USER_FUNCTION_NAME"],
+            Payload=json.dumps(event_dict),
+        )
+
+        streaming_body = response["Payload"]
+        payload_bytes = streaming_body.read()
+        payload_str = payload_bytes.decode("utf-8")
+        payload_dict = json.loads(payload_str)
+        user_scores = json.loads(payload_dict["body"])
+
+        return user_scores
 
     def __write_score_to_user_in_user_db(
         self, event, location_riddle_id: str, score: int

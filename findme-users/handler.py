@@ -145,6 +145,19 @@ def get_similar_users() -> List[UserDTO]:
     )
 
 
+@app.get("/users/<username>/scores")
+@tracer.capture_method
+@authorizer.requires_auth(app=app)
+def get_user_scores(username: Annotated[str, Path()]) -> list[Score]:
+    """
+    Endpoint: GET /users/<username>/scores
+    Body: None
+    Description: Retrieves all scores of a specific user.
+    Returns: A list of scores.
+    """
+    return user_service.get_user_scores(username)
+
+
 @app.put("/users/<username>/follow")
 @tracer.capture_method
 @authorizer.requires_auth(app=app)

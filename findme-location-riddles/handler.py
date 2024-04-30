@@ -126,7 +126,7 @@ def get_location_riddles_by_user(username: Annotated[str, Path()]):
         Description: Retrieves all location riddles for a specific user.
         Returns: A list of location riddles.
     """
-    return location_riddles_service.get_location_riddles_for_user(username, __get_username())
+    return location_riddles_service.get_location_riddles_for_user(username=username, requester_username=__get_username())
 
 
 @app.get("/location-riddles/user")
@@ -139,7 +139,41 @@ def get_location_riddles_by_user():
         Description: Retrieves all location riddles for the current user.
         Returns: A list of location riddles.
     """
-    return location_riddles_service.get_location_riddles_for_user(__get_username(), __get_username())
+    return location_riddles_service.get_location_riddles_for_user(
+        username=__get_username(),
+        requester_username=__get_username())
+
+
+@app.get("/location-riddles/user/<username>/solved")
+@tracer.capture_method
+@authorizer.requires_auth(app=app)
+def get_solved_location_riddles_by_user(username: Annotated[str, Path()]):
+    """
+        Endpoint: GET /location-riddles/user/<username>/solved
+        Body: None
+        Description: Retrieves all solved location riddles for a specific user.
+        Returns: A list of location riddles.
+    """
+    return location_riddles_service.get_solved_location_riddles_for_user(
+        app.current_event,
+        username=username,
+        requester_username=__get_username())
+
+
+@app.get("/location-riddles/user/solved")
+@tracer.capture_method
+@authorizer.requires_auth(app=app)
+def get_solved_location_riddles_by_user():
+    """
+        Endpoint: GET /location-riddles/user
+        Body: None
+        Description: Retrieves all solved location riddles for the current user.
+        Returns: A list of location riddles.
+    """
+    return location_riddles_service.get_solved_location_riddles_for_user(
+        app.current_event,
+        username=__get_username(),
+        requester_username=__get_username())
 
 
 @app.get("/location-riddles/<location_riddle_id>")

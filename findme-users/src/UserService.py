@@ -31,6 +31,9 @@ class UserService:
     def get_user(self, username: str) -> UserDTO:
         return self.user_repository.get_user_by_username_from_db(username).to_dto()
 
+    def get_user_scores(self, username: str) -> list[Score]:
+        return self.user_repository.get_user_by_username_from_db(username).scores
+
     def update_user(self, data: dict, username: str) -> UserDTO:
         try:
             user_put_dto = UserPutDTO(**data)
