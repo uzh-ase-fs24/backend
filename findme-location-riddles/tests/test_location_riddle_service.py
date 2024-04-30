@@ -4,6 +4,7 @@ from decimal import Decimal
 from ..src.LocationRiddlesService import LocationRiddlesService
 from ..src.test.MockImageBucketRepository import MockImageBucketRepository
 from ..src.test.MockLocationRiddlesRepository import MockLocationRiddlesRepository
+from ..src.test.MockUserMicroserviceClient import MockUserMicroserviceClient
 
 
 class TestLocationRiddleService(unittest.TestCase):
@@ -11,7 +12,7 @@ class TestLocationRiddleService(unittest.TestCase):
         self.maxDiff = None
         self.image_bucket_repository = MockImageBucketRepository()
         self.location_riddle_repository = MockLocationRiddlesRepository()
-        self.user_microservice_client = None
+        self.user_microservice_client = MockUserMicroserviceClient()
         self.location_riddles_service = LocationRiddlesService(
             self.location_riddle_repository, self.image_bucket_repository, self.user_microservice_client
         )
@@ -46,6 +47,16 @@ class TestLocationRiddleService(unittest.TestCase):
         self.assertEqual(location_riddle.username, "mock_username")
         self.assertEqual(location_riddle.comments, [])
         self.assertEqual(location_riddle.image_base64, "mock_image_base64")
+
+    def test_get_solved_location_riddles_for_user(self):
+        location_riddles = self.location_riddles_service.get_solved_location_riddles_for_user(
+            "event", "mock_username", "mock_username"
+        )
+        location_riddle = location_riddles[0]
+
+        self.assertEqual(location_riddle.location_riddle_id, "mock_location_riddle_id")
+        self.assertEqual(location_riddle.username, "mock_username")
+        self.assertEqual(location_riddle.solved, True)
 
     def test_guess_location_riddle(self):
         # Test that the user can not rate its own location riddle

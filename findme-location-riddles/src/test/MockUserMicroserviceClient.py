@@ -4,8 +4,8 @@ from ..base.AbstractUserMicroserviceClient import AbstractUserMicroserviceClient
 class MockUserMicroserviceClient(AbstractUserMicroserviceClient):
     def get_following_users_list(self, event, username: str):
         return [
-            {"username": "test_user", "first_name": "Test", "last_name": "User"},
-            {"username": "test_user2", "first_name": "Test2", "last_name": "User2"}
+            {"username": "mock_username", "first_name": "Test", "last_name": "User"},
+            {"username": "mock_username2", "first_name": "Test2", "last_name": "User2"}
         ]
 
     def get_user_scores(self, event, username: str):
