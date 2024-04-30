@@ -19,6 +19,7 @@ from enum import Enum
 from src.LocationRiddlesService import LocationRiddlesService
 from src.ImageBucketRepository import ImageBucketRepository
 from src.LocationRiddlesRepository import LocationRiddlesRepository
+from src.UserMicroserviceClient import UserMicroserviceClient
 
 tracer = Tracer()
 logger = Logger()
@@ -34,7 +35,11 @@ authorizer = Authorizer(
 
 image_bucket_repository = ImageBucketRepository()
 location_riddle_repository = LocationRiddlesRepository()
-location_riddles_service = LocationRiddlesService(location_riddle_repository, image_bucket_repository)
+user_microservice_client = UserMicroserviceClient()
+location_riddles_service = LocationRiddlesService(
+    location_riddle_repository,
+    image_bucket_repository,
+    user_microservice_client)
 
 
 class RequestBodyAttribute(Enum):
@@ -59,9 +64,10 @@ def post_location_riddles():
         Description: Creates a new location riddle with the provided image and location.
         Returns: A message indicating the successful upload of the location riddle.
     """
-    return location_riddles_service.post_location_riddle(__get_attribute_from_request_body(RequestBodyAttribute.IMAGE.value, app),
-                                                         __get_attribute_from_request_body(RequestBodyAttribute.LOCATION.value, app),
-                                                         __get_username())
+    return location_riddles_service.post_location_riddle(
+        __get_attribute_from_request_body(RequestBodyAttribute.IMAGE.value, app),
+        __get_attribute_from_request_body(RequestBodyAttribute.LOCATION.value, app),
+        __get_username())
 
 
 @app.post("/location-riddles/<location_riddle_id>/guess")
@@ -84,7 +90,9 @@ def post_guess_to_location_riddle(location_riddle_id: Annotated[str, Path()]):
     return location_riddles_service.guess_location_riddle(app.current_event,
                                                           location_riddle_id,
                                                           __get_username(),
-                                                          __get_attribute_from_request_body(RequestBodyAttribute.GUESS.value, app))
+                                                          __get_attribute_from_request_body(
+                                                              RequestBodyAttribute.GUESS.value, app)
+                                                          )
 
 
 @app.post("/location-riddles/<location_riddle_id>/comment")
@@ -100,7 +108,9 @@ def post_comment_to_location_riddle(location_riddle_id: Annotated[str, Path()]):
         Returns: The updated location riddle with the new comment.
     """
     return location_riddles_service.comment_location_riddle(location_riddle_id, __get_username(),
-                                                            __get_attribute_from_request_body(RequestBodyAttribute.COMMENT.value, app))
+                                                            __get_attribute_from_request_body(
+                                                                RequestBodyAttribute.COMMENT.value, app)
+                                                            )
 
 
 @app.get("/location-riddles")
@@ -126,7 +136,10 @@ def get_location_riddles_by_user(username: Annotated[str, Path()]):
         Description: Retrieves all location riddles for a specific user.
         Returns: A list of location riddles.
     """
-    return location_riddles_service.get_location_riddles_for_user(username=username, requester_username=__get_username())
+    return location_riddles_service.get_location_riddles_for_user(
+        username=username,
+        requester_username=__get_username()
+    )
 
 
 @app.get("/location-riddles/user")
@@ -202,7 +215,9 @@ def rate_location_riddle(location_riddle_id: Annotated[str, Path()]):
         Returns: The updated location riddle with the new rating.
     """
     return location_riddles_service.rate_location_riddle(location_riddle_id, __get_username(),
-                                                         __get_attribute_from_request_body(RequestBodyAttribute.RATING.value, app))
+                                                         __get_attribute_from_request_body(
+                                                             RequestBodyAttribute.RATING.value, app)
+                                                         )
 
 
 @app.delete("/location-riddles/<location_riddle_id>")

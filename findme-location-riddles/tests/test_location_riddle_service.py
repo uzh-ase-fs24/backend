@@ -11,8 +11,9 @@ class TestLocationRiddleService(unittest.TestCase):
         self.maxDiff = None
         self.image_bucket_repository = MockImageBucketRepository()
         self.location_riddle_repository = MockLocationRiddlesRepository()
+        self.user_microservice_client = None
         self.location_riddles_service = LocationRiddlesService(
-            self.location_riddle_repository, self.image_bucket_repository
+            self.location_riddle_repository, self.image_bucket_repository, self.user_microservice_client
         )
 
     def test_post_location_riddle(self):

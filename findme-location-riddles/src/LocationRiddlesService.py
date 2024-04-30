@@ -1,12 +1,7 @@
-import json
 import math
-import os
 import uuid
 from decimal import Decimal
 from typing import Union
-from urllib.parse import urljoin
-
-import boto3
 from aws_lambda_powertools.event_handler.exceptions import (
     BadRequestError,
     NotFoundError,
@@ -29,9 +24,10 @@ logger = Logger()
 
 
 class LocationRiddlesService:
-    def __init__(self, location_riddle_repository, image_bucket_repository):
+    def __init__(self, location_riddle_repository, image_bucket_repository, user_microservice_client):
         self.image_bucket_repository = image_bucket_repository
         self.location_riddle_repository = location_riddle_repository
+        self.user_microservice_client = user_microservice_client
 
     def post_location_riddle(
         self, image_base64: str, location: list, username: str
@@ -99,7 +95,9 @@ class LocationRiddlesService:
     def get_solved_location_riddles_for_user(
         self, event, username: str, requester_username: str
     ) -> list[Union[LocationRiddleDTO, SolvedLocationRiddleDTO]]:
-        location_riddle_ids = [location_riddle["location_riddle_id"] for location_riddle in self.__get_user_scores(event, username)]
+        location_riddle_ids = [location_riddle["location_riddle_id"]
+                               for location_riddle
+                               in self.user_microservice_client.get_user_scores(event, username)]
 
         if len(location_riddle_ids) == 0:
             raise NotFoundError(
@@ -122,7 +120,7 @@ class LocationRiddlesService:
     def get_location_riddles_feed(
         self, event, username: str
     ) -> list[Union[LocationRiddleDTO, SolvedLocationRiddleDTO]]:
-        following_users = self.__get_following_users_list(event, username)
+        following_users = self.user_microservice_client.get_following_users_list(event, username)
 
         response = []
         for following_user in following_users:
@@ -215,7 +213,7 @@ class LocationRiddlesService:
         )
 
         try:
-            self.__write_score_to_user_in_user_db(event, location_riddle_id, int(score))
+            self.user_microservice_client.write_score_to_user_in_user_db(event, location_riddle_id, int(score))
         except Exception as e:
             logger.error(f"There was an error writing the score to the user db: {e}")
 
@@ -269,56 +267,6 @@ class LocationRiddlesService:
             location_riddle_id
         )
         return {"message": "Location riddle deleted successfully"}
-
-    def __get_following_users_list(self, event, username: str):
-        event_dict = dict(event)
-        base_url = "/users/"
-        event_dict["path"] = urljoin(base_url, f"{username}/follow")
-        client = boto3.client("lambda", region_name="eu-central-2")
-        response = client.invoke(
-            FunctionName=os.environ["USER_FUNCTION_NAME"],
-            Payload=json.dumps(event_dict),
-        )
-
-        streaming_body = response["Payload"]
-        payload_bytes = streaming_body.read()
-        payload_str = payload_bytes.decode("utf-8")
-        payload_dict = json.loads(payload_str)
-        user_connections = json.loads(payload_dict["body"])
-
-        return user_connections["following"]
-
-    def __get_user_scores(self, event, username: str):
-        event_dict = dict(event)
-        base_url = "/users/"
-        event_dict["path"] = urljoin(base_url, f"{username}/scores")
-        client = boto3.client("lambda", region_name="eu-central-2")
-        response = client.invoke(
-            FunctionName=os.environ["USER_FUNCTION_NAME"],
-            Payload=json.dumps(event_dict),
-        )
-
-        streaming_body = response["Payload"]
-        payload_bytes = streaming_body.read()
-        payload_str = payload_bytes.decode("utf-8")
-        payload_dict = json.loads(payload_str)
-        user_scores = json.loads(payload_dict["body"])
-
-        return user_scores
-
-    def __write_score_to_user_in_user_db(
-        self, event, location_riddle_id: str, score: int
-    ):
-        event_dict = dict(event)
-        event_dict["path"] = "/users/score"
-        event_dict["body"] = json.dumps(
-            {"score": score, "location_riddle_id": location_riddle_id}
-        )
-        client = boto3.client("lambda", region_name="eu-central-2")
-        _ = client.invoke(
-            FunctionName=os.environ["USER_FUNCTION_NAME"],
-            Payload=json.dumps(event_dict),
-        )
 
     def __append_image_to_location_riddle(self, location_riddle: LocationRiddle):
         key = f"location-riddles/{location_riddle.location_riddle_id}.png"
