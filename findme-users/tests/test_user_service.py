@@ -44,6 +44,24 @@ class TestUserService(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.user_service.get_user(username)
 
+    def test_get_user_scores(self):
+        # Create a user
+        user_data = {"first_name": "Test", "last_name": "User"}
+        username = "testuser"
+        _ = self.user_service.post_user(user_data, username)
+
+        # Test correct input
+        username = "testuser"
+        result = self.user_service.get_user_scores(username)
+        self.assertEqual(result, [])
+
+        # add a score to the user
+        location_riddle_id = "test_location_riddle_id"
+        score = 10
+        _ = self.user_service.write_guessing_score_to_user(username, location_riddle_id, score)
+        result = self.user_service.get_user_scores(username)
+        self.assertEqual(result[0].location_riddle_id, location_riddle_id)
+
     def test_update_user(self):
         # Create a user
         user_data = {"first_name": "Test", "last_name": "User"}
