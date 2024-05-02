@@ -104,9 +104,9 @@ class FollowerRepository(AbstractFollowerRepository):
                     "partition_key": PartitionKey.REQUEST.value,
                     "sort_key": f"{requester}#{requestee}",
                 },
-                UpdateExpression="set request_status = :s",
+                UpdateExpression="SET request_status = :s",
                 ExpressionAttributeValues={":s": "declined"},
-                ReturnValues="UPDATED_NEW",
+                ReturnValues="ALL_NEW",
             )
         except Exception as e:
             logger.error(f"Unable to deny follow request. {e}")
