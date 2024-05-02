@@ -10,8 +10,8 @@ class MockUserMicroserviceClient(AbstractUserMicroserviceClient):
 
     def get_user_scores(self, event, username: str):
         return [
-            {"location_riddle_id": "test_location_riddle_id", "score": 100},
-            {"location_riddle_id": "test_location_riddle_id2", "score": 200}
+            {"location_riddle_id": "mock_location_riddle_id", "score": 100},
+            {"location_riddle_id": "mock_location_riddle_id2", "score": 200}
         ]
 
     def write_score_to_user_in_user_db(

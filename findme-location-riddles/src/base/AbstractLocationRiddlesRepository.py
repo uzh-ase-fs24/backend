@@ -22,6 +22,10 @@ class AbstractLocationRiddlesRepository(ABC):
         pass
 
     @abstractmethod
+    def get_all_location_riddles_containing_arena(self, arena: str):
+        pass
+
+    @abstractmethod
     def update_location_riddle_rating_in_db(
         self, location_riddle_id: str, rating: Rating
     ):
