@@ -1,126 +1,131 @@
 import unittest
+from unittest.mock import MagicMock, patch
+from pydantic import ValidationError
+from aws_lambda_powertools.event_handler.exceptions import NotFoundError, BadRequestError
 
+from ..src.entities.Score import Score
+from ..src.entities.User import User, UserDTO, UserPutDTO
 from ..src.UserService import UserService
-from ..src.test.MockUserRepository import MockUserRepository
 
 
 class TestUserService(unittest.TestCase):
     def setUp(self):
-        self.user_repository = MockUserRepository()
-        self.user_service = UserService(self.user_repository)
+        self.mock_repo = MagicMock()
+        self.user_service = UserService(user_repository=self.mock_repo)
 
-    def test_post_user(self):
-        # Test correct input
-        user_data = {"first_name": "Test", "last_name": "User", "bio": "Test bio"}
+    def test_post_user_success(self):
+        user_data = {"first_name": "John", "last_name": "Doe", "bio": "Test bio"}
         username = "testuser"
-        result = self.user_service.post_user(user_data, username)
-        self.assertEqual(result.username, "testuser")
-        self.assertEqual(result.first_name, "Test")
-        self.assertEqual(result.last_name, "User")
-        self.assertEqual(result.bio, "Test bio")
+        user = User(username=username, **user_data)
+        user_dto = UserDTO(username=username, **user_data)
 
-        # Test incorrect input (same username)
-        user_data = {
-            "first_name": "Test",
-            "last_name": "User",
-        }
+        self.mock_repo.post_user_to_db.return_value = user
+
+        result = self.user_service.post_user(data=user_data, username=username)
+
+        self.mock_repo.post_user_to_db.assert_called_once_with(user)
+        self.assertEqual(result, user_dto)
+
+    def test_post_user_validation_error(self):
+        user_data = {"first_name": "John", "bio": "Test bio"}  # Missing last_name
         username = "testuser"
-        with self.assertRaises(ValueError):
-            self.user_service.post_user(user_data, username)
+        with self.assertRaises(BadRequestError):
+            self.user_service.post_user(data=user_data, username=username)
 
     def test_get_user(self):
-        # Create a user
-        user_data = {"first_name": "Test", "last_name": "User"}
         username = "testuser"
-        _ = self.user_service.post_user(user_data, username)
+        user = User(username=username, first_name="John", last_name="Doe", bio="Test bio")
+        user_dto = user.to_dto()
 
-        # Test correct input
-        username = "testuser"
+        self.mock_repo.get_user_by_username_from_db.return_value = user
+
         result = self.user_service.get_user(username)
-        self.assertEqual(result.last_name, "User")
 
-        # Test incorrect input
-        username = "not_existing"
-        with self.assertRaises(ValueError):
-            self.user_service.get_user(username)
+        self.mock_repo.get_user_by_username_from_db.assert_called_once_with(username)
+        self.assertEqual(result, user_dto)
 
-    def test_get_user_scores(self):
-        # Create a user
-        user_data = {"first_name": "Test", "last_name": "User"}
+    def test_update_user_success(self):
+        user_data = {"first_name": "Jane", "last_name": "Doe", "bio": "Updated bio"}
         username = "testuser"
-        _ = self.user_service.post_user(user_data, username)
+        user_put_dto = UserPutDTO(**user_data)
+        user = User(username=username, **user_data)
+        user_dto = user.to_dto()
 
-        # Test correct input
+        self.mock_repo.update_user_in_db.return_value = user
+
+        result = self.user_service.update_user(data=user_data, username=username)
+
+        self.mock_repo.update_user_in_db.assert_called_once_with(username, user_put_dto)
+        self.assertEqual(result, user_dto)
+
+    def test_update_user_validation_error(self):
+        user_data = {"first_name": "Jane", "bio": "Updated bio"}  # Missing last_name
         username = "testuser"
-        result = self.user_service.get_user_scores(username)
-        self.assertEqual(result, [])
+        with self.assertRaises(BadRequestError):
+            self.user_service.update_user(data=user_data, username=username)
 
-        # add a score to the user
-        location_riddle_id = "test_location_riddle_id"
-        score = 10
-        _ = self.user_service.write_guessing_score_to_user(username, location_riddle_id, score)
-        result = self.user_service.get_user_scores(username)
-        self.assertEqual(result[0].location_riddle_id, location_riddle_id)
-
-    def test_update_user(self):
-        # Create a user
-        user_data = {"first_name": "Test", "last_name": "User"}
+    def test_write_guessing_score_to_user_success(self):
         username = "testuser"
-        _ = self.user_service.post_user(user_data, username)
+        location_riddle_id = "1"
+        score_value = 100
+        score = Score(location_riddle_id=location_riddle_id, score=score_value)
+        user = User(username=username, first_name="John", last_name="Doe")
+        user_dto = user.to_dto()
 
-        # Test correct input
-        user_data = {"first_name": "Updated", "last_name": "User"}
-        username = "testuser"
-        result = self.user_service.update_user(user_data, username)
-        self.assertEqual(result.first_name, "Updated")
+        self.mock_repo.update_user_score_in_db.return_value = user
 
-        # Test incorrect input
-        username = "non_existing"
-        with self.assertRaises(ValueError):
-            self.user_service.update_user(user_data, username)
+        result = self.user_service.write_guessing_score_to_user(username, location_riddle_id, score_value)
 
-    def test_get_similar_users(self):
-        # Create users
-        user_data = {"first_name": "John", "last_name": "Doe"}
-        username = "johndoe"
-        _ = self.user_service.post_user(user_data, username)
-        user_data = {"username": "janedoe", "first_name": "Jane", "last_name": "Doe"}
-        username = "janedoe"
-        _ = self.user_service.post_user(user_data, username)
-        user_data = {"first_name": "jack", "last_name": "Doe"}
-        username = "jackdoe"
-        _ = self.user_service.post_user(user_data, username)
+        self.mock_repo.update_user_score_in_db.assert_called_once_with(username, score)
+        self.assertEqual(result, user_dto)
 
-        # Test correct input
-        username_prefix = "j"
-        username = "johndoe"
-        self.assertEqual(
-            len(self.user_service.get_similar_users(username_prefix, username)), 2
-        )
-        username_prefix = "jane"
-        result = self.user_service.get_similar_users(username_prefix, username)
+    def test_write_guessing_score_to_user_validation_error(self):
+        with self.assertRaises(BadRequestError):
+            self.user_service.write_guessing_score_to_user("testuser", "1", "not-an-int")
+
+    def test_get_similar_users_success(self):
+        user_data1 = {"username": "testuser1", "first_name": "John", "last_name": "Doe", "bio": "Test bio"}
+        user_data2 = {"username": "testuser2", "first_name": "John", "last_name": "Doe", "bio": "Test bio"}
+
+        similar_users = [User(**user_data1), User(**user_data2)]
+        self.mock_repo.get_users_by_username_prefix.return_value = similar_users
+
+        result = self.user_service.get_similar_users(query_username_prefix="test", username=similar_users[0].username)
+
         self.assertEqual(len(result), 1)
-        self.assertEqual(result[0].last_name, "Doe")
+        self.assertNotEqual(result[0].username, similar_users[0].username)
 
-        # Test incorrect input
-        username_prefix = "non_exisiting"
-        with self.assertRaises(Exception):
-            self.user_service.get_similar_users(username_prefix, username)
+    def test_get_similar_users_not_found(self):
+        username = "testuser"
+        self.mock_repo.get_users_by_username_prefix.return_value = []
+        with self.assertRaises(NotFoundError):
+            self.user_service.get_similar_users(query_username_prefix="test", username=username)
 
     def test_does_user_with_username_exist(self):
-        user_data = {"first_name": "Test", "last_name": "User"}
         username = "testuser"
-        _ = self.user_service.post_user(user_data, username)
-        # Test correct input
-        username = "testuser"
+        self.mock_repo.does_user_with_username_exist.return_value = True
         result = self.user_service.does_user_with_username_exist(username)
         self.assertTrue(result)
 
-        # Test incorrect input
-        username = "non_existing"
-        result = self.user_service.does_user_with_username_exist(username)
-        self.assertFalse(result)
+    def test_write_guessing_score_to_user_exception(self):
+        username = "testuser"
+        location_riddle_id = "1"
+        invalid_score = "not-an-int"  # This is not an integer and should trigger a ValidationError
+        with self.assertRaises(BadRequestError) as context:
+            self.user_service.write_guessing_score_to_user(username, location_riddle_id, invalid_score)
+        self.assertIn("unable to update the user with provided parameters", str(context.exception))
 
+    def test_get_user_scores(self):
+        username = "testuser"
+        scores = [Score(location_riddle_id="1", score=10), Score(location_riddle_id="2", score=20)]
+        user = User(username=username, first_name="John", last_name="Doe", scores=scores)
+
+        self.mock_repo.get_user_by_username_from_db.return_value = user
+
+        result = self.user_service.get_user_scores(username)
+
+        self.mock_repo.get_user_by_username_from_db.assert_called_once_with(username)
+        self.assertEqual(result, scores)
 
 if __name__ == "__main__":
     unittest.main()
