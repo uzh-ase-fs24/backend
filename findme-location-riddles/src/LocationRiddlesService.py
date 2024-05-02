@@ -105,10 +105,15 @@ class LocationRiddlesService:
                 f"No location riddles for user with username: {username} found"
             )
 
-        location_riddles = [
-            self.location_riddle_repository.get_location_riddle_by_location_riddle_id_from_db(location_riddle_id)
-            for location_riddle_id in location_riddle_ids
-        ]
+        location_riddles = []
+        for location_riddle_id in location_riddle_ids:
+            try:
+                location_riddle = self.location_riddle_repository.get_location_riddle_by_location_riddle_id_from_db(
+                    location_riddle_id)
+                location_riddles.append(location_riddle)
+            except Exception as e:
+                logger.error(f"Error occurred while fetching location riddle with id {location_riddle_id}: {e}")
+                continue
 
         location_riddle_dtos = [
             location_riddle.to_dto(requester_username)
