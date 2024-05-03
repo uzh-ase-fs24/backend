@@ -71,7 +71,7 @@ class TestLocationRiddleService(unittest.TestCase):
 
     def test_get_location_riddles_arena(self):
         location_riddles = self.location_riddles_service.get_location_riddles_arena(
-            "mock_arena", "mock_username"
+            "mock_arena", "mock_username2"
         )
         location_riddle = location_riddles[0]
 
@@ -83,7 +83,7 @@ class TestLocationRiddleService(unittest.TestCase):
         # test retrieving location riddles for an arena that does not exist
         with self.assertRaises(Exception):
             location_riddles = self.location_riddles_service.get_location_riddles_arena(
-                "mock_arena2", "mock_username"
+                "mock_arena2", "mock_username2"
             )
 
     def test_guess_location_riddle(self):

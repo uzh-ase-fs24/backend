@@ -31,8 +31,8 @@ class MockLocationRiddlesRepository(AbstractLocationRiddlesRepository):
                 return mock_data
         raise Exception("Location riddle not found")
 
-    def get_all_location_riddles_containing_arena(self, arena: str):
-        return [mock_data for mock_data in self.mock_data if arena in mock_data.arenas]
+    def get_all_location_riddles_containing_arena(self, arena: str, username: str):
+        return [mock_data for mock_data in self.mock_data if arena in mock_data.arenas and mock_data.username != username]
 
     def update_location_riddle_rating_in_db(
         self, location_riddle_id: str, rating: Rating

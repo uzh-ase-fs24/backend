@@ -22,7 +22,7 @@ class AbstractLocationRiddlesRepository(ABC):
         pass
 
     @abstractmethod
-    def get_all_location_riddles_containing_arena(self, arena: str):
+    def get_all_location_riddles_containing_arena(self, arena: str, username: str):
         pass
 
     @abstractmethod
