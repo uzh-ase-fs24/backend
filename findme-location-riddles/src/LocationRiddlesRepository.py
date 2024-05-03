@@ -68,11 +68,12 @@ class LocationRiddlesRepository(AbstractLocationRiddlesRepository):
 
         return location_riddle
 
-    def get_all_location_riddles_containing_arena(self, arena: str):
+    def get_all_location_riddles_containing_arena(self, arena: str, username: str):
         response = self.table.scan(
-            FilterExpression="contains (arenas, :arena)",
+            FilterExpression="contains (arenas, :arena) AND NOT username = :username",
             ExpressionAttributeValues={
-                ":arena": arena
+                ":arena": arena,
+                ":username": username
             }
         )
         items = response["Items"]

@@ -143,7 +143,7 @@ class LocationRiddlesService:
     def get_location_riddles_arena(
             self, arena: str, username: str
     ) -> list[Union[LocationRiddleDTO, SolvedLocationRiddleDTO]]:
-        location_riddles = self.location_riddle_repository.get_all_location_riddles_containing_arena(arena)
+        location_riddles = self.location_riddle_repository.get_all_location_riddles_containing_arena(arena, username)
         if len(location_riddles) == 0:
             raise NotFoundError(
                 f"No location riddles for arena: {arena} found"
