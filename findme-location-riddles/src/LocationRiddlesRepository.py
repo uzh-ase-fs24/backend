@@ -68,6 +68,34 @@ class LocationRiddlesRepository(AbstractLocationRiddlesRepository):
 
         return location_riddle
 
+    def get_all_location_riddles_containing_arena(self, arena: str, username: str):
+        response = self.table.scan(
+            FilterExpression="contains (arenas, :arena) AND NOT username = :username",
+            ExpressionAttributeValues={
+                ":arena": arena,
+                ":username": username
+            }
+        )
+        items = response["Items"]
+
+        while "LastEvaluatedKey" in response:
+            response = self.table.scan(
+                FilterExpression="contains (arenas, :arena)",
+                ExpressionAttributeValues={
+                    ":arena": arena
+                },
+                ExclusiveStartKey=response["LastEvaluatedKey"]
+            )
+            items.extend(response["Items"])
+
+        try:
+            location_riddles = [LocationRiddle(**item) for item in items]
+        except ValidationError as e:
+            logger.info(f"Unable to read Data from DB {e}")
+            raise BadRequestError(f"Unable to read Data from DB {e}")
+
+        return location_riddles
+
     def update_location_riddle_rating_in_db(
         self, location_riddle_id: str, rating: Rating
     ):

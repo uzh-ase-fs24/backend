@@ -5,3 +5,4 @@ omit =
     */*test*/*.py
     */tests/*.py
     */*tests*/*.py
+    */*Abstract*.py

@@ -31,7 +31,11 @@ class MockUserRepository(AbstractUserRepository):
         ]
 
     def update_user_score_in_db(self, username, score):
-        return self.get_user_by_username_from_db(username)
+        for i, user in enumerate(self.users):
+            if user.username == username:
+                self.users[i].scores.append(score)
+                return self.users[i]
+        raise ValueError(f"No User with username: {username} found")
 
     def does_user_with_username_exist(self, username):
         return any(user.username == username for user in self.users)

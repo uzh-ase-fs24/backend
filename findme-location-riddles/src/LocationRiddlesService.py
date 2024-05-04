@@ -1,12 +1,7 @@
-import json
 import math
-import os
 import uuid
 from decimal import Decimal
 from typing import Union
-from urllib.parse import urljoin
-
-import boto3
 from aws_lambda_powertools.event_handler.exceptions import (
     BadRequestError,
     NotFoundError,
@@ -29,17 +24,19 @@ logger = Logger()
 
 
 class LocationRiddlesService:
-    def __init__(self, location_riddle_repository, image_bucket_repository):
+    def __init__(self, location_riddle_repository, image_bucket_repository, user_microservice_client):
         self.image_bucket_repository = image_bucket_repository
         self.location_riddle_repository = location_riddle_repository
+        self.user_microservice_client = user_microservice_client
 
     def post_location_riddle(
-        self, image_base64: str, location: list, username: str
+        self, image_base64: str, location: list, arenas: list, username: str
     ) -> dict:
         try:
             location_riddle = LocationRiddle(
                 location_riddle_id=str(uuid.uuid4()),
                 username=username,
+                arenas=arenas,
                 location=Coordinate(
                     coordinate=[Decimal(str(coord)) for coord in location]
                 ),
@@ -96,10 +93,40 @@ class LocationRiddlesService:
             self.__append_image_to_location_riddle(location_riddle_dto)
         return location_riddle_dtos
 
+    def get_solved_location_riddles_for_user(
+        self, event, username: str, requester_username: str
+    ) -> list[Union[LocationRiddleDTO, SolvedLocationRiddleDTO]]:
+        location_riddle_ids = [location_riddle["location_riddle_id"]
+                               for location_riddle
+                               in self.user_microservice_client.get_user_scores(event, username)]
+
+        if len(location_riddle_ids) == 0:
+            raise NotFoundError(
+                f"No location riddles for user with username: {username} found"
+            )
+
+        location_riddles = []
+        for location_riddle_id in location_riddle_ids:
+            try:
+                location_riddle = self.location_riddle_repository.get_location_riddle_by_location_riddle_id_from_db(
+                    location_riddle_id)
+                location_riddles.append(location_riddle)
+            except Exception as e:
+                logger.error(f"Error occurred while fetching location riddle with id {location_riddle_id}: {e}")
+                continue
+
+        location_riddle_dtos = [
+            location_riddle.to_dto(requester_username)
+            for location_riddle in location_riddles
+        ]
+        for location_riddle_dto in location_riddle_dtos:
+            self.__append_image_to_location_riddle(location_riddle_dto)
+        return location_riddle_dtos
+
     def get_location_riddles_feed(
         self, event, username: str
     ) -> list[Union[LocationRiddleDTO, SolvedLocationRiddleDTO]]:
-        following_users = self.__get_following_users_list(event, username)
+        following_users = self.user_microservice_client.get_following_users_list(event, username)
 
         response = []
         for following_user in following_users:
@@ -112,6 +139,23 @@ class LocationRiddlesService:
             except NotFoundError:
                 continue
         return sorted(response, key=lambda riddle: riddle.created_at, reverse=True)
+
+    def get_location_riddles_arena(
+            self, arena: str, username: str
+    ) -> list[Union[LocationRiddleDTO, SolvedLocationRiddleDTO]]:
+        location_riddles = self.location_riddle_repository.get_all_location_riddles_containing_arena(arena, username)
+        if len(location_riddles) == 0:
+            raise NotFoundError(
+                f"No location riddles for arena: {arena} found"
+            )
+
+        location_riddle_dtos = [
+            location_riddle.to_dto(username)
+            for location_riddle in location_riddles
+        ]
+        for location_riddle_dto in location_riddle_dtos:
+            self.__append_image_to_location_riddle(location_riddle_dto)
+        return location_riddle_dtos
 
     def rate_location_riddle(
         self, location_riddle_id: str, username: str, rating: int
@@ -192,7 +236,7 @@ class LocationRiddlesService:
         )
 
         try:
-            self.__write_score_to_user_in_user_db(event, location_riddle_id, int(score))
+            self.user_microservice_client.write_score_to_user_in_user_db(event, location_riddle_id, int(score))
         except Exception as e:
             logger.error(f"There was an error writing the score to the user db: {e}")
 
@@ -246,38 +290,6 @@ class LocationRiddlesService:
             location_riddle_id
         )
         return {"message": "Location riddle deleted successfully"}
-
-    def __get_following_users_list(self, event, username: str):
-        event_dict = dict(event)
-        base_url = "/users/"
-        event_dict["path"] = urljoin(base_url, f"{username}/follow")
-        client = boto3.client("lambda", region_name="eu-central-2")
-        response = client.invoke(
-            FunctionName=os.environ["USER_FUNCTION_NAME"],
-            Payload=json.dumps(event_dict),
-        )
-
-        streaming_body = response["Payload"]
-        payload_bytes = streaming_body.read()
-        payload_str = payload_bytes.decode("utf-8")
-        payload_dict = json.loads(payload_str)
-        user_connections = json.loads(payload_dict["body"])
-
-        return user_connections["following"]
-
-    def __write_score_to_user_in_user_db(
-        self, event, location_riddle_id: str, score: int
-    ):
-        event_dict = dict(event)
-        event_dict["path"] = "/users/score"
-        event_dict["body"] = json.dumps(
-            {"score": score, "location_riddle_id": location_riddle_id}
-        )
-        client = boto3.client("lambda", region_name="eu-central-2")
-        _ = client.invoke(
-            FunctionName=os.environ["USER_FUNCTION_NAME"],
-            Payload=json.dumps(event_dict),
-        )
 
     def __append_image_to_location_riddle(self, location_riddle: LocationRiddle):
         key = f"location-riddles/{location_riddle.location_riddle_id}.png"

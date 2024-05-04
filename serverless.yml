@@ -145,6 +145,15 @@ functions:
               paths:
                 username: true
       - http:
+          path: /users/{username}/scores
+          method: get
+          cors:
+            origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
+          request:
+            parameters:
+              paths:
+                username: true
+      - http:
           path: /users/follow
           method: get
           cors:
@@ -195,6 +204,15 @@ functions:
           cors:
             origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
       - http:
+          path: /location-riddles/arena/{arena_name}
+          method: get
+          cors:
+            origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
+          request:
+            parameters:
+              paths:
+                arena_name: true
+      - http:
           path: /location-riddles/{location_riddle_id}
           method: get
           cors:
@@ -214,6 +232,20 @@ functions:
                 id: true
       - http:
           path: /location-riddles/user
+          method: get
+          cors:
+            origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
+      - http:
+          path: /location-riddles/user/{username}/solved
+          method: get
+          cors:
+            origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
+          request:
+            parameters:
+              paths:
+                id: true
+      - http:
+          path: /location-riddles/user/solved
           method: get
           cors:
             origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
