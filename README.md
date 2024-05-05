@@ -30,16 +30,17 @@ how to get a token for development, and how to run tests.
 
 1. create a sls-config-local.yml file in the root directory with the following content:
     ```yaml
-    FindmeDashusersLambdaFunction:
-      Properties:
-        Code:
-          S3Bucket: hot-reload
-          S3Key: <absoloute-path-to-repository>/workspace/backend/findme-users
-    FindmeDashlocationDashriddlesLambdaFunction:
-      Properties:
-        Code:
-          S3Bucket: hot-reload
-          S3Key: <absoloute-path-to-repository>/workspace/backend/findme-location-riddles
+    extensions:
+        FindmeDashusersLambdaFunction:
+          Properties:
+            Code:
+              S3Bucket: hot-reload
+              S3Key: <absoloute-path-to-repository>/workspace/backend/findme-users
+        FindmeDashlocationDashriddlesLambdaFunction:
+          Properties:
+            Code:
+              S3Bucket: hot-reload
+              S3Key: <absoloute-path-to-repository>/workspace/backend/findme-location-riddles
     ```
    verify that the paths are absolute and point to the correct directories
 2. install all serverless dependencies with `npm install` in the root directory
