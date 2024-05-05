@@ -351,3 +351,4 @@ resources:
 plugins:
   - serverless-python-requirements
   - serverless-localstack
+  - serverless-iam-roles-per-function
