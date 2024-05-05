@@ -29,12 +29,12 @@ jobs:
           python-version: '3.12'
       - run: npm ci
       - name: serverless deploy apigateway
-        uses: serverless/github-action@v3.2
+        uses: uzh-ase-fs24/sls-deployment-gh-action@master
         with:
           args: -c "cd ./infrastructure/apigateway && serverless deploy --stage prod"
           entrypoint: /bin/sh
       - name: serverless deploy microservices
-        uses: serverless/github-action@v3.2
+        uses: uzh-ase-fs24/sls-deployment-gh-action@master
         with:
           args: -c "serverless deploy --stage prod"
           entrypoint: /bin/sh
