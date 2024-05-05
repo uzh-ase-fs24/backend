@@ -1,4 +1,8 @@
 service: findme-apigateway
+provider:
+  name: aws
+  region: eu-central-2
+  stage: prod
 
 custom:
   localstack:
@@ -6,7 +10,7 @@ custom:
       - local
       - local-no-mount
       - dev
-    host: ${self:custom.stage.${opt:stage}.host}
+    host: ${self:custom.stage.${opt:stage}.host, 'http://localstack-main'}
     edgePort: 4566
     lambda:
       mountCode: false
@@ -18,10 +22,6 @@ custom:
     local-no-mount:
       host: http://localhost
 
-provider:
-  name: aws
-  region: eu-central-2
-
 resources:
   Resources:
     findmeApiGateway:
@@ -31,6 +31,15 @@ resources:
         Tags:
           - Key: _custom_id_
             Value: findme
+
+    CustomDomain:
+      Type: AWS::ApiGateway::DomainName
+      Properties:
+        DomainName: 'api.find-me.life'
+        EndpointConfiguration:
+          Types:
+            - REGIONAL
+        RegionalCertificateArn: arn:aws:acm:eu-central-2:433745530327:certificate/3d44bd99-d349-47a7-9060-2fe2c892da48
 
   Outputs:
     apiGatewayRestApiId:

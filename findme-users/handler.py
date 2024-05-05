@@ -45,7 +45,7 @@ follower_service = FollowerService(follower_repository)
 
 class RequestBodyAttribute(Enum):
     USERNAME = "username"
-    FINDME_USERNAME = "https://findme.ch/username"
+    FINDME_USERNAME = "https://api.find-me.life/username"
     LOCATION_RIDDLE_ID = "location_riddle_id"
     SCORE = "score"
     ACTION = "action"
@@ -125,7 +125,9 @@ def post_score_to_user(score: Score) -> UserDTO:
     """
     return user_service.write_guessing_score_to_user(
         __get_username(),
-        __get_attribute_from_request_body(RequestBodyAttribute.LOCATION_RIDDLE_ID.value),
+        __get_attribute_from_request_body(
+            RequestBodyAttribute.LOCATION_RIDDLE_ID.value
+        ),
         __get_attribute_from_request_body(RequestBodyAttribute.SCORE.value),
     )
 
@@ -141,7 +143,10 @@ def get_similar_users() -> List[UserDTO]:
     Returns: A list of users with similar usernames.
     """
     return user_service.get_similar_users(
-        app.current_event.query_string_parameters.get(RequestBodyAttribute.USERNAME.value), __get_username()
+        app.current_event.query_string_parameters.get(
+            RequestBodyAttribute.USERNAME.value
+        ),
+        __get_username(),
     )
 
 
@@ -185,7 +190,9 @@ def update_follow_user(requester: Annotated[str, Path()]) -> FollowRequest:
     Returns: A json confirming the accepting or declining of the follow request
     """
     requestee = __get_username()
-    action = app.current_event.query_string_parameters.get(RequestBodyAttribute.ACTION.value)
+    action = app.current_event.query_string_parameters.get(
+        RequestBodyAttribute.ACTION.value
+    )
 
     if action == "accept":
         return follower_service.accept_follow_request(requester, requestee)

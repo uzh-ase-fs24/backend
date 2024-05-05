@@ -1,6 +1,16 @@
-service: findme-microservices
-
 frameworkVersion: "3"
+service: findme-microservices
+provider:
+  name: aws
+  runtime: python3.12
+  stage: prod
+  region: eu-central-2
+  apiGateway:
+    restApiId:
+      "Fn::ImportValue": findmeApiGateway-restApiId
+    restApiRootResourceId:
+      "Fn::ImportValue": findmeApiGateway-rootResourceId
+
 
 custom:
   localstack:
@@ -8,14 +18,19 @@ custom:
       - local
       - local-no-mount
       - dev
-    host: ${self:custom.stage.${opt:stage}.host}
+    host: ${self:custom.stage.${opt:stage}.host, 'http://localstack-main'}
     edgePort: 4566
     autoStart: true
     lambda:
-      mountCode: ${self:custom.stage.${opt:stage}.mountCode}
+      mountCode: ${self:custom.stage.${opt:stage}.mountCode, 'false'}
   pythonRequirements:
     dockerizePip: non-linux
   stage:
+    prod:
+      frontendOrigin: https://find-me.life
+      auth0Domain: findme-prod.eu.auth0.com
+      auth0Audience: https://findme-prod.eu.auth0.com/api/v2/
+
     dev:
       host: http://localstack-main
       mountCode: false
@@ -49,16 +64,6 @@ package:
     - '!**/package*.json'
     - '!**/infrastructure/**'
 
-provider:
-  name: aws
-  runtime: python3.12
-  region: eu-central-2
-  apiGateway:
-    restApiId:
-      "Fn::ImportValue": findmeApiGateway-restApiId
-    restApiRootResourceId:
-      "Fn::ImportValue": findmeApiGateway-rootResourceId
-
 functions:
   findme-users:
     handler: handler.lambda_handler
@@ -68,7 +73,7 @@ functions:
     environment:
       FRONTEND_ORIGIN: ${self:custom.stage.${opt:stage}.frontendOrigin}
       AUTH0_DOMAIN: ${self:custom.stage.${opt:stage}.auth0Domain}
-      AUTH0_AUDIENCE: ${self:custom.stage.${opt:stage, 'dev'}.auth0Audience}
+      AUTH0_AUDIENCE: ${self:custom.stage.${opt:stage}.auth0Audience}
     events:
       - http:
           path: /users/swagger
@@ -158,6 +163,20 @@ functions:
           method: get
           cors:
             origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
+    iamRoleStatements:
+      - Effect: "Allow"
+        Action:
+          - dynamodb:Query
+          - dynamodb:Scan
+          - dynamodb:GetItem
+          - dynamodb:PutItem
+          - dynamodb:UpdateItem
+          - dynamodb:DeleteItem
+        Resource:
+          - !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/usersTable"
+          - !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/usersTable/index/*"
+          - !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/FollowerTable"
+          - !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/FollowerTable/index/*"
 
   findme-location-riddles:
     handler: handler.lambda_handler
@@ -263,91 +282,35 @@ functions:
             parameters:
               paths:
                 id: true
+    iamRoleStatements:
+      - Effect: "Allow"
+        Action:
+          - dynamodb:Query
+          - dynamodb:Scan
+          - dynamodb:GetItem
+          - dynamodb:PutItem
+          - dynamodb:UpdateItem
+          - dynamodb:DeleteItem
+        Resource:
+          - !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/locationRiddleTable"
+          - !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/locationRiddleTable/index/*"
+      - Effect: "Allow"
+        Action:
+          - s3:PutObject
+          - s3:GetObject
+          - s3:DeleteObject
+        Resource: "arn:aws:s3:::ase-findme-image-upload-bucket/*"
+      - Effect: "Allow"
+        Action:
+          - lambda:InvokeFunction
+        Resource:
+          - !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:findme-users-${opt:stage}"
 
 resources:
-  extensions: ${file(./sls-config-${opt:stage}.yml), null}
-  Resources:
-
-    ase-findme-image-upload-bucket:
-      Type: AWS::S3::Bucket
-      Properties:
-        BucketName: ase-findme-image-upload-bucket
-        AccessControl: PublicRead
-
-    usersTable:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        TableName: usersTable
-        AttributeDefinitions:
-          - AttributeName: partition_key
-            AttributeType: S
-          - AttributeName: username
-            AttributeType: S
-        BillingMode: PAY_PER_REQUEST
-        KeySchema:
-          - AttributeName: partition_key
-            KeyType: HASH
-          - AttributeName: username
-            KeyType: RANGE
-
-    FollowerTable:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        TableName: FollowerTable
-        AttributeDefinitions:
-          - AttributeName: partition_key # REQUEST / FOLLOWERS / FOLLOWING
-            AttributeType: S
-          - AttributeName: sort_key # USERNAME
-            AttributeType: S
-          - AttributeName: requestee
-            AttributeType: S
-          - AttributeName: requester
-            AttributeType: S
-        KeySchema:
-          - AttributeName: partition_key
-            KeyType: HASH
-          - AttributeName: sort_key
-            KeyType: RANGE
-        BillingMode: PAY_PER_REQUEST
-        GlobalSecondaryIndexes:
-          - IndexName: RequesterIndex
-            KeySchema:
-              - AttributeName: requester
-                KeyType: HASH
-              - AttributeName: partition_key
-                KeyType: RANGE
-            Projection:
-              ProjectionType: ALL
-          - IndexName: RequesteeIndex
-            KeySchema:
-              - AttributeName: requestee
-                KeyType: HASH
-              - AttributeName: partition_key
-                KeyType: RANGE
-            Projection:
-              ProjectionType: ALL
-
-    locationRiddleTable:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        TableName: locationRiddleTable
-        AttributeDefinitions:
-          - AttributeName: location_riddle_id
-            AttributeType: S
-          - AttributeName: username
-            AttributeType: S
-        KeySchema:
-          - AttributeName: location_riddle_id
-            KeyType: HASH
-        BillingMode: PAY_PER_REQUEST
-        GlobalSecondaryIndexes:
-          - IndexName: UserIndex
-            KeySchema:
-              - AttributeName: username
-                KeyType: HASH
-            Projection:
-              ProjectionType: ALL
+  - ${file(./resources.yml)}
+  - ${file(./sls-config-${opt:stage}.yml), null}
 
 plugins:
   - serverless-python-requirements
   - serverless-localstack
+  - serverless-iam-roles-per-function
