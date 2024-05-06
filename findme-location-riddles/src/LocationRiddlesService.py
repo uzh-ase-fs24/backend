@@ -299,7 +299,7 @@ class LocationRiddlesService:
 
     @staticmethod
     def calculate_score_and_distance(
-        actual_coord, guessed_coord, max_score=10000, distance_penalty=100
+        actual_coord, guessed_coord, max_score=10000, distance_penalty=3
     ):
         distance = (
             math.sqrt(
