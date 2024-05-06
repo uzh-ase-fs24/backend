@@ -207,7 +207,7 @@ functions:
           request:
             parameters:
               paths:
-                id: true
+                location_riddle_id: true
       - http:
           path: /location-riddles/{location_riddle_id}/comment
           method: post
@@ -216,7 +216,7 @@ functions:
           request:
             parameters:
               paths:
-                id: true
+                location_riddle_id: true
       - http:
           path: /location-riddles
           method: get
@@ -239,7 +239,7 @@ functions:
           request:
             parameters:
               paths:
-                id: true
+                location_riddle_id: true
       - http:
           path: /location-riddles/user/{username}
           method: get
@@ -248,7 +248,7 @@ functions:
           request:
             parameters:
               paths:
-                id: true
+                username: true
       - http:
           path: /location-riddles/user
           method: get
@@ -262,7 +262,7 @@ functions:
           request:
             parameters:
               paths:
-                id: true
+                username: true
       - http:
           path: /location-riddles/user/solved
           method: get
@@ -281,7 +281,7 @@ functions:
           request:
             parameters:
               paths:
-                id: true
+                location_riddle_id: true
     iamRoleStatements:
       - Effect: "Allow"
         Action:
