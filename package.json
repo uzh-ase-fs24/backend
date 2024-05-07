@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "start": "cd ./infrastructure/apigateway/ && sls deploy -s local-no-mount && cd ../.. && sls deploy -s local-no-mount"
+    "start": "cd ./infrastructure/apigateway/ && sls deploy -s nm && cd ../.. && sls deploy -s nm"
   },
   "devDependencies": {
     "serverless-domain-manager": "^7.3.8",

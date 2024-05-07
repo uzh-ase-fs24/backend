@@ -11,12 +11,11 @@ provider:
     restApiRootResourceId:
       "Fn::ImportValue": findmeApiGateway-rootResourceId
 
-
 custom:
   localstack:
     stages:
       - local
-      - local-no-mount
+      - nm
       - dev
     host: ${self:custom.stage.${opt:stage}.host, 'http://localstack-main'}
     edgePort: 4566
@@ -45,7 +44,7 @@ custom:
       auth0Domain: findme-dev.eu.auth0.com
       auth0Audience: https://findme-dev.eu.auth0.com/api/v2/
 
-    local-no-mount:
+    nm:
       host: http://localhost
       mountCode: false
       frontendOrigin: http://localhost:8100
@@ -55,14 +54,14 @@ custom:
 package:
   individually: true
   patterns:
-    - '!**/.venv/**'
-    - '!**/node_modules/**'
-    - '!**/tests/**'
-    - '!**/.serverless/**'
-    - '!**/*.md'
-    - '!**/requirements.txt'
-    - '!**/package*.json'
-    - '!**/infrastructure/**'
+    - "!**/.venv/**"
+    - "!**/node_modules/**"
+    - "!**/tests/**"
+    - "!**/.serverless/**"
+    - "!**/*.md"
+    - "!**/requirements.txt"
+    - "!**/package*.json"
+    - "!**/infrastructure/**"
 
 functions:
   findme-users:
