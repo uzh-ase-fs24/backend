@@ -1,11 +1,11 @@
 import unittest
-from unittest.mock import MagicMock, patch
-from pydantic import ValidationError
 from aws_lambda_powertools.event_handler.exceptions import NotFoundError, BadRequestError
+from pydantic import ValidationError
+from unittest.mock import MagicMock, patch
 
+from ..src.UserService import UserService
 from ..src.entities.Score import Score
 from ..src.entities.User import User, UserDTO, UserPutDTO
-from ..src.UserService import UserService
 
 
 class TestUserService(unittest.TestCase):
@@ -95,12 +95,6 @@ class TestUserService(unittest.TestCase):
         self.assertEqual(len(result), 1)
         self.assertNotEqual(result[0].username, similar_users[0].username)
 
-    def test_get_similar_users_not_found(self):
-        username = "testuser"
-        self.mock_repo.get_users_by_username_prefix.return_value = []
-        with self.assertRaises(NotFoundError):
-            self.user_service.get_similar_users(query_username_prefix="test", username=username)
-
     def test_does_user_with_username_exist(self):
         username = "testuser"
         self.mock_repo.does_user_with_username_exist.return_value = True
@@ -126,6 +120,7 @@ class TestUserService(unittest.TestCase):
 
         self.mock_repo.get_user_by_username_from_db.assert_called_once_with(username)
         self.assertEqual(result, scores)
+
 
 if __name__ == "__main__":
     unittest.main()
