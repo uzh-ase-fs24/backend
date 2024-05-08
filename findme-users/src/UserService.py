@@ -1,11 +1,9 @@
-from typing import List
-
 from aws_lambda_powertools.event_handler.exceptions import (
-    NotFoundError,
     BadRequestError,
 )
 from aws_lambda_powertools.logging import Logger
 from pydantic import ValidationError
+from typing import List
 
 from .entities.Score import Score
 from .entities.User import User, UserDTO, UserPutDTO
@@ -70,14 +68,10 @@ class UserService:
             filter(
                 lambda user: user.username != username,
                 self.user_repository.get_users_by_username_prefix(
-                    query_username_prefix
+                    query_username_prefix.lower()
                 ),
             )
         )
-        if not users:
-            raise NotFoundError(
-                f"No users found with username prefix {query_username_prefix}!"
-            )
         return [user.to_dto() for user in users]
 
     def does_user_with_username_exist(self, username: str) -> bool:
