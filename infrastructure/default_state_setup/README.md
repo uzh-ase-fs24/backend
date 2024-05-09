@@ -12,12 +12,14 @@ This default application state includes:
 - chrispyb
 - goldachboi
 - lachs
+- e2e-user-1
+- e2e-user-2
 
 You can log in to the application by username and password. The password for all users is `Password123`
 
 ### Content
 
-Each of the users has uploaded one location riddle, solved the ones they saw in their feed, and commented on other
+Each of the users has uploaded one location riddle (except for the e2e users), solved the ones they saw in their feed, and commented on other
 riddles. Not all the users follow each other,
 however the demo user is connected to all other users and has not solved any riddles yet.
 

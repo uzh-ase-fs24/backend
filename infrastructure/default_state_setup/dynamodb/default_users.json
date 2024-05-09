@@ -1,6 +1,52 @@
 {
   "Items": [
     {
+      "average_score": {
+        "NULL": true
+      },
+      "scores": {
+        "L": []
+      },
+      "bio": {
+        "S": "This user was created for e2e testing purpose"
+      },
+      "last_name": {
+        "S": "Test-User"
+      },
+      "partition_key": {
+        "S": "USER"
+      },
+      "first_name": {
+        "S": "E2E-1"
+      },
+      "username": {
+        "S": "e2e-user-1"
+      }
+    },
+    {
+      "average_score": {
+        "NULL": true
+      },
+      "scores": {
+        "L": []
+      },
+      "bio": {
+        "S": "This user was created for e2e testing purpose"
+      },
+      "last_name": {
+        "S": "Test-User"
+      },
+      "partition_key": {
+        "S": "USER"
+      },
+      "first_name": {
+        "S": "E2E-2"
+      },
+      "username": {
+        "S": "e2e-user-2"
+      }
+    },
+    {
       "bio": {
         "S": "I'm a software engineer from Switzerland"
       },
