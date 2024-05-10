@@ -1,0 +1,40 @@
+name: Deploy Backend to AWS
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:  # This allows manual triggering
+
+env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+jobs:
+  deploy:
+    name: deploy
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [ 18.x ]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+      - run: npm ci
+      - name: serverless deploy apigateway
+        uses: uzh-ase-fs24/sls-deployment-gh-action@master
+        with:
+          args: -c "cd ./infrastructure/apigateway && serverless deploy --stage prod"
+          entrypoint: /bin/sh
+      - name: serverless deploy microservices
+        uses: uzh-ase-fs24/sls-deployment-gh-action@master
+        with:
+          args: -c "serverless deploy --stage prod"
+          entrypoint: /bin/sh

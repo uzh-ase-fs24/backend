@@ -1,0 +1,637 @@
+{
+    "Items": [
+        {
+            "request_status": {
+                "S": "accepted"
+            },
+            "requester": {
+                "S": "chrispyb"
+            },
+            "requestee": {
+                "S": "flyingbeat"
+            },
+            "partition_key": {
+                "S": "REQUEST"
+            },
+            "sort_key": {
+                "S": "chrispyb#flyingbeat"
+            },
+            "timestamp": {
+                "S": "2024-04-23T16:29:03.805937"
+            }
+        },
+        {
+            "request_status": {
+                "S": "accepted"
+            },
+            "requester": {
+                "S": "chrispyb"
+            },
+            "requestee": {
+                "S": "goldachboi"
+            },
+            "partition_key": {
+                "S": "REQUEST"
+            },
+            "sort_key": {
+                "S": "chrispyb#goldachboi"
+            },
+            "timestamp": {
+                "S": "2024-04-23T16:29:09.955626"
+            }
+        },
+        {
+            "request_status": {
+                "S": "accepted"
+            },
+            "requester": {
+                "S": "chrispyb"
+            },
+            "requestee": {
+                "S": "lachs"
+            },
+            "partition_key": {
+                "S": "REQUEST"
+            },
+            "sort_key": {
+                "S": "chrispyb#lachs"
+            },
+            "timestamp": {
+                "S": "2024-04-23T16:29:06.748800"
+            }
+        },
+        {
+            "request_status": {
+                "S": "accepted"
+            },
+            "requester": {
+                "S": "demo"
+            },
+            "requestee": {
+                "S": "chrispyb"
+            },
+            "partition_key": {
+                "S": "REQUEST"
+            },
+            "sort_key": {
+                "S": "demo#chrispyb"
+            },
+            "timestamp": {
+                "S": "2024-04-28T10:17:32.645788"
+            }
+        },
+        {
+            "request_status": {
+                "S": "accepted"
+            },
+            "requester": {
+                "S": "demo"
+            },
+            "requestee": {
+                "S": "flyingbeat"
+            },
+            "partition_key": {
+                "S": "REQUEST"
+            },
+            "sort_key": {
+                "S": "demo#flyingbeat"
+            },
+            "timestamp": {
+                "S": "2024-04-28T10:17:05.114631"
+            }
+        },
+        {
+            "request_status": {
+                "S": "accepted"
+            },
+            "requester": {
+                "S": "demo"
+            },
+            "requestee": {
+                "S": "goldachboi"
+            },
+            "partition_key": {
+                "S": "REQUEST"
+            },
+            "sort_key": {
+                "S": "demo#goldachboi"
+            },
+            "timestamp": {
+                "S": "2024-04-28T10:17:22.950305"
+            }
+        },
+        {
+            "request_status": {
+                "S": "accepted"
+            },
+            "requester": {
+                "S": "demo"
+            },
+            "requestee": {
+                "S": "lachs"
+            },
+            "partition_key": {
+                "S": "REQUEST"
+            },
+            "sort_key": {
+                "S": "demo#lachs"
+            },
+            "timestamp": {
+                "S": "2024-04-28T10:17:12.780703"
+            }
+        },
+        {
+            "request_status": {
+                "S": "accepted"
+            },
+            "requester": {
+                "S": "flyingbeat"
+            },
+            "requestee": {
+                "S": "chrispyb"
+            },
+            "partition_key": {
+                "S": "REQUEST"
+            },
+            "sort_key": {
+                "S": "flyingbeat#chrispyb"
+            },
+            "timestamp": {
+                "S": "2024-04-23T16:24:18.745011"
+            }
+        },
+        {
+            "request_status": {
+                "S": "accepted"
+            },
+            "requester": {
+                "S": "flyingbeat"
+            },
+            "requestee": {
+                "S": "goldachboi"
+            },
+            "partition_key": {
+                "S": "REQUEST"
+            },
+            "sort_key": {
+                "S": "flyingbeat#goldachboi"
+            },
+            "timestamp": {
+                "S": "2024-04-23T16:24:09.731956"
+            }
+        },
+        {
+            "request_status": {
+                "S": "accepted"
+            },
+            "requester": {
+                "S": "goldachboi"
+            },
+            "requestee": {
+                "S": "chrispyb"
+            },
+            "partition_key": {
+                "S": "REQUEST"
+            },
+            "sort_key": {
+                "S": "goldachboi#chrispyb"
+            },
+            "timestamp": {
+                "S": "2024-04-23T16:28:37.419033"
+            }
+        },
+        {
+            "request_status": {
+                "S": "accepted"
+            },
+            "requester": {
+                "S": "goldachboi"
+            },
+            "requestee": {
+                "S": "flyingbeat"
+            },
+            "partition_key": {
+                "S": "REQUEST"
+            },
+            "sort_key": {
+                "S": "goldachboi#flyingbeat"
+            },
+            "timestamp": {
+                "S": "2024-04-23T16:28:29.771080"
+            }
+        },
+        {
+            "request_status": {
+                "S": "accepted"
+            },
+            "requester": {
+                "S": "goldachboi"
+            },
+            "requestee": {
+                "S": "lachs"
+            },
+            "partition_key": {
+                "S": "REQUEST"
+            },
+            "sort_key": {
+                "S": "goldachboi#lachs"
+            },
+            "timestamp": {
+                "S": "2024-04-23T16:28:34.198441"
+            }
+        },
+        {
+            "request_status": {
+                "S": "accepted"
+            },
+            "requester": {
+                "S": "lachs"
+            },
+            "requestee": {
+                "S": "chrispyb"
+            },
+            "partition_key": {
+                "S": "REQUEST"
+            },
+            "sort_key": {
+                "S": "lachs#chrispyb"
+            },
+            "timestamp": {
+                "S": "2024-04-23T16:25:01.392946"
+            }
+        },
+        {
+            "request_status": {
+                "S": "accepted"
+            },
+            "requester": {
+                "S": "lachs"
+            },
+            "requestee": {
+                "S": "flyingbeat"
+            },
+            "partition_key": {
+                "S": "REQUEST"
+            },
+            "sort_key": {
+                "S": "lachs#flyingbeat"
+            },
+            "timestamp": {
+                "S": "2024-04-23T15:41:43.351197"
+            }
+        },
+        {
+            "request_status": {
+                "S": "accepted"
+            },
+            "requester": {
+                "S": "lachs"
+            },
+            "requestee": {
+                "S": "goldachboi"
+            },
+            "partition_key": {
+                "S": "REQUEST"
+            },
+            "sort_key": {
+                "S": "lachs#goldachboi"
+            },
+            "timestamp": {
+                "S": "2024-04-23T16:25:15.339706"
+            }
+        },
+        {
+            "partition_key": {
+                "S": "FOLLOWING"
+            },
+            "sort_key": {
+                "S": "chrispyb#flyingbeat"
+            },
+            "timestamp": {
+                "S": "2024-04-23T16:31:19.491753"
+            }
+        },
+        {
+            "partition_key": {
+                "S": "FOLLOWING"
+            },
+            "sort_key": {
+                "S": "chrispyb#goldachboi"
+            },
+            "timestamp": {
+                "S": "2024-04-23T16:30:01.864794"
+            }
+        },
+        {
+            "partition_key": {
+                "S": "FOLLOWING"
+            },
+            "sort_key": {
+                "S": "chrispyb#lachs"
+            },
+            "timestamp": {
+                "S": "2024-04-23T16:30:33.064363"
+            }
+        },
+        {
+            "partition_key": {
+                "S": "FOLLOWING"
+            },
+            "sort_key": {
+                "S": "demo#chrispyb"
+            },
+            "timestamp": {
+                "S": "2024-04-28T10:18:34.547992"
+            }
+        },
+        {
+            "partition_key": {
+                "S": "FOLLOWING"
+            },
+            "sort_key": {
+                "S": "demo#flyingbeat"
+            },
+            "timestamp": {
+                "S": "2024-04-28T10:17:54.832451"
+            }
+        },
+        {
+            "partition_key": {
+                "S": "FOLLOWING"
+            },
+            "sort_key": {
+                "S": "demo#goldachboi"
+            },
+            "timestamp": {
+                "S": "2024-04-28T10:18:51.886315"
+            }
+        },
+        {
+            "partition_key": {
+                "S": "FOLLOWING"
+            },
+            "sort_key": {
+                "S": "demo#lachs"
+            },
+            "timestamp": {
+                "S": "2024-04-28T10:18:15.472323"
+            }
+        },
+        {
+            "partition_key": {
+                "S": "FOLLOWING"
+            },
+            "sort_key": {
+                "S": "flyingbeat#chrispyb"
+            },
+            "timestamp": {
+                "S": "2024-04-23T16:29:25.700467"
+            }
+        },
+        {
+            "partition_key": {
+                "S": "FOLLOWING"
+            },
+            "sort_key": {
+                "S": "flyingbeat#goldachboi"
+            },
+            "timestamp": {
+                "S": "2024-04-23T16:29:56.506773"
+            }
+        },
+        {
+            "partition_key": {
+                "S": "FOLLOWING"
+            },
+            "sort_key": {
+                "S": "goldachboi#chrispyb"
+            },
+            "timestamp": {
+                "S": "2024-04-23T16:29:21.289488"
+            }
+        },
+        {
+            "partition_key": {
+                "S": "FOLLOWING"
+            },
+            "sort_key": {
+                "S": "goldachboi#flyingbeat"
+            },
+            "timestamp": {
+                "S": "2024-04-23T16:31:25.019097"
+            }
+        },
+        {
+            "partition_key": {
+                "S": "FOLLOWING"
+            },
+            "sort_key": {
+                "S": "goldachboi#lachs"
+            },
+            "timestamp": {
+                "S": "2024-04-23T16:30:28.995407"
+            }
+        },
+        {
+            "partition_key": {
+                "S": "FOLLOWING"
+            },
+            "sort_key": {
+                "S": "lachs#chrispyb"
+            },
+            "timestamp": {
+                "S": "2024-04-23T16:29:29.746975"
+            }
+        },
+        {
+            "partition_key": {
+                "S": "FOLLOWING"
+            },
+            "sort_key": {
+                "S": "lachs#flyingbeat"
+            },
+            "timestamp": {
+                "S": "2024-04-23T15:42:04.933166"
+            }
+        },
+        {
+            "partition_key": {
+                "S": "FOLLOWING"
+            },
+            "sort_key": {
+                "S": "lachs#goldachboi"
+            },
+            "timestamp": {
+                "S": "2024-04-23T16:30:04.168408"
+            }
+        },
+        {
+            "partition_key": {
+                "S": "FOLLOWERS"
+            },
+            "sort_key": {
+                "S": "chrispyb#demo"
+            },
+            "timestamp": {
+                "S": "2024-04-28T10:18:34.536272"
+            }
+        },
+        {
+            "partition_key": {
+                "S": "FOLLOWERS"
+            },
+            "sort_key": {
+                "S": "chrispyb#flyingbeat"
+            },
+            "timestamp": {
+                "S": "2024-04-23T16:29:25.685545"
+            }
+        },
+        {
+            "partition_key": {
+                "S": "FOLLOWERS"
+            },
+            "sort_key": {
+                "S": "chrispyb#goldachboi"
+            },
+            "timestamp": {
+                "S": "2024-04-23T16:29:21.276616"
+            }
+        },
+        {
+            "partition_key": {
+                "S": "FOLLOWERS"
+            },
+            "sort_key": {
+                "S": "chrispyb#lachs"
+            },
+            "timestamp": {
+                "S": "2024-04-23T16:29:29.733727"
+            }
+        },
+        {
+            "partition_key": {
+                "S": "FOLLOWERS"
+            },
+            "sort_key": {
+                "S": "flyingbeat#chrispyb"
+            },
+            "timestamp": {
+                "S": "2024-04-23T16:31:19.478668"
+            }
+        },
+        {
+            "partition_key": {
+                "S": "FOLLOWERS"
+            },
+            "sort_key": {
+                "S": "flyingbeat#demo"
+            },
+            "timestamp": {
+                "S": "2024-04-28T10:17:54.819577"
+            }
+        },
+        {
+            "partition_key": {
+                "S": "FOLLOWERS"
+            },
+            "sort_key": {
+                "S": "flyingbeat#goldachboi"
+            },
+            "timestamp": {
+                "S": "2024-04-23T16:31:25.006562"
+            }
+        },
+        {
+            "partition_key": {
+                "S": "FOLLOWERS"
+            },
+            "sort_key": {
+                "S": "flyingbeat#lachs"
+            },
+            "timestamp": {
+                "S": "2024-04-23T15:42:04.919493"
+            }
+        },
+        {
+            "partition_key": {
+                "S": "FOLLOWERS"
+            },
+            "sort_key": {
+                "S": "goldachboi#chrispyb"
+            },
+            "timestamp": {
+                "S": "2024-04-23T16:30:01.852582"
+            }
+        },
+        {
+            "partition_key": {
+                "S": "FOLLOWERS"
+            },
+            "sort_key": {
+                "S": "goldachboi#demo"
+            },
+            "timestamp": {
+                "S": "2024-04-28T10:18:51.875561"
+            }
+        },
+        {
+            "partition_key": {
+                "S": "FOLLOWERS"
+            },
+            "sort_key": {
+                "S": "goldachboi#flyingbeat"
+            },
+            "timestamp": {
+                "S": "2024-04-23T16:29:56.494816"
+            }
+        },
+        {
+            "partition_key": {
+                "S": "FOLLOWERS"
+            },
+            "sort_key": {
+                "S": "goldachboi#lachs"
+            },
+            "timestamp": {
+                "S": "2024-04-23T16:30:04.156103"
+            }
+        },
+        {
+            "partition_key": {
+                "S": "FOLLOWERS"
+            },
+            "sort_key": {
+                "S": "lachs#chrispyb"
+            },
+            "timestamp": {
+                "S": "2024-04-23T16:30:33.051556"
+            }
+        },
+        {
+            "partition_key": {
+                "S": "FOLLOWERS"
+            },
+            "sort_key": {
+                "S": "lachs#demo"
+            },
+            "timestamp": {
+                "S": "2024-04-28T10:18:15.461169"
+            }
+        },
+        {
+            "partition_key": {
+                "S": "FOLLOWERS"
+            },
+            "sort_key": {
+                "S": "lachs#goldachboi"
+            },
+            "timestamp": {
+                "S": "2024-04-23T16:30:28.983632"
+            }
+        }
+    ],
+    "Count": 45,
+    "ScannedCount": 45,
+    "ConsumedCapacity": null
+}

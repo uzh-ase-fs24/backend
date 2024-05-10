@@ -1,31 +1,315 @@
-service: aws-custom-authorizer-auth0
-
 frameworkVersion: "3"
+service: findme-microservices
+provider:
+  name: aws
+  runtime: python3.12
+  stage: prod
+  region: eu-central-2
+  apiGateway:
+    restApiId:
+      "Fn::ImportValue": findmeApiGateway-restApiId
+    restApiRootResourceId:
+      "Fn::ImportValue": findmeApiGateway-rootResourceId
 
 custom:
   localstack:
     stages:
       - local
+      - nm
+      - dev
+    host: ${self:custom.stage.${opt:stage}.host, 'http://localstack-main'}
+    edgePort: 4566
+    autoStart: true
     lambda:
-      mountCode: false
+      mountCode: ${self:custom.stage.${opt:stage}.mountCode, 'false'}
   pythonRequirements:
     dockerizePip: non-linux
+  stage:
+    prod:
+      frontendOrigin: https://find-me.life
+      auth0Domain: findme-prod.eu.auth0.com
+      auth0Audience: https://findme-prod.eu.auth0.com/api/v2/
 
+    dev:
+      host: http://localstack-main
+      mountCode: false
+      frontendOrigin: http://localhost:8100
+      auth0Domain: findme-dev.eu.auth0.com
+      auth0Audience: https://findme-dev.eu.auth0.com/api/v2/
 
-provider:
-  name: aws
-  runtime: python3.9
-  region: eu-central-2
+    local:
+      host: http://localhost
+      mountCode: true
+      frontendOrigin: http://localhost:8100
+      auth0Domain: findme-dev.eu.auth0.com
+      auth0Audience: https://findme-dev.eu.auth0.com/api/v2/
 
+    nm:
+      host: http://localhost
+      mountCode: false
+      frontendOrigin: http://localhost:8100
+      auth0Domain: findme-dev.eu.auth0.com
+      auth0Audience: https://findme-dev.eu.auth0.com/api/v2/
+
+package:
+  individually: true
+  patterns:
+    - "!**/.venv/**"
+    - "!**/node_modules/**"
+    - "!**/tests/**"
+    - "!**/.serverless/**"
+    - "!**/*.md"
+    - "!**/requirements.txt"
+    - "!**/package*.json"
+    - "!**/infrastructure/**"
 
 functions:
   findme-users:
-    handler: findme-users/handler.lambda_handler
+    handler: handler.lambda_handler
+    name: findme-users-${opt:stage}
+    timeout: 30
+    module: findme-users
+    environment:
+      FRONTEND_ORIGIN: ${self:custom.stage.${opt:stage}.frontendOrigin}
+      AUTH0_DOMAIN: ${self:custom.stage.${opt:stage}.auth0Domain}
+      AUTH0_AUDIENCE: ${self:custom.stage.${opt:stage}.auth0Audience}
     events:
       - http:
-          path: /
+          path: /users/swagger
           method: get
-          cors: true
+          cors:
+            origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
+      - http:
+          path: /users/{username}
+          method: get
+          cors:
+            origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
+          request:
+            parameters:
+              paths:
+                username: true
+      - http:
+          path: /users
+          method: get
+          cors:
+            origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
+      - http:
+          path: /users
+          method: post
+          cors:
+            origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
+      - http:
+          path: /users/score
+          method: post
+          cors:
+            origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
+      - http:
+          path: /users
+          method: put
+          cors:
+            origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
+      - http:
+          path: /users/search
+          method: get
+          cors:
+            origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
+          request:
+            parameters:
+              querystrings:
+                username: true
+                type: false
+      - http:
+          path: /users/{username}/follow
+          method: put
+          cors:
+            origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
+          request:
+            parameters:
+              paths:
+                username: true
+      - http:
+          path: /users/{username}/follow
+          method: patch
+          cors:
+            origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
+          request:
+            parameters:
+              paths:
+                username: true
+              querystrings:
+                action: true
+                type: false
+      - http:
+          path: /users/{username}/follow
+          method: get
+          cors:
+            origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
+          request:
+            parameters:
+              paths:
+                username: true
+      - http:
+          path: /users/{username}/scores
+          method: get
+          cors:
+            origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
+          request:
+            parameters:
+              paths:
+                username: true
+      - http:
+          path: /users/follow
+          method: get
+          cors:
+            origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
+    iamRoleStatements:
+      - Effect: "Allow"
+        Action:
+          - dynamodb:Query
+          - dynamodb:Scan
+          - dynamodb:GetItem
+          - dynamodb:PutItem
+          - dynamodb:UpdateItem
+          - dynamodb:DeleteItem
+        Resource:
+          - !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/usersTable"
+          - !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/usersTable/index/*"
+          - !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/FollowerTable"
+          - !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/FollowerTable/index/*"
+
+  findme-location-riddles:
+    handler: handler.lambda_handler
+    module: findme-location-riddles
+    name: findme-location-riddles-${opt:stage}
+    timeout: 30
+    environment:
+      FRONTEND_ORIGIN: ${self:custom.stage.${opt:stage}.frontendOrigin}
+      AUTH0_DOMAIN: ${self:custom.stage.${opt:stage}.auth0Domain}
+      AUTH0_AUDIENCE: ${self:custom.stage.${opt:stage, 'local'}.auth0Audience}
+      USER_FUNCTION_NAME: findme-users-${opt:stage}
+    events:
+      - http:
+          path: /location-riddles/swagger
+          method: get
+          cors:
+            origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
+      - http:
+          path: /location-riddles
+          method: post
+          cors:
+            origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
+      - http:
+          path: /location-riddles/{location_riddle_id}/guess
+          method: post
+          cors:
+            origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
+          request:
+            parameters:
+              paths:
+                location_riddle_id: true
+      - http:
+          path: /location-riddles/{location_riddle_id}/comment
+          method: post
+          cors:
+            origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
+          request:
+            parameters:
+              paths:
+                location_riddle_id: true
+      - http:
+          path: /location-riddles
+          method: get
+          cors:
+            origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
+      - http:
+          path: /location-riddles/arena/{arena_name}
+          method: get
+          cors:
+            origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
+          request:
+            parameters:
+              paths:
+                arena_name: true
+      - http:
+          path: /location-riddles/{location_riddle_id}
+          method: get
+          cors:
+            origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
+          request:
+            parameters:
+              paths:
+                location_riddle_id: true
+      - http:
+          path: /location-riddles/user/{username}
+          method: get
+          cors:
+            origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
+          request:
+            parameters:
+              paths:
+                username: true
+      - http:
+          path: /location-riddles/user
+          method: get
+          cors:
+            origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
+      - http:
+          path: /location-riddles/user/{username}/solved
+          method: get
+          cors:
+            origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
+          request:
+            parameters:
+              paths:
+                username: true
+      - http:
+          path: /location-riddles/user/solved
+          method: get
+          cors:
+            origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
+      - http:
+          path: /location-riddles/{location_riddle_id}/rate
+          method: post
+          cors:
+            origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
+      - http:
+          path: /location-riddles/{location_riddle_id}
+          method: delete
+          cors:
+            origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
+          request:
+            parameters:
+              paths:
+                location_riddle_id: true
+    iamRoleStatements:
+      - Effect: "Allow"
+        Action:
+          - dynamodb:Query
+          - dynamodb:Scan
+          - dynamodb:GetItem
+          - dynamodb:PutItem
+          - dynamodb:UpdateItem
+          - dynamodb:DeleteItem
+        Resource:
+          - !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/locationRiddleTable"
+          - !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/locationRiddleTable/index/*"
+      - Effect: "Allow"
+        Action:
+          - s3:PutObject
+          - s3:GetObject
+          - s3:DeleteObject
+        Resource: "arn:aws:s3:::ase-findme-image-upload-bucket/*"
+      - Effect: "Allow"
+        Action:
+          - lambda:InvokeFunction
+        Resource:
+          - !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:findme-users-${opt:stage}"
+
+resources:
+  - ${file(./resources.yml)}
+  - ${file(./sls-config-${opt:stage}.yml), null}
+
 plugins:
   - serverless-python-requirements
   - serverless-localstack
+  - serverless-iam-roles-per-function

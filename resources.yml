@@ -1,0 +1,87 @@
+Resources:
+  locationRiddleBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: ase-findme-image-upload-bucket
+
+  usersTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: usersTable
+      AttributeDefinitions:
+        - AttributeName: partition_key
+          AttributeType: S
+        - AttributeName: username
+          AttributeType: S
+      BillingMode: PAY_PER_REQUEST
+      KeySchema:
+        - AttributeName: partition_key
+          KeyType: HASH
+        - AttributeName: username
+          KeyType: RANGE
+
+  FollowerTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: FollowerTable
+      AttributeDefinitions:
+        - AttributeName: partition_key # REQUEST / FOLLOWERS / FOLLOWING
+          AttributeType: S
+        - AttributeName: sort_key # USERNAME
+          AttributeType: S
+        - AttributeName: requestee
+          AttributeType: S
+        - AttributeName: requester
+          AttributeType: S
+      KeySchema:
+        - AttributeName: partition_key
+          KeyType: HASH
+        - AttributeName: sort_key
+          KeyType: RANGE
+      BillingMode: PAY_PER_REQUEST
+      GlobalSecondaryIndexes:
+        - IndexName: RequesterIndex
+          KeySchema:
+            - AttributeName: requester
+              KeyType: HASH
+            - AttributeName: partition_key
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+        - IndexName: RequesteeIndex
+          KeySchema:
+            - AttributeName: requestee
+              KeyType: HASH
+            - AttributeName: partition_key
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+
+  locationRiddleTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: locationRiddleTable
+      AttributeDefinitions:
+        - AttributeName: location_riddle_id
+          AttributeType: S
+        - AttributeName: username
+          AttributeType: S
+      KeySchema:
+        - AttributeName: location_riddle_id
+          KeyType: HASH
+      BillingMode: PAY_PER_REQUEST
+      GlobalSecondaryIndexes:
+        - IndexName: UserIndex
+          KeySchema:
+            - AttributeName: username
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+
+  BasePathMapping:
+    Type: AWS::ApiGateway::BasePathMapping
+    Properties:
+      DomainName: 'api.find-me.life'
+      Stage: prod
+      RestApiId:
+        "Fn::ImportValue": findmeApiGateway-restApiId
