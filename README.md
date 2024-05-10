@@ -86,6 +86,7 @@ in e.g findme-users/ you will see the change after saving without redeploying.
 To run the tests for the microservices, run ` python -m unittest discover` from the backend root.
 (If the virtual environment hasn't been activated yet, you can do so by running the
 command ` source .venv/bin/activate`.)
+For generating a test report, execute the [generateTestReport.py](https://github.com/uzh-ase-fs24/workspace/blob/develop/scripts/generateTestReport.py) script.
 
 ### Token
 
