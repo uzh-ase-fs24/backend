@@ -44,7 +44,7 @@ class ImageBucketRepository(AbstractImageBucketRepository):
         try:
             url = self.s3.generate_presigned_url(
                 client_method,
-                Params={ "Key": key},
+                Params={"Bucket": self.bucket_name, "Key": key},
                 ExpiresIn=3600,
             )
             return url
