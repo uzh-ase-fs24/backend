@@ -18,7 +18,6 @@ class ImageBucketRepository(AbstractImageBucketRepository):
         self.s3 = boto3.client(
             "s3",
             region_name=region,
-            config=Config(s3={"addressing_style": "path"}),
             endpoint_url=endpoint_url,
         )
 
@@ -45,7 +44,7 @@ class ImageBucketRepository(AbstractImageBucketRepository):
         try:
             url = self.s3.generate_presigned_url(
                 client_method,
-                Params={"Bucket": self.bucket_name, "Key": key},
+                Params={ "Key": key},
                 ExpiresIn=3600,
             )
             return url

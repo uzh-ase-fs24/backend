@@ -49,7 +49,7 @@ class LocationRiddlesService:
                 f"unable to update location_riddle with provided parameters. {e}"
             )
 
-        image_path = f"{self.image_bucket_repository.bucket_name}/location-riddles/{location_riddle.location_riddle_id}.png"
+        image_path = f"location-riddles/{location_riddle.location_riddle_id}.png"
         response = self.image_bucket_repository.post_image_to_s3(
             image_base64, image_path
         )
