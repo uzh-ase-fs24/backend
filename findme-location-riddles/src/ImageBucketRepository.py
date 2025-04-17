@@ -28,14 +28,20 @@ class ImageBucketRepository(AbstractImageBucketRepository):
             raise BadRequestError(f"Error saving image to bucket: {e}")
 
     def get_image_from_s3(self, key: str) -> str:
-        image_data = self.__get_image_data_from_s3(key)
+        return self.create_pre_signed_image_url(key)
 
-        if image_data:
-            encoded_image = base64.b64encode(image_data).decode("utf-8")
-
-            return encoded_image
-        else:
-            raise BadRequestError("Failed to retrieve image from S3")
+    def create_pre_signed_image_url(
+        self, key: str, client_method: str = "get_object"
+    ) -> str:
+        try:
+            url = self.s3.generate_presigned_url(
+                client_method,
+                Params={"Bucket": self.bucket_name, "Key": key},
+                ExpiresIn=3600,
+            )
+            return url
+        except ClientError as e:
+            raise BadRequestError(f"Error generating presigned URL: {e}")
 
     def delete_image_from_s3(self, key: str) -> dict:
         try:

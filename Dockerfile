@@ -3,7 +3,7 @@ FROM nikolaik/python-nodejs:python3.12-nodejs21
 # Install serverless dependencies
 RUN apt-get update && apt-get install -y \
     netcat-openbsd \
- && npm install -g serverless
+ && npm install -g serverless@3.39.0
 
 RUN apt-get install -y jq
 RUN pip install awscli awscli-local
