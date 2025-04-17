@@ -4,13 +4,21 @@ from aws_lambda_powertools.event_handler.exceptions import (
     BadRequestError,
 )
 from botocore.exceptions import ClientError
+from botocore.client import Config
+
 
 from .base.AbstractImageBucketRepository import AbstractImageBucketRepository
 
 
 class ImageBucketRepository(AbstractImageBucketRepository):
     def __init__(self):
-        self.s3 = boto3.client("s3", region_name="eu-central-2")
+        region = "eu-central-2"
+        s3_config = Config(
+            region_name=region,
+            signature_version="s3v4",
+        )
+
+        self.s3 = boto3.client("s3", region_name=region, config=s3_config)
         self.bucket_name = "ase-findme-image-upload-bucket"
 
     def post_image_to_s3(self, image_base64: str, key: str) -> dict:
