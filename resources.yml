@@ -81,7 +81,7 @@ Resources:
   BasePathMapping:
     Type: AWS::ApiGateway::BasePathMapping
     Properties:
-      DomainName: 'api.find-me.life'
+      DomainName: 'api.find-me.click'
       Stage: prod
       RestApiId:
         "Fn::ImportValue": findmeApiGateway-restApiId

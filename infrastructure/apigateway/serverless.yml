@@ -35,11 +35,11 @@ resources:
     CustomDomain:
       Type: AWS::ApiGateway::DomainName
       Properties:
-        DomainName: "api.find-me.life"
+        DomainName: "api.find-me.click"
         EndpointConfiguration:
           Types:
             - REGIONAL
-        RegionalCertificateArn: arn:aws:acm:eu-central-2:433745530327:certificate/3d44bd99-d349-47a7-9060-2fe2c892da48
+        RegionalCertificateArn: arn:aws:acm:eu-central-2:433745530327:certificate/941c7d12-3463-41be-8baa-90112bba7791
 
   Outputs:
     apiGatewayRestApiId:

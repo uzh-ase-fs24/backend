@@ -45,7 +45,7 @@ follower_service = FollowerService(follower_repository)
 
 class RequestBodyAttribute(Enum):
     USERNAME = "username"
-    FINDME_USERNAME = "https://api.find-me.life/username"
+    FINDME_USERNAME = "https://api.find-me.click/username"
     LOCATION_RIDDLE_ID = "location_riddle_id"
     SCORE = "score"
     ACTION = "action"

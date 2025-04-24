@@ -40,7 +40,7 @@ location_riddles_service = LocationRiddlesService(
 
 
 class RequestBodyAttribute(Enum):
-    FINDME_USERNAME = "https://api.find-me.life/username"
+    FINDME_USERNAME = "https://api.find-me.click/username"
     LOCATION = "location"
     IMAGE = "image"
     GUESS = "guess"
@@ -211,7 +211,7 @@ def get_solved_location_riddles_by_user():
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
 def get_location_riddles_by_location_riddle_id(
-        location_riddle_id: Annotated[str, Path()],
+    location_riddle_id: Annotated[str, Path()],
 ):
     """
     Endpoint: GET /location-riddles/<location_riddle_id>
@@ -247,7 +247,7 @@ def rate_location_riddle(location_riddle_id: Annotated[str, Path()]):
 @tracer.capture_method
 @authorizer.requires_auth(app=app)
 def delete_location_riddles_by_location_riddle_id(
-        location_riddle_id: Annotated[str, Path()],
+    location_riddle_id: Annotated[str, Path()],
 ):
     """
     Endpoint: DELETE /location-riddles/<location_riddle_id>

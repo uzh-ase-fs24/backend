@@ -26,7 +26,7 @@ custom:
     dockerizePip: non-linux
   stage:
     prod:
-      frontendOrigin: https://find-me.life
+      frontendOrigin: https://find-me.click
       auth0Domain: findme-prod.eu.auth0.com
       auth0Audience: https://findme-prod.eu.auth0.com/api/v2/
 
