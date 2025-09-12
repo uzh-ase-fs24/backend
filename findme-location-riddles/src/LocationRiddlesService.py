@@ -235,10 +235,12 @@ class LocationRiddlesService:
             [float(coord) for coord in guess.guess.coordinate],
         )
 
-        try:
-            self.user_microservice_client.write_score_to_user_in_user_db(event, location_riddle_id, int(score))
-        except Exception as e:
-            logger.error(f"There was an error writing the score to the user db: {e}")
+        # Only write score to user database for authenticated users (not anonymous)
+        if username != "anonymous":
+            try:
+                self.user_microservice_client.write_score_to_user_in_user_db(event, location_riddle_id, int(score))
+            except Exception as e:
+                logger.error(f"There was an error writing the score to the user db: {e}")
 
         location_riddle_dto = updated_location_riddle.to_dto(username)
         self.__append_image_to_location_riddle(location_riddle_dto)

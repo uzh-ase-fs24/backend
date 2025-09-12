@@ -41,6 +41,7 @@ location_riddles_service = LocationRiddlesService(
 
 class RequestBodyAttribute(Enum):
     FINDME_USERNAME = "https://api.find-me.click/username"
+    USERNAME = "username"  # For unauthenticated requests
     LOCATION = "location"
     IMAGE = "image"
     GUESS = "guess"
@@ -73,12 +74,12 @@ def post_location_riddles():
 
 @app.post("/location-riddles/<location_riddle_id>/guess")
 @tracer.capture_method
-@authorizer.requires_auth(app=app)
 def post_guess_to_location_riddle(location_riddle_id: Annotated[str, Path()]):
     """
     Endpoint: POST /location-riddles/<location_riddle_id>/guess
     Body: {
-        "guess": <coordinate_list> e.g. [12.345, 67.890]
+        "guess": <coordinate_list> e.g. [12.345, 67.890],
+        "username": <username_string> (only required for unauthenticated users)
     }
     Description: Submits a guess for a specific location riddle.
     Returns: The updated location riddle with the new guess
@@ -91,7 +92,7 @@ def post_guess_to_location_riddle(location_riddle_id: Annotated[str, Path()]):
     return location_riddles_service.guess_location_riddle(
         app.current_event,
         location_riddle_id,
-        __get_username(),
+        __get_username_for_public_endpoint(),
         __get_attribute_from_request_body(RequestBodyAttribute.GUESS.value, app),
     )
 
@@ -209,18 +210,19 @@ def get_solved_location_riddles_by_user():
 
 @app.get("/location-riddles/<location_riddle_id>")
 @tracer.capture_method
-@authorizer.requires_auth(app=app)
 def get_location_riddles_by_location_riddle_id(
     location_riddle_id: Annotated[str, Path()],
 ):
     """
     Endpoint: GET /location-riddles/<location_riddle_id>
-    Body: None
+    Body: {
+        "username": <username_string> (only required for unauthenticated users)
+    }
     Description: Retrieves a specific location riddle by its ID.
     Returns: The requested location riddle.
     """
     return location_riddles_service.get_location_riddle(
-        location_riddle_id, __get_username()
+        location_riddle_id, __get_username_for_public_endpoint()
     )
 
 
@@ -262,6 +264,29 @@ def delete_location_riddles_by_location_riddle_id(
 
 def __get_username():
     return app.context.get("claims").get(RequestBodyAttribute.FINDME_USERNAME.value)
+
+
+def __get_username_for_public_endpoint():
+    """
+    Get username for public endpoints that support both authenticated and unauthenticated users.
+    For authenticated users, get username from JWT claims.
+    For unauthenticated users, get username from request body.
+    """
+    # Try to get username from JWT claims first (authenticated users)
+    try:
+        claims = app.context.get("claims")
+        if claims:
+            username = claims.get(RequestBodyAttribute.FINDME_USERNAME.value)
+            if username:
+                return username
+    except:
+        pass
+
+    # Fall back to request body for unauthenticated users
+    try:
+        return app.current_event.json_body[RequestBodyAttribute.USERNAME.value]
+    except (KeyError, AttributeError):
+        raise BadRequestError("Username is required in request body for unauthenticated users")
 
 
 def __get_attribute_from_request_body(attribute, app):
