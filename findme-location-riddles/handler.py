@@ -47,46 +47,6 @@ class RequestBodyAttribute(Enum):
     COMMENT = "comment"
     RATING = "rating"
     ARENAS = "arenas"
-    USERNAME = "username"
-
-
-# Public endpoints (no authentication required)
-@app.get("/public/location-riddles/<location_riddle_id>")
-@tracer.capture_method
-def get_location_riddle_public(location_riddle_id: Annotated[str, Path()]):
-    """
-    Public endpoint to get location riddle without authentication
-    Endpoint: GET /public/location-riddles/<location_riddle_id>
-    Body: {
-        "username": <username_string>
-        }
-    Description: Retrieves a specific location riddle by its ID without requiring authentication.
-    Returns: The requested location riddle.
-    """
-    username = __get_attribute_from_request_body(RequestBodyAttribute.USERNAME.value, app)
-    return location_riddles_service.get_location_riddle(location_riddle_id, username)
-
-
-@app.post("/public/location-riddles/<location_riddle_id>/guess")
-@tracer.capture_method
-def post_guess_to_location_riddle_public(location_riddle_id: Annotated[str, Path()]):
-    """
-    Public endpoint to submit guess without authentication
-    Endpoint: POST /public/location-riddles/<location_riddle_id>/guess
-    Body: {
-        "username": <username_string>,
-        "guess": <coordinate_list> e.g. [12.345, 67.890]
-    }
-    Description: Submits a guess for a specific location riddle without authentication.
-    Note: Scores are not tracked for public users.
-    Returns: The updated location riddle with the new guess and distance/score information.
-    """
-    username = __get_attribute_from_request_body(RequestBodyAttribute.USERNAME.value, app)
-    guess = __get_attribute_from_request_body(RequestBodyAttribute.GUESS.value, app)
-
-    return location_riddles_service.guess_location_riddle_public(
-        location_riddle_id, username, guess
-    )
 
 
 @app.post("/location-riddles")
