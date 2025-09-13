@@ -56,14 +56,15 @@ class RequestBodyAttribute(Enum):
 def get_location_riddle_public(location_riddle_id: Annotated[str, Path()]):
     """
     Public endpoint to get location riddle without authentication
-    Endpoint: GET /public/location-riddles/<location_riddle_id>
-    Body: {
-        "username": <username_string>
-        }
+    Endpoint: GET /public/location-riddles/<location_riddle_id>?username=<username_string>
+    Query Parameters:
+        username: <username_string>
     Description: Retrieves a specific location riddle by its ID without requiring authentication.
     Returns: The requested location riddle.
     """
-    username = __get_attribute_from_request_body(RequestBodyAttribute.USERNAME.value, app)
+    username = app.current_event.query_string_parameters.get("username") if app.current_event.query_string_parameters else None
+    if not username:
+        raise BadRequestError("Missing required query parameter: username")
     return location_riddles_service.get_location_riddle(location_riddle_id, username)
 
 
