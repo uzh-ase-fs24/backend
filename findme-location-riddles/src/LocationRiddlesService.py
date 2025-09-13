@@ -1,5 +1,6 @@
 import math
 import uuid
+import re
 from decimal import Decimal
 from typing import Union
 from aws_lambda_powertools.event_handler.exceptions import (
@@ -290,6 +291,59 @@ class LocationRiddlesService:
             location_riddle_id
         )
         return {"message": "Location riddle deleted successfully"}
+
+    def guess_location_riddle_public(self, location_riddle_id: str, username: str, guess: list) -> dict:
+        """Public version without user score tracking"""
+
+        location_riddle = self.location_riddle_repository.get_location_riddle_by_location_riddle_id_from_db(
+            location_riddle_id
+        )
+
+        if location_riddle.username == username:
+            raise BadRequestError("User cannot guess their own location riddle")
+
+        # Check if user has already guessed (same logic as authenticated version)
+        for guess_entry in location_riddle.guesses:
+            if guess_entry.username == username:
+                raise BadRequestError("User has already guessed this location riddle")
+
+        try:
+            guess_obj = Guess(
+                username=username,
+                guess=Coordinate(coordinate=[Decimal(str(coord)) for coord in guess]),
+            )
+        except ValidationError as e:
+            logger.info(
+                f"unable to update location_riddle with provided parameters. {e}"
+            )
+            raise BadRequestError(
+                f"unable to update location_riddle with provided parameters. {e}"
+            )
+
+        try:
+            updated_location_riddle = (
+                self.location_riddle_repository.update_location_riddle_guesses_in_db(
+                    location_riddle_id, guess_obj
+                )
+            )
+        except Exception as e:
+            logger.error(e)
+            raise BadRequestError(f"{e}")
+
+        score, distance = LocationRiddlesService.calculate_score_and_distance(
+            [float(coord) for coord in updated_location_riddle.location.coordinate],
+            [float(coord) for coord in guess_obj.guess.coordinate],
+        )
+
+        # Note: No score tracking in public version - scores are not saved to user database
+        logger.info(f"Public guess made by {username} for riddle {location_riddle_id}: score={int(score)}, distance={distance}")
+
+        location_riddle_dto = updated_location_riddle.to_dto(username)
+        self.__append_image_to_location_riddle(location_riddle_dto)
+        return {
+            "location_riddle": location_riddle_dto.dict(),
+            "guess_result": {"distance": distance, "received_score": int(score)},
+        }
 
     def __append_image_to_location_riddle(self, location_riddle: LocationRiddle):
         key = f"location-riddles/{location_riddle.location_riddle_id}.png"

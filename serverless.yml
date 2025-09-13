@@ -194,6 +194,24 @@ functions:
           cors:
             origin: ${self:custom.stage.${opt:stage}.frontendOrigin}
       - http:
+          path: /public/location-riddles/{location_riddle_id}
+          method: get
+          cors:
+            origin: '*'
+          request:
+            parameters:
+              paths:
+                location_riddle_id: true
+      - http:
+          path: /public/location-riddles/{location_riddle_id}/guess
+          method: post
+          cors:
+            origin: '*'
+          request:
+            parameters:
+              paths:
+                location_riddle_id: true
+      - http:
           path: /location-riddles
           method: post
           cors:
