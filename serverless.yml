@@ -202,9 +202,6 @@ functions:
             parameters:
               paths:
                 location_riddle_id: true
-              querystrings:
-                username: true
-                type: false
       - http:
           path: /public/location-riddles/{location_riddle_id}/guess
           method: post
